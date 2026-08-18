@@ -10,20 +10,28 @@ const tiers = [
   },
   {
     num: 'TIER 02',
-    name: 'Complete Local Presence',
-    price: '€1,500–2,500',
-    purpose: 'Priced against pure web studios — with a real edge',
-    desc: 'On-site photo and video shoot, a custom website build designed around those images, and full Google Business Profile setup and optimisation. This is the package that actually fixes a business\'s online presence, not just its homepage.',
-    core: true,
-  },
-  {
-    num: 'TIER 03',
     name: 'Growth Retainer',
     price: '€75–150',
     priceSuffix: '/mo',
     purpose: 'Recurring, on top of the project fee',
     desc: 'Hosting and maintenance, a quarterly content refresh — new seasonal photos and a short clip — plus ongoing review monitoring, so the site and listing stay current long after launch.',
     core: false,
+  },
+  {
+    num: 'TIER 03',
+    name: 'Visual Visibility',
+    price: '€600–1,500',
+    purpose: 'Competitive with the Irish freelance market — website only',
+    desc: 'A custom website build, plus full Google Business Profile setup and optimisation — everything needed to fix a business\'s online presence, without a photo or video shoot.',
+    core: false,
+  },
+  {
+    num: 'TIER 04',
+    name: 'Complete Local Presence',
+    price: '€1,500–2,500',
+    purpose: 'The full package, shoot to search',
+    desc: 'On-site photo and video shoot, a custom website build designed around those images, and full Google Business Profile setup and optimisation. This is the package that actually fixes a business\'s online presence, not just its homepage.',
+    core: true,
   },
 ];
 ---
@@ -60,8 +68,8 @@ const tiers = [
 </section>
 
 <style>
-  .tiers{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-  @media (max-width: 900px){ .tiers{ grid-template-columns: 1fr; } }
+  .tiers{ display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  @media (max-width: 760px){ .tiers{ grid-template-columns: 1fr; } }
   .tier{
     background: var(--panel);
     border: 1px solid var(--line);
