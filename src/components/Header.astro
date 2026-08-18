@@ -1,0 +1,60 @@
+---
+const brandName = 'Ready Frame';
+---
+
+<header>
+  <div class="wrap nav">
+    <div class="brand">{brandName} <em>Studio</em></div>
+    <nav class="navlinks">
+      <a href="#offer">The Offer</a>
+      <a href="#portfolio">Portfolio</a>
+      <a href="#process">Process</a>
+      <a href="#about">About</a>
+      <a href="#contact" class="nav-cta">Book a Shoot</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  header{
+    position: sticky; top: 0; z-index: 50;
+    background: transparent;
+    border-bottom: 1px solid transparent;
+    transition: background .3s ease, border-color .3s ease, backdrop-filter .3s ease;
+  }
+  header:global(.scrolled){
+    background: rgba(11,11,9,0.86);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav{
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 0;
+  }
+  .brand{
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    letter-spacing: 0.01em;
+  }
+  .brand em{ color: var(--brass); font-style: italic; }
+  .navlinks{ display: flex; gap: 34px; align-items: center; }
+  .navlinks a{
+    text-decoration: none; color: var(--paper-dim);
+    font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
+    font-family: 'IBM Plex Mono', monospace;
+    transition: color .2s ease;
+  }
+  .navlinks a:hover, .navlinks a:focus-visible{ color: var(--brass); }
+  .navlinks a:focus-visible{ outline: 1px solid var(--brass); outline-offset: 4px; }
+  .nav-cta{
+    padding: 10px 18px;
+    border: 1px solid var(--brass);
+    color: var(--brass) !important;
+    border-radius: var(--radius);
+  }
+  .nav-cta:hover{ background: var(--brass); color: var(--bg) !important; }
+  @media (max-width: 860px){
+    .navlinks a:not(.nav-cta){ display: none; }
+    .nav-cta{ font-size: 11px; padding: 9px 14px; }
+  }
+</style>

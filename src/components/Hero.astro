@@ -1,0 +1,117 @@
+---
+const stats = [
+  { k: '1', v: 'Photographer + software engineer, one point of contact throughout' },
+  { k: '5-day', v: 'Turnaround on a Visual Refresh shoot, edited and delivered' },
+  { k: '€1.5–2.5k', v: 'Full local presence package: shoot, site, and Google Business setup' },
+  { k: 'Local', v: 'Built for cafés, salons, gyms, clinics and trades — not corporates' },
+];
+---
+
+<section class="hero">
+  <div class="viewfinder">
+    <span class="vf-corner tl"></span>
+    <span class="vf-corner tr"></span>
+    <span class="vf-corner bl"></span>
+    <span class="vf-corner br"></span>
+    <span class="vf-center"></span>
+  </div>
+  <div class="wrap hero-inner">
+    <div class="hero-eyebrow"><span class="rec"></span>Photography · Video · Websites · Local SEO — Ireland</div>
+    <h1 class="hero-h">Stock photos are why your website looks like <i>everyone else's.</i></h1>
+    <p class="hero-sub">
+      We shoot your business on-site, build the website around it, and set up your local search
+      presence — all from one person who's spent years behind both a camera and a keyboard.
+    </p>
+    <div class="hero-ctas">
+      <a href="#contact" class="btn btn-primary">Book a Founder Shoot</a>
+      <a href="#offer" class="btn btn-ghost">See the Three Tiers</a>
+    </div>
+    <div class="hero-strip">
+      {stats.map((s) => (
+        <div>
+          <span class="k">{s.k}</span>
+          <span class="v">{s.v}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero{
+    position: relative;
+    min-height: 92vh;
+    display: flex; align-items: center;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(201,162,39,0.14), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 10%, rgba(178,58,46,0.10), transparent 55%),
+      var(--bg);
+    padding: 120px 0 90px;
+    overflow: hidden;
+  }
+  .viewfinder{ position: absolute; inset: 28px; pointer-events: none; }
+  .vf-corner{
+    position: absolute; width: 34px; height: 34px;
+    border-color: var(--paper-dim);
+    opacity: 0;
+  }
+  .vf-corner.tl{ top: 0; left: 0; border-top: 2px solid; border-left: 2px solid; }
+  .vf-corner.tr{ top: 0; right: 0; border-top: 2px solid; border-right: 2px solid; }
+  .vf-corner.bl{ bottom: 0; left: 0; border-bottom: 2px solid; border-left: 2px solid; }
+  .vf-corner.br{ bottom: 0; right: 0; border-bottom: 2px solid; border-right: 2px solid; }
+  .vf-center{
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 26px; height: 26px; opacity: 0.25;
+  }
+  .vf-center::before, .vf-center::after{ content: ""; position: absolute; background: var(--paper-dim); }
+  .vf-center::before{ top: 50%; left: 0; width: 100%; height: 1px; }
+  .vf-center::after{ left: 50%; top: 0; height: 100%; width: 1px; }
+
+  .hero-inner{ position: relative; z-index: 2; }
+  .hero-eyebrow{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--brass);
+    margin-bottom: 26px;
+    display: flex; align-items: center; gap: 10px;
+    opacity: 0;
+  }
+  .hero-eyebrow .rec{
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--safelight);
+    box-shadow: 0 0 10px 2px rgba(178,58,46,0.8);
+  }
+  h1.hero-h{
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    font-size: clamp(40px, 6.2vw, 84px);
+    line-height: 1.02;
+    letter-spacing: -0.01em;
+    max-width: 920px;
+    margin: 0 0 28px;
+    opacity: 0;
+  }
+  h1.hero-h i{ font-style: italic; color: var(--brass); }
+  .hero-sub{
+    font-size: 19px; line-height: 1.6;
+    color: var(--paper-dim);
+    max-width: 560px;
+    margin: 0 0 44px;
+    opacity: 0;
+  }
+  .hero-ctas{ display: flex; gap: 16px; flex-wrap: wrap; align-items: center; opacity: 0; }
+
+  .hero-strip{
+    margin-top: 78px;
+    display: flex; gap: 0;
+    border-top: 1px solid var(--line);
+    padding-top: 22px;
+    flex-wrap: wrap;
+  }
+  .hero-strip > div{ flex: 1; min-width: 150px; padding-right: 24px; opacity: 0; }
+  .hero-strip .k{
+    font-family: 'Instrument Serif', serif; font-style: italic;
+    font-size: 28px; color: var(--brass); display: block; margin-bottom: 4px;
+  }
+  .hero-strip .v{ font-size: 13px; color: var(--paper-dim); line-height: 1.4; }
+</style>

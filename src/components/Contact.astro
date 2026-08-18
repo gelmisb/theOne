@@ -1,0 +1,105 @@
+<section class="cta-section" id="contact">
+  <div class="wrap">
+    <div class="frame-tag" style="justify-content:center;" data-reveal data-reveal-group="contact-head">
+      <span class="num">FRAME 007</span> Get In Touch
+    </div>
+    <h2 class="section-h" data-reveal data-reveal-group="contact-head">
+      Tell us a bit about your business, and we'll take it from there.
+    </h2>
+    <p class="section-sub" data-reveal data-reveal-group="contact-head">
+      Founder shoots are booking now — first come, first slotted. No obligation, no generic pitch.
+    </p>
+
+    <form class="cta-form" id="enquiry-form" data-reveal data-reveal-group="contact-head">
+      <div class="row2">
+        <div>
+          <label for="name">Your name</label>
+          <input id="name" name="name" type="text" required placeholder="Full name" />
+        </div>
+        <div>
+          <label for="business">Business name</label>
+          <input id="business" name="business" type="text" required placeholder="Business name" />
+        </div>
+      </div>
+      <div class="row2">
+        <div>
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required placeholder="you@business.ie" />
+        </div>
+        <div>
+          <label for="tier">Interested in</label>
+          <select id="tier" name="tier">
+            <option>Tier 1 — Visual Refresh</option>
+            <option>Tier 2 — Complete Local Presence</option>
+            <option>Tier 3 — Growth Retainer</option>
+            <option>Not sure yet</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label for="msg">A little about your business</label>
+        <textarea id="msg" name="message" placeholder="What you do, where you're based, and what prompted you to get in touch..."></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Send Enquiry</button>
+      <p class="form-note form-success" id="form-success" hidden>
+        Thanks — this is a demo form for now. Wire it up to an email address or booking tool before launch.
+      </p>
+      <p class="form-note">Usually replies within one business day.</p>
+    </form>
+  </div>
+</section>
+
+<script>
+  const form = document.getElementById('enquiry-form') as HTMLFormElement | null;
+  const success = document.getElementById('form-success');
+  const submitBtn = form?.querySelector('button[type="submit"]');
+
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    // TODO: replace with a real endpoint (Formspree, a serverless function, etc.)
+    // before launch — this is a front-end-only demo state.
+    success?.removeAttribute('hidden');
+    submitBtn?.setAttribute('style', 'display:none;');
+  });
+</script>
+
+<style>
+  .cta-section{
+    background:
+      radial-gradient(ellipse 700px 400px at 50% 0%, rgba(201,162,39,0.14), transparent 60%),
+      var(--panel);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    text-align: center;
+  }
+  .cta-section h2{ max-width: 700px; margin: 0 auto 20px; }
+  .cta-section .section-sub{ max-width: 520px; margin: 0 auto 44px; }
+  .cta-form{
+    max-width: 560px; margin: 0 auto;
+    display: flex; flex-direction: column; gap: 14px;
+    text-align: left;
+  }
+  .cta-form .row2{ display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 560px){ .cta-form .row2{ grid-template-columns: 1fr; } }
+  .cta-form label{
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--paper-dim); margin-bottom: 6px; display: block;
+  }
+  .cta-form input, .cta-form textarea, .cta-form select{
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--line-strong);
+    color: var(--paper);
+    padding: 13px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    border-radius: var(--radius);
+  }
+  .cta-form input:focus, .cta-form textarea:focus, .cta-form select:focus{
+    outline: none; border-color: var(--brass);
+  }
+  .cta-form textarea{ resize: vertical; min-height: 100px; }
+  .cta-form button{ margin-top: 8px; align-self: flex-start; }
+  .form-note{ font-size: 12px; color: var(--paper-dim); margin-top: 10px; opacity: 0.7; }
+  .form-success{ color: var(--brass); opacity: 1; }
+</style>

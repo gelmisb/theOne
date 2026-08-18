@@ -1,0 +1,49 @@
+---
+const steps = [
+  {
+    exif: 'f/2.8 · ISO 200 · 1/250s',
+    title: 'We visit',
+    desc: 'A half-day on-site shoot at your business — photos and a short video clip, shot around your actual space, staff and products rather than a studio backdrop.',
+  },
+  {
+    exif: 'f/4 · ISO 100 · 1/60s',
+    title: 'We build',
+    desc: 'A custom website designed around your new imagery, with a clear services and pricing page — live and reviewed with you before anything goes public.',
+  },
+  {
+    exif: 'f/5.6 · ISO 400 · 1/125s',
+    title: 'You get found',
+    desc: 'Your Google Business Profile is completed and optimised, with consistent name, address and phone details wherever you\'re listed online.',
+  },
+];
+---
+
+<section id="process">
+  <div class="wrap">
+    <div class="section-head" data-reveal data-reveal-group="process-head">
+      <div class="frame-tag"><span class="num">FRAME 004</span> How It Works</div>
+      <h2 class="section-h">One visit. One build. One thing to check off your list.</h2>
+    </div>
+    <div class="process">
+      {steps.map((s) => (
+        <div class="step" data-reveal data-reveal-group="process-steps">
+          <div class="exif">{s.exif}</div>
+          <h3>{s.title}</h3>
+          <p>{s.desc}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .process{
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 2px;
+    background: var(--line); border: 1px solid var(--line);
+  }
+  @media (max-width: 760px){ .process{ grid-template-columns: 1fr; } }
+  .step{ background: var(--bg); padding: 40px 34px; }
+  .step .exif{ margin-bottom: 24px; }
+  .step h3{ font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 26px; margin: 0 0 14px; }
+  .step p{ color: var(--paper-dim); font-size: 15px; line-height: 1.65; margin: 0; }
+</style>

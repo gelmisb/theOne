@@ -1,0 +1,70 @@
+---
+const frameCount = 10;
+const frames = Array.from({ length: frameCount }, (_, i) => String(i + 1).padStart(3, '0'));
+---
+
+<section id="portfolio">
+  <div class="wrap">
+    <div class="section-head" data-reveal data-reveal-group="portfolio-head">
+      <div class="frame-tag"><span class="num">FRAME 003</span> Portfolio</div>
+      <h2 class="section-h">First rolls are <i>developing.</i></h2>
+      <p class="section-sub">
+        This studio is relaunching, not starting cold — the founder shoots below are being booked
+        now, with real local businesses, shown here with their permission as soon as galleries are
+        delivered.
+      </p>
+    </div>
+
+    <div class="contact-sheet" data-reveal data-reveal-group="portfolio-head">
+      <div class="cs-grid">
+        {frames.map((n, i) => (
+          <div class="frame" style={`--hue-shift:${(i * 11) % 40}deg`}>
+            <span class="fnum">{n}</span>
+            <div class="swatch"></div>
+            <span class="x">—</span>
+          </div>
+        ))}
+      </div>
+      <div class="cs-note">
+        <p>
+          <strong>Founder shoots booking now</strong> for cafés, salons, gyms and tradespeople along
+          the commuter belt. First galleries land here as soon as they're delivered.
+        </p>
+        <a href="#contact" class="btn btn-ghost">Get an early slot</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact-sheet{ background: var(--panel); border: 1px solid var(--line); padding: 0; }
+  .cs-grid{ display: grid; grid-template-columns: repeat(5, 1fr); }
+  @media (max-width: 900px){ .cs-grid{ grid-template-columns: repeat(3,1fr); } }
+  @media (max-width: 560px){ .cs-grid{ grid-template-columns: repeat(2,1fr); } }
+  .frame{
+    aspect-ratio: 1/1;
+    border: 1px solid var(--line);
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .frame .fnum{
+    position: absolute; top: 8px; left: 10px; z-index: 2;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--paper-dim); opacity: .6;
+  }
+  .frame .swatch{
+    position: absolute; inset: 0;
+    background: linear-gradient(calc(135deg + var(--hue-shift)), rgba(201,162,39,0.16), rgba(11,11,9,0.9) 60%);
+  }
+  .frame .x{
+    font-family: 'Instrument Serif', serif; font-style: italic; font-size: 15px;
+    color: var(--paper-dim); opacity: 0.55; z-index: 2;
+  }
+  .cs-note{
+    padding: 34px 36px;
+    border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap;
+  }
+  .cs-note p{ margin: 0; font-size: 15px; color: var(--paper-dim); max-width: 520px; line-height: 1.6; }
+  .cs-note p strong{ color: var(--paper); }
+</style>

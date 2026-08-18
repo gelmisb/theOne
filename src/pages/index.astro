@@ -1,0 +1,49 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import Sprockets from '../components/Sprockets.astro';
+import Gap from '../components/Gap.astro';
+import Offer from '../components/Offer.astro';
+import Portfolio from '../components/Portfolio.astro';
+import Process from '../components/Process.astro';
+import About from '../components/About.astro';
+import Seo from '../components/Seo.astro';
+import Contact from '../components/Contact.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout>
+  <Header />
+  <Hero />
+  <Sprockets />
+  <Gap />
+  <Sprockets dark />
+  <Offer />
+  <Sprockets />
+  <Portfolio />
+  <Sprockets dark />
+  <Process />
+  <Sprockets />
+  <About />
+  <Sprockets dark />
+  <Seo />
+  <Contact />
+  <Footer />
+</Layout>
+
+<script>
+  import {
+    initScrollReveals,
+    initHeroTimeline,
+    initHeroParallax,
+    initContactSheetReveal,
+    initNavOnScroll,
+  } from '../scripts/animations';
+
+  initHeroTimeline();
+  initHeroParallax();
+  initScrollReveals();
+  initContactSheetReveal();
+  initNavOnScroll();
+</script>

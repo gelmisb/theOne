@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root{
+  --bg: #0B0B09;
+  --panel: #16150F;
+  --panel-2: #1D1C15;
+  --paper: #F3EEE1;
+  --paper-dim: #C9C3B2;
+  --brass: #C9A227;
+  --brass-dim: #8f7220;
+  --safelight: #B23A2E;
+  --line: rgba(243,238,225,0.14);
+  --line-strong: rgba(243,238,225,0.28);
+  --radius: 2px;
+}
+
+*{ box-sizing: border-box; }
+html{ scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior: auto; }
+  *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+
+body{
+  margin: 0;
+  background: var(--bg);
+  color: var(--paper);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+a{ color: inherit; }
+.mono{ font-family: 'IBM Plex Mono', monospace; }
+.serif{ font-family: 'Instrument Serif', serif; }
+
+.wrap{ max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+@media (max-width: 640px){ .wrap{ padding: 0 20px; } }
+
+/* Sprocket divider — signature texture */
+.sprockets{
+  height: 14px;
+  width: 100%;
+  background-image: radial-gradient(circle, rgba(243,238,225,0.35) 1.6px, transparent 1.7px);
+  background-size: 22px 14px;
+  background-position: 10px center;
+  opacity: 0.55;
+}
+.sprockets.dark{ opacity: 0.18; }
+
+/* Frame tag — signature element */
+.frame-tag{
+  display: flex; align-items: baseline; gap: 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--brass);
+  margin-bottom: 18px;
+  text-transform: uppercase;
+}
+.frame-tag .num{ color: var(--paper); opacity: 0.9; }
+.frame-tag::before{
+  content: "";
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--safelight);
+  box-shadow: 0 0 8px 1px rgba(178,58,46,0.7);
+  flex-shrink: 0;
+}
+.exif{
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--paper-dim);
+  opacity: 0.75;
+}
+
+section{ padding: 110px 0; position: relative; }
+@media (max-width: 640px){ section{ padding: 70px 0; } }
+
+.section-head{ max-width: 680px; margin-bottom: 60px; }
+h2.section-h{
+  font-family: 'Instrument Serif', serif; font-weight: 400;
+  font-size: clamp(32px, 4vw, 50px);
+  line-height: 1.08;
+  margin: 0 0 18px;
+}
+h2.section-h i{ font-style: italic; color: var(--brass); }
+.section-sub{ color: var(--paper-dim); font-size: 17px; line-height: 1.65; }
+
+.btn{
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 15px 28px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
+  text-decoration: none;
+  border-radius: var(--radius);
+  transition: transform .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.btn:focus-visible{ outline: 2px solid var(--brass); outline-offset: 3px; }
+.btn-primary{ background: var(--brass); color: var(--bg); }
+.btn-primary:hover{ transform: translateY(-2px); background: #ddb531; }
+.btn-ghost{ border-color: var(--line-strong); color: var(--paper); }
+.btn-ghost:hover{ border-color: var(--brass); color: var(--brass); transform: translateY(-2px); }
+
+/* GSAP reveal base state — JS adds .gsap-ready and animates via ScrollTrigger */
+.reveal{ opacity: 0; transform: translateY(24px); }

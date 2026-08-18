@@ -1,0 +1,44 @@
+---
+const rows = [
+  { lbl: 'Category', val: 'Set & verified' },
+  { lbl: 'Service area', val: 'Correctly defined' },
+  { lbl: 'Photos', val: 'Shot on-site, not stock' },
+  { lbl: 'NAP consistency', val: 'Matched across listings' },
+  { lbl: 'Reviews', val: 'NFC tap-to-review card' },
+];
+---
+
+<section id="seo">
+  <div class="wrap">
+    <div class="seo-block">
+      <div data-reveal data-reveal-group="seo-block">
+        <div class="frame-tag"><span class="num">FRAME 006</span> Local SEO</div>
+        <h2 class="section-h">Your Google listing is doing more selling than your homepage.</h2>
+        <p class="section-sub" style="margin-bottom:0;">
+          Most local searches never make it past the map pack. A finished, verified, correctly
+          categorised Google Business Profile — backed by real photos and consistent details
+          everywhere you're listed — is worked into every Tier 2 and 3 package, not treated as an
+          afterthought.
+        </p>
+      </div>
+      <div class="gbp-card" data-reveal data-reveal-group="seo-block">
+        {rows.map((r) => (
+          <div class="gbp-row">
+            <span class="lbl">{r.lbl}</span>
+            <span class="val">{r.val}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .seo-block{ display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  @media (max-width: 860px){ .seo-block{ grid-template-columns: 1fr; gap: 36px; } }
+  .gbp-card{ background: var(--panel); border: 1px solid var(--line); padding: 32px; }
+  .gbp-row{ display: flex; justify-content: space-between; padding: 14px 0; border-top: 1px solid var(--line); font-size: 14px; }
+  .gbp-row:first-child{ border-top: none; }
+  .gbp-row .lbl{ color: var(--paper-dim); }
+  .gbp-row .val{ color: var(--brass); font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
+</style>
