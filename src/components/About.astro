@@ -6,23 +6,37 @@ const tags = ['Cafés', 'Salons', 'Gyms & Studios', 'Clinics', 'Tradespeople', '
   <div class="wrap">
     <div class="about">
       <div class="about-visual" data-reveal data-reveal-group="about-block">
-        <span class="cap mono">FOUNDER — ROLL 01, FRAME 12</span>
+        <span class="cap mono">EXPERIENCE — ROLL 01, FRAME 12</span>
       </div>
       <div class="about-body" data-reveal data-reveal-group="about-block">
         <div class="frame-tag"><span class="num">FRAME 005</span> About</div>
         <h2 class="section-h" style="margin-bottom:26px;">
-          A former professional photographer, now a working software engineer.
+          10+ years building software. 5+ years shooting professionally.
         </h2>
+
+        <div class="cred-strip">
+          <div>
+            <span class="cred-k">10+ yrs</span>
+            <span class="cred-v">Senior software engineering — production systems, not side projects</span>
+          </div>
+          <div>
+            <span class="cred-k">5+ yrs</span>
+            <span class="cred-v">Professional photography &amp; videography experience</span>
+          </div>
+        </div>
+
         <p>
           Most web studios have never held a camera on a paid job, and most photographers can't
-          build the site their photos end up on. <strong>That combination is the whole edge here</strong>
-          — one person, on-site with real gear, and equally comfortable shipping the website that
-          goes with it.
+          ship production-grade software. <strong>That combination is the whole edge here</strong> —
+          real on-site photography and video, paired with the engineering background to build,
+          host and maintain the website it ends up on.
         </p>
         <p>
-          This studio works best with <strong>local, visible-decision-maker businesses</strong> with
-          an active but under-photographed Google presence — the kind of business that can say yes
-          on a five-minute phone call, not after three rounds of internal sign-off.
+          The result is a website built the way software should be: fast, maintainable, and
+          designed around real imagery rather than a template. Best suited to
+          <strong>local, visible-decision-maker businesses</strong> with an active but
+          under-photographed Google presence — the kind of business that can say yes on a
+          five-minute phone call, not after three rounds of internal sign-off.
         </p>
         <div class="about-tags">
           {tags.map((t) => <span>{t}</span>)}
@@ -45,6 +59,22 @@ const tags = ['Cafés', 'Salons', 'Gyms & Studios', 'Clinics', 'Tradespeople', '
     display: flex; align-items: flex-end; padding: 26px;
   }
   .about-visual .cap{ font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--paper-dim); }
+
+  .cred-strip{
+    display: flex; gap: 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 22px 0;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+  }
+  .cred-strip > div{ flex: 1; min-width: 180px; padding-right: 24px; }
+  .cred-k{
+    font-family: 'Instrument Serif', serif; font-style: italic;
+    font-size: 26px; color: var(--brass); display: block; margin-bottom: 6px;
+  }
+  .cred-v{ font-size: 13px; color: var(--paper-dim); line-height: 1.45; display: block; }
+
   .about-body p{ font-size: 17px; line-height: 1.75; color: var(--paper-dim); margin: 0 0 22px; }
   .about-body p strong{ color: var(--paper); font-weight: 600; }
   .about-tags{ display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
