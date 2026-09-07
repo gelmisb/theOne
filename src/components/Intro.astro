@@ -2,16 +2,20 @@
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
+// Deliberately the same file Hero.astro uses (not the old dedicated
+// hero.jpg) — the portal reveals the exact photo that then carries through
+// as Hero's own background, so the scroll from Frame 000 into Frame 001
+// reads as one continuous shot rather than a cut to a different image.
 const heroImages = import.meta.glob<{ default: ImageMetadata }>(
-  '/src/assets/photos/hero.{jpg,jpeg,png,webp}',
+  '/src/assets/photos/hero-signage.{jpg,jpeg,png,webp}',
   { eager: true }
 );
 const heroImage = Object.values(heroImages)[0]?.default;
 
 // Foreground "porthole" layer — a dark window opening onto the hero photo.
 // The pinned scroll timeline zooms this dramatically toward the viewer,
-// while the hero.jpg background beneath scales subtly, so it reads as
-// flying through the window into the photo beyond.
+// while the background beneath scales subtly, so it reads as flying
+// through the window into the photo beyond.
 const windowImages = import.meta.glob<{ default: ImageMetadata }>(
   '/src/assets/photos/intro-window.{jpg,jpeg,png,webp}',
   { eager: true }

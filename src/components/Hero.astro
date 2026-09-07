@@ -9,8 +9,9 @@ const stats = [
   { k: 'Local', v: 'Built for cafés, salons, gyms, clinics and trades - not corporates' },
 ];
 
-// Deliberately a distinct file from hero.jpg (used by Intro's Frame 000) —
-// Hero's photo can change independently without affecting Intro's mosaic source.
+// Same file Intro's Frame 000 reveals through its portal (see Intro.astro) —
+// deliberately shared, so the scroll from Frame 000 into Hero carries the
+// same photo through rather than cutting to a different one.
 const heroImages = import.meta.glob<{ default: ImageMetadata }>(
   '/src/assets/photos/hero-signage.{jpg,jpeg,png,webp}',
   { eager: true }
