@@ -38,6 +38,7 @@ import Footer from '../components/Footer.astro';
 
 <script>
   import {
+    initScrollHashFix,
     initScrollReveals,
     initIntroTimeline,
     initIntroZoomTransition,
@@ -54,6 +55,7 @@ import Footer from '../components/Footer.astro';
     initSectionTransitions,
   } from '../scripts/animations';
 
+  initScrollHashFix();
   initIntroTimeline();
   initIntroZoomTransition();
   initPersistBgFade();

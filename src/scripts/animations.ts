@@ -6,6 +6,36 @@ gsap.registerPlugin(ScrollTrigger);
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /**
+ * Fixes a real bug: loading the page directly at a URL hash (e.g. /#offer)
+ * makes the browser jump there natively, often before ScrollTrigger has
+ * measured the pinned Intro section — if that jump lands past Intro's
+ * trigger range before GSAP has anything to measure against, the pin can
+ * get stuck in its pinned (position: fixed) state indefinitely, leaving
+ * Intro's portal artwork rendered fixed at the top of the viewport no
+ * matter how far down the page you actually are.
+ *
+ * Must run before any other init function sets up a pinned ScrollTrigger.
+ * Forces the page to start at the top (so every pin measures correctly),
+ * then — once the rest of this module's init functions have run and the
+ * page has settled — refreshes ScrollTrigger against the real layout and
+ * scrolls to the original hash target.
+ */
+export function initScrollHashFix() {
+  if (!location.hash) return;
+  const hash = location.hash;
+
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  window.scrollTo(0, 0);
+
+  window.addEventListener('load', () => {
+    requestAnimationFrame(() => {
+      ScrollTrigger.refresh();
+      document.querySelector(hash)?.scrollIntoView();
+    });
+  });
+}
+
+/**
  * Scroll-triggered reveal for any element with [data-reveal].
  * Groups that share a [data-reveal-group] stagger together.
  */
