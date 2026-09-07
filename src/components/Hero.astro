@@ -9,8 +9,10 @@ const stats = [
   { k: 'Local', v: 'Built for cafés, salons, gyms, clinics and trades - not corporates' },
 ];
 
+// Deliberately a distinct file from hero.jpg (used by Intro's Frame 000) —
+// Hero's photo can change independently without affecting Intro's mosaic source.
 const heroImages = import.meta.glob<{ default: ImageMetadata }>(
-  '/src/assets/photos/hero.{jpg,jpeg,png,webp}',
+  '/src/assets/photos/hero-signage.{jpg,jpeg,png,webp}',
   { eager: true }
 );
 const heroImage = Object.values(heroImages)[0]?.default;
