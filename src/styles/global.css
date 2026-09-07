@@ -80,6 +80,9 @@ a{ color: inherit; }
 section{ padding: 110px 0; position: relative; }
 @media (max-width: 640px){ section{ padding: 70px 0; } }
 
+/* Word-by-word heading reveal — spans created at runtime by splitIntoWordSpans() */
+.split-word{ display: inline-block; will-change: transform, opacity; }
+
 .section-head{ max-width: 680px; margin-bottom: 60px; }
 h2.section-h{
   font-family: 'Montserrat', serif; font-weight: 400;

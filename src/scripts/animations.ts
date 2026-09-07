@@ -254,15 +254,61 @@ export function initIntroParallax() {
   });
 }
 
+/**
+ * Wraps every word of an element's text content in a `.split-word` span,
+ * recursing into child elements (e.g. an `<i>` accent span) so their own
+ * styling still applies per-word. Whitespace is preserved as plain text
+ * nodes between words so normal line-wrapping still works. Shared by the
+ * Hero entrance timeline and the generic scroll-triggered heading reveal
+ * below, rather than duplicated per component.
+ */
+export function splitIntoWordSpans(el: HTMLElement): HTMLElement[] {
+  function walk(node: Node) {
+    node.childNodes.forEach((child) => {
+      if (child.nodeType === Node.TEXT_NODE) {
+        const parts = (child.textContent ?? '').split(/(\s+)/);
+        const frag = document.createDocumentFragment();
+        parts.forEach((part) => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) {
+            frag.appendChild(document.createTextNode(part));
+          } else {
+            const span = document.createElement('span');
+            span.className = 'split-word';
+            span.textContent = part;
+            frag.appendChild(span);
+          }
+        });
+        child.replaceWith(frag);
+      } else if (child.nodeType === Node.ELEMENT_NODE) {
+        walk(child);
+      }
+    });
+  }
+  walk(el);
+  return Array.from(el.querySelectorAll<HTMLElement>('.split-word'));
+}
+
 /** Hero entrance timeline — plays once on load, not on scroll. */
 export function initHeroTimeline() {
+  const heading = document.querySelector<HTMLElement>('.hero-h');
+  const words = heading ? splitIntoWordSpans(heading) : [];
+
+  if (prefersReducedMotion) {
+    gsap.set(
+      '.hero-eyebrow, .hero-sub, .hero-ctas, .vf-corner, .hero-strip > div',
+      { opacity: 1, y: 0 }
+    );
+    gsap.set('.vf-corner', { opacity: 0.35 });
+    gsap.set(words, { opacity: 1, y: 0 });
+    return;
+  }
+
   const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-  if (prefersReducedMotion) return;
-
   tl.fromTo('.hero-eyebrow', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.6 })
-    .fromTo('.hero-h', { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.8 }, '-=0.35')
-    .fromTo('.hero-sub', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7 }, '-=0.5')
+    .fromTo(words, { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.06 }, '-=0.35')
+    .fromTo('.hero-sub', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7 }, '-=0.3')
     .fromTo('.hero-ctas', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.6 }, '-=0.45')
     .fromTo('.vf-corner', { opacity: 0 }, { opacity: 0.35, duration: 1, stagger: 0.08 }, '-=0.6')
     .fromTo(
@@ -271,6 +317,39 @@ export function initHeroTimeline() {
       { opacity: 1, y: 0, duration: 0.6, stagger: 0.1 },
       '-=0.3'
     );
+}
+
+/**
+ * Generic scroll-triggered word-by-word reveal for any heading marked
+ * [data-split-reveal] (Offer's headline to start). Snappier stagger than the
+ * block-level [data-reveal] fade, matching the existing contact-sheet
+ * sequential-reveal pacing convention.
+ */
+export function initHeadingSplitReveal() {
+  const headings = document.querySelectorAll<HTMLElement>('[data-split-reveal]');
+  if (!headings.length) return;
+
+  if (prefersReducedMotion) return; // untouched text, nothing to reveal
+
+  headings.forEach((heading) => {
+    const words = splitIntoWordSpans(heading);
+    gsap.fromTo(
+      words,
+      { opacity: 0, y: 20 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: 'power3.out',
+        stagger: 0.07,
+        scrollTrigger: {
+          trigger: heading,
+          start: 'top 85%',
+          once: true,
+        },
+      }
+    );
+  });
 }
 
 /** Subtle parallax drift on the viewfinder brackets as the hero scrolls out. */
