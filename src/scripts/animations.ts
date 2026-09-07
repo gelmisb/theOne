@@ -622,3 +622,33 @@ export function initVideoLightbox() {
     if (e.target === lightbox) close();
   });
 }
+
+/**
+ * Section-to-section flowing transition: each section gently dims and
+ * scales down as it's scrolled past, so moving between sections reads as a
+ * continuous flow rather than a hard cut. Scroll-scrubbed (tied directly to
+ * scroll position, not a fixed-duration tween), so it never scroll-jacks.
+ * Intro is excluded — it already has its own bespoke exit parallax
+ * (initIntroParallax) covering essentially its whole visible content, so a
+ * second wrapper-level effect there would just compound rather than add.
+ */
+export function initSectionTransitions() {
+  if (prefersReducedMotion) return;
+
+  const sections = gsap.utils.toArray<HTMLElement>('section').filter((s) => s.id !== 'intro');
+
+  sections.forEach((section) => {
+    gsap.set(section, { transformOrigin: '50% 100%' });
+    gsap.to(section, {
+      opacity: 0.5,
+      scale: 0.96,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: section,
+        start: 'bottom 88%',
+        end: 'bottom 8%',
+        scrub: 0.6,
+      },
+    });
+  });
+}

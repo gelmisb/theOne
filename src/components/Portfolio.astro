@@ -127,26 +127,35 @@ const hasVideos = videos.length > 0;
       </div>
     )}
   </div>
-
-  {hasVideos && (
-    <div class="lightbox video-lightbox" data-video-lightbox role="dialog" aria-modal="true" aria-label="Video player" aria-hidden="true">
-      <button type="button" class="lb-close" data-video-lightbox-close aria-label="Close video">✕</button>
-      <div class="lb-video-wrap" data-video-lightbox-wrap></div>
-    </div>
-  )}
-
-  {hasPhotos && (
-    <div class="lightbox" data-lightbox>
-      <button type="button" class="lb-close" data-lightbox-close aria-label="Close">✕</button>
-      <button type="button" class="lb-nav lb-prev" data-lightbox-prev aria-label="Previous photo">‹</button>
-      <button type="button" class="lb-nav lb-next" data-lightbox-next aria-label="Next photo">›</button>
-      <figure class="lb-figure">
-        <img data-lightbox-img alt="" />
-        <figcaption class="mono" data-lightbox-caption></figcaption>
-      </figure>
-    </div>
-  )}
 </section>
+
+{/*
+  Both lightboxes render as siblings of <section>, not nested inside it:
+  position:fixed only means "relative to the viewport" as long as no
+  ancestor has a CSS transform. initSectionTransitions() applies a scroll-
+  scrubbed transform to every top-level section (including this one), which
+  would otherwise make the section the fixed-positioning containing block
+  and break these modals' full-viewport overlay.
+*/}
+
+{hasVideos && (
+  <div class="lightbox video-lightbox" data-video-lightbox role="dialog" aria-modal="true" aria-label="Video player" aria-hidden="true">
+    <button type="button" class="lb-close" data-video-lightbox-close aria-label="Close video">✕</button>
+    <div class="lb-video-wrap" data-video-lightbox-wrap></div>
+  </div>
+)}
+
+{hasPhotos && (
+  <div class="lightbox" data-lightbox>
+    <button type="button" class="lb-close" data-lightbox-close aria-label="Close">✕</button>
+    <button type="button" class="lb-nav lb-prev" data-lightbox-prev aria-label="Previous photo">‹</button>
+    <button type="button" class="lb-nav lb-next" data-lightbox-next aria-label="Next photo">›</button>
+    <figure class="lb-figure">
+      <img data-lightbox-img alt="" />
+      <figcaption class="mono" data-lightbox-caption></figcaption>
+    </figure>
+  </div>
+)}
 
 {hasPhotos && (
   <script is:inline define:vars={{ photoUrls: photos.map((p) => p.src.src), captions: photos.map((p) => p.caption) }}>
