@@ -68,9 +68,10 @@ export function initIntroTimeline() {
  * official pinned-zoom demo (codepen.io/GreenSock/pen/YzbPYMx): a foreground
  * "porthole" photo (a dark window opening) scales up and pushes toward the
  * viewer via CSS 3D perspective while the section stays pinned for a fixed
- * scroll distance, its opening growing to reveal the hero photo underneath
- * — which itself scales up subtly at the same time — before releasing into
- * Hero. Replaces the old mosaic-lens effect, which didn't read well here.
+ * scroll distance, its opening growing to reveal the persistent site
+ * background (Layout.astro's .persist-bg, fixed behind every section)
+ * underneath, before releasing into Hero. Replaces the old mosaic-lens
+ * effect, which didn't read well here.
  *
  * `end` is a function (not a fixed string) so the pin covers a consistent
  * 1.5 viewport-heights of scroll regardless of the visitor's screen height —
@@ -79,9 +80,8 @@ export function initIntroTimeline() {
  */
 export function initIntroZoomTransition() {
   const intro = document.querySelector<HTMLElement>('.intro');
-  const bg = document.querySelector<HTMLElement>('.intro-bg');
   const feature = document.querySelector<HTMLElement>('[data-intro-feature]');
-  if (!intro || !bg || !feature) return;
+  if (!intro || !feature) return;
 
   if (prefersReducedMotion) return; // no pin, no zoom — plain scroll past
 
@@ -98,8 +98,32 @@ export function initIntroZoomTransition() {
     })
     .to('.intro-reveal, .intro-frame, .intro-scroll', { opacity: 0, ease: 'power1.inOut' }, 0)
     .to(feature, { scale: 6, z: 350, transformOrigin: 'center center', ease: 'power1.inOut' }, 0)
-    .to(feature, { opacity: 0, ease: 'power1.in' }, 0.5)
-    .to(bg, { scale: 1.1, transformOrigin: 'center center', ease: 'power1.inOut' }, 0);
+    .to(feature, { opacity: 0, ease: 'power1.in' }, 0.5);
+}
+
+/**
+ * Fades Layout.astro's persistent journey background (revealed through
+ * Intro's portal, visible through Hero) out as Gap scrolls through the
+ * viewport, scrubbed to scroll position — fully faded by the time Gap has
+ * passed, handing off cleanly to Gap's own background photo.
+ */
+export function initPersistBgFade() {
+  const bg = document.querySelector<HTMLElement>('[data-persist-bg]');
+  const gap = document.getElementById('offer-intro');
+  if (!bg || !gap) return;
+
+  if (prefersReducedMotion) return;
+
+  gsap.to(bg, {
+    opacity: 0,
+    ease: 'none',
+    scrollTrigger: {
+      trigger: gap,
+      start: 'top bottom',
+      end: 'bottom top',
+      scrub: true,
+    },
+  });
 }
 
 /**
