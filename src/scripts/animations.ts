@@ -97,7 +97,8 @@ export function initIntroZoomTransition() {
       },
     })
     .to('.intro-reveal, .intro-frame, .intro-scroll', { opacity: 0, ease: 'power1.inOut' }, 0)
-    .to(feature, { scale: 2, z: 350, transformOrigin: 'center center', ease: 'power1.inOut' }, 0)
+    .to(feature, { scale: 6, z: 350, transformOrigin: 'center center', ease: 'power1.inOut' }, 0)
+    .to(feature, { opacity: 0, ease: 'power1.in' }, 0.5)
     .to(bg, { scale: 1.1, transformOrigin: 'center center', ease: 'power1.inOut' }, 0);
 }
 
