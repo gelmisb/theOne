@@ -23,6 +23,14 @@ const hasGenerated = photos.some((p) => p.generated);
 const frameCount = 10;
 const frames = Array.from({ length: frameCount }, (_, i) => String(i + 1).padStart(3, '0'));
 const hasPhotos = photos.length > 0;
+
+// On-site video clips. Add entries here the same way photos live in
+// src/assets/photos/portfolio — poster is optional (falls back to a plain
+// swatch tile like the photo grid's empty state). Example:
+// { id: 'cafe-walkthrough', title: 'Café Walkthrough', type: 'youtube', src: 'dQw4w9WgXcQ' }
+// { id: 'salon-reel', title: 'Salon Reel', type: 'file', src: '/videos/salon-reel.mp4', poster: '/videos/salon-reel-poster.jpg' }
+const videos: { id: string; title: string; type: 'youtube' | 'file'; src: string; poster?: string }[] = [];
+const hasVideos = videos.length > 0;
 ---
 
 <section id="portfolio">
@@ -90,7 +98,42 @@ const hasPhotos = photos.length > 0;
         <a href="#contact" class="btn btn-ghost">Get an early slot</a>
       </div>
     </div>
+
+    {hasVideos && (
+      <div class="video-block" data-reveal data-reveal-group="portfolio-video">
+        <div class="video-head mono">On-site video</div>
+        <div class="video-grid">
+          {videos.map((v, i) => (
+            <button
+              type="button"
+              class="frame has-video"
+              data-video-trigger
+              data-video-type={v.type}
+              data-video-src={v.src}
+              data-video-title={v.title}
+              aria-label={`Play video: ${v.title}`}
+            >
+              <span class="fnum">{String(i + 1).padStart(3, '0')}</span>
+              {v.poster ? (
+                <img src={v.poster} alt="" class="photo" loading="lazy" />
+              ) : (
+                <div class="swatch" style={`--hue-shift:${(i * 17) % 40}deg`}></div>
+              )}
+              <span class="play-badge" aria-hidden="true">▶</span>
+              <span class="caption mono">{v.title}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    )}
   </div>
+
+  {hasVideos && (
+    <div class="lightbox video-lightbox" data-video-lightbox role="dialog" aria-modal="true" aria-label="Video player" aria-hidden="true">
+      <button type="button" class="lb-close" data-video-lightbox-close aria-label="Close video">✕</button>
+      <div class="lb-video-wrap" data-video-lightbox-wrap></div>
+    </div>
+  )}
 
   {hasPhotos && (
     <div class="lightbox" data-lightbox>
@@ -181,6 +224,67 @@ const hasPhotos = photos.length > 0;
   .frame.has-photo:hover .caption,
   .frame.has-photo:focus-visible .caption{ opacity: 1; transform: translateY(0); }
   .frame.has-photo:focus-visible{ outline: 2px solid var(--brass); outline-offset: -2px; }
+
+  /* Video grid */
+  .video-block{ margin-top: 24px; }
+  .video-head{
+    font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--paper-dim); margin-bottom: 14px;
+  }
+  .video-grid{
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;
+    background: var(--line); border: 1px solid var(--line);
+  }
+  @media (max-width: 900px){ .video-grid{ grid-template-columns: repeat(2,1fr); } }
+  .frame.has-video{
+    margin: 0; padding: 0; background: var(--panel); cursor: pointer;
+    font: inherit; color: inherit;
+  }
+  .frame.has-video img.photo{
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    transition: transform .5s ease;
+  }
+  .frame.has-video:hover img.photo,
+  .frame.has-video:focus-visible img.photo{ transform: scale(1.06); }
+  .frame.has-video .play-badge{
+    position: relative; z-index: 2;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: rgba(10,14,19,0.55);
+    border: 1px solid rgba(234,242,248,0.35);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--paper);
+    font-size: 14px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: background .2s ease, border-color .2s ease, transform .2s ease;
+  }
+  .frame.has-video:hover .play-badge,
+  .frame.has-video:focus-visible .play-badge{
+    background: var(--brass); border-color: var(--brass); transform: scale(1.08);
+  }
+  .frame.has-video .caption{
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+    padding: 8px 10px;
+    font-size: 10px; letter-spacing: 0.03em; color: #FFFFFF;
+    background: linear-gradient(0deg, rgba(10,14,19,0.85), transparent);
+    text-align: left;
+  }
+  .frame.has-video:focus-visible{ outline: 2px solid var(--brass); outline-offset: -2px; }
+
+  /* Video lightbox */
+  .video-lightbox .lb-video-wrap{
+    position: relative;
+    width: min(92vw, 1100px);
+    aspect-ratio: 16/9;
+  }
+  .video-lightbox .lb-video-wrap :global(iframe),
+  .video-lightbox .lb-video-wrap :global(video){
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: #000;
+  }
 
   /* Lightbox — deliberately stays a dark viewer regardless of site theme, for photo contrast */
   .lightbox{

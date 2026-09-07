@@ -511,3 +511,114 @@ export function initScrollNav() {
     });
   });
 }
+
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea, input, select, iframe, video, [tabindex]:not([tabindex="-1"])';
+
+/**
+ * Portfolio video grid — click a poster tile to open a modal playing either
+ * a YouTube embed or a local file, fading/scaling in with GSAP, closing on
+ * backdrop click or Escape, and trapping focus while open. Closing removes
+ * the player element entirely (rather than pausing) so audio/video reliably
+ * stops, including for the YouTube iframe case with no postMessage API.
+ */
+export function initVideoLightbox() {
+  const lightbox = document.querySelector<HTMLElement>('[data-video-lightbox]');
+  const wrap = document.querySelector<HTMLElement>('[data-video-lightbox-wrap]');
+  const closeBtn = document.querySelector<HTMLElement>('[data-video-lightbox-close]');
+  const triggers = gsap.utils.toArray<HTMLElement>('[data-video-trigger]');
+  if (!lightbox || !wrap || !closeBtn || !triggers.length) return;
+
+  let lastFocused: HTMLElement | null = null;
+
+  function buildPlayer(type: string | undefined, src: string | undefined, title: string | undefined) {
+    wrap!.innerHTML = '';
+    if (!src) return;
+    if (type === 'youtube') {
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube-nocookie.com/embed/${src}?autoplay=1&rel=0`;
+      iframe.title = title ?? 'Video';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+      wrap!.appendChild(iframe);
+    } else {
+      const video = document.createElement('video');
+      video.src = src;
+      video.controls = true;
+      video.autoplay = true;
+      video.setAttribute('playsinline', '');
+      wrap!.appendChild(video);
+    }
+  }
+
+  function open(trigger: HTMLElement) {
+    lastFocused = document.activeElement as HTMLElement | null;
+    buildPlayer(trigger.dataset.videoType, trigger.dataset.videoSrc, trigger.dataset.videoTitle);
+
+    lightbox!.classList.add('open');
+    lightbox!.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+
+    if (prefersReducedMotion) {
+      gsap.set(lightbox, { opacity: 1 });
+      gsap.set(wrap, { opacity: 1, scale: 1 });
+    } else {
+      gsap.fromTo(lightbox, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: 'power2.out' });
+      gsap.fromTo(wrap, { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.35, ease: 'power2.out' });
+    }
+
+    closeBtn!.focus();
+    document.addEventListener('keydown', onKeydown);
+  }
+
+  function close() {
+    document.removeEventListener('keydown', onKeydown);
+
+    const finish = () => {
+      wrap!.innerHTML = ''; // stops playback — iframe/video removed, not just hidden
+      lightbox!.classList.remove('open');
+      lightbox!.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      lastFocused?.focus();
+    };
+
+    if (prefersReducedMotion) {
+      finish();
+    } else {
+      gsap.to(wrap, { opacity: 0, scale: 0.94, duration: 0.2, ease: 'power1.in' });
+      gsap.to(lightbox, { opacity: 0, duration: 0.25, ease: 'power1.in', onComplete: finish });
+    }
+  }
+
+  function onKeydown(e: KeyboardEvent) {
+    if (e.key === 'Escape') {
+      close();
+      return;
+    }
+    if (e.key !== 'Tab') return;
+
+    const focusable = Array.from(lightbox!.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+      (el) => el.offsetParent !== null
+    );
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
+  triggers.forEach((trigger) => {
+    trigger.addEventListener('click', () => open(trigger));
+  });
+
+  closeBtn.addEventListener('click', close);
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox) close();
+  });
+}
