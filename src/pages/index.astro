@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
+import Intro from '../components/Intro.astro';
 import Hero from '../components/Hero.astro';
 import Sprockets from '../components/Sprockets.astro';
 import Gap from '../components/Gap.astro';
@@ -15,6 +16,7 @@ import Footer from '../components/Footer.astro';
 
 <Layout>
   <Header />
+  <Intro />
   <Hero />
   <Sprockets />
   <Gap />
@@ -35,15 +37,25 @@ import Footer from '../components/Footer.astro';
 <script>
   import {
     initScrollReveals,
+    initIntroTimeline,
+    initIntroGrid,
+    initIntroParallax,
     initHeroTimeline,
     initHeroParallax,
     initContactSheetReveal,
     initNavOnScroll,
+    initMagneticButtons,
+    initPortfolioLightbox,
   } from '../scripts/animations';
 
+  initIntroTimeline();
+  initIntroGrid();
+  initIntroParallax();
   initHeroTimeline();
   initHeroParallax();
   initScrollReveals();
   initContactSheetReveal();
   initNavOnScroll();
+  initMagneticButtons();
+  initPortfolioLightbox();
 </script>

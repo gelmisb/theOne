@@ -43,6 +43,217 @@ export function initScrollReveals() {
   });
 }
 
+/** Intro reveal — plays once on load. The grid materializes, then the iris opens onto the wordmark. */
+export function initIntroTimeline() {
+  const intro = document.querySelector('.intro');
+  if (!intro) return;
+
+  if (prefersReducedMotion) {
+    gsap.set('.intro-reveal', { clipPath: 'circle(150% at 50% 50%)' });
+    return;
+  }
+
+  gsap.set('.intro-reveal', { clipPath: 'circle(0% at 50% 50%)' });
+
+  const tl = gsap.timeline({ defaults: { ease: 'power2.inOut' } });
+
+  tl.to('.intro-reveal', { clipPath: 'circle(140% at 50% 50%)', duration: 1.1, ease: 'power3.inOut' }, 0.6)
+    .fromTo('[data-intro-el]', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.12 }, 1.05)
+    .fromTo('.intro-word', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7 }, 1.05)
+    .fromTo('.intro-scroll', { opacity: 0 }, { opacity: 0.7, duration: 0.6 }, 1.65);
+}
+
+/**
+ * Interactive mosaic-pixelation lens, ported from a reference CodePen (Tom
+ * Miller / creativeocean, "Canvas Grid Mouse Effect"): a grid of boxes near
+ * the cursor gets overdrawn with a zoomed-in crop of the source image,
+ * fading out with distance — like a photo resolving into focus around the
+ * cursor. The effect radius itself is driven by how far the eased cursor
+ * still lags the raw one, so a quick flick opens a big reveal that settles.
+ *
+ * The "image" here is the same hero photo used in the section right below —
+ * drawn dim and desaturated behind the real, always-crisp DOM wordmark, so
+ * legibility never depends on it. It's the same photo the visitor sees in
+ * full a moment later in Hero, just foggy here until the cursor resolves it.
+ * GSAP-ticker driven (matching the reference), fine-pointer only, paused
+ * off-screen.
+ */
+export function initIntroGrid() {
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-intro-canvas]');
+  const section = document.querySelector<HTMLElement>('.intro');
+  const bgImg = document.querySelector<HTMLImageElement>('[data-intro-bg]');
+  if (!canvas || !section || !bgImg) return;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const BOX = 48;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let width = 0;
+  let height = 0;
+  let source: HTMLCanvasElement | null = null;
+  let boxes: { x: number; y: number }[] = [];
+
+  const m = { x: 0, y: 0, s: 1.5, x2: 0, y2: 0 };
+  const xTo = gsap.quickTo(m, 'x', { duration: 1, ease: 'expo' });
+  const yTo = gsap.quickTo(m, 'y', { duration: 1, ease: 'expo' });
+  const sTo = gsap.quickTo(m, 's', { duration: 2, ease: 'power2' });
+
+  function renderSource() {
+    if (!bgImg!.naturalWidth) return;
+    source = document.createElement('canvas');
+    source.width = width * dpr;
+    source.height = height * dpr;
+    const sctx = source.getContext('2d');
+    if (!sctx) return;
+    sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // matches Hero's own .hero-bg color treatment, dimmer since this is the "before" state
+    sctx.filter = 'grayscale(0.25) sepia(0.3) hue-rotate(155deg) saturate(1.3) brightness(0.9) contrast(1.05)';
+
+    const iw = bgImg!.naturalWidth;
+    const ih = bgImg!.naturalHeight;
+    const scale = Math.max(width / iw, height / ih);
+    const dw = iw * scale;
+    const dh = ih * scale;
+    sctx.drawImage(bgImg!, (width - dw) / 2, (height - dh) / 2, dw, dh);
+  }
+
+  function buildGrid() {
+    const rect = section!.getBoundingClientRect();
+    width = rect.width;
+    height = rect.height;
+    canvas!.width = width * dpr;
+    canvas!.height = height * dpr;
+    canvas!.style.width = `${width}px`;
+    canvas!.style.height = `${height}px`;
+    ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    m.x = m.x2 = width / 2;
+    m.y = m.y2 = height / 2;
+
+    renderSource();
+
+    boxes = [];
+    for (let y = 0; y <= height; y += BOX) {
+      for (let x = 0; x <= width; x += BOX) boxes.push({ x, y });
+    }
+  }
+
+  function draw() {
+    if (!source) return;
+
+    const d = Math.hypot(m.x - m.x2, m.y - m.y2);
+    sTo(gsap.utils.clamp(0, 1.6, (d / Math.max(width, height)) * 2));
+
+    const radius = Math.max(width, height) * m.s;
+
+    ctx!.clearRect(0, 0, width, height);
+    ctx!.globalAlpha = 0.12;
+    ctx!.drawImage(source!, 0, 0, width, height, 0, 0, width, height);
+
+    for (const b of boxes) {
+      const dist = Math.hypot(b.x - m.x, b.y - m.y);
+      const s = 1 - gsap.utils.clamp(0, 1, dist / radius);
+      if (s < 0.02) continue;
+      const boxScaled = BOX * s;
+      const srcSize = Math.max(BOX - boxScaled, 1);
+      ctx!.globalAlpha = 0.12 + s * 0.45;
+      ctx!.drawImage(
+        source!,
+        b.x + boxScaled / 2, b.y + boxScaled / 2, srcSize, srcSize,
+        b.x, b.y, BOX, BOX
+      );
+    }
+
+    ctx!.fillStyle = 'rgba(79, 168, 222, 1)';
+    for (const b of boxes) {
+      const dist = Math.hypot(b.x - m.x, b.y - m.y);
+      const s = 1 - gsap.utils.clamp(0, 1, dist / radius);
+      if (s < 0.05) continue;
+      ctx!.globalAlpha = s * 0.5;
+      ctx!.beginPath();
+      ctx!.arc(b.x, b.y, BOX * 0.12 * s, 0, Math.PI * 2);
+      ctx!.fill();
+    }
+    ctx!.globalAlpha = 1;
+  }
+
+  let running = false;
+  function start() {
+    if (running) return;
+    running = true;
+    gsap.ticker.add(draw);
+  }
+  function stop() {
+    if (!running) return;
+    running = false;
+    gsap.ticker.remove(draw);
+  }
+
+  function init() {
+    buildGrid();
+    draw();
+
+    if (prefersReducedMotion) {
+      gsap.set(canvas!, { opacity: 0.4 });
+      return;
+    }
+
+    gsap.to(canvas!, { opacity: 1, duration: 1, delay: 0.15, ease: 'power2.out' });
+
+    const isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (!isFinePointer) return;
+
+    section!.addEventListener('pointermove', (e) => {
+      const rect = section!.getBoundingClientRect();
+      m.x2 = e.clientX - rect.left;
+      m.y2 = e.clientY - rect.top;
+      xTo(m.x2);
+      yTo(m.y2);
+    });
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) start();
+        else stop();
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(section!);
+
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(buildGrid, 200);
+    });
+  }
+
+  if (bgImg.complete && bgImg.naturalWidth) {
+    init();
+  } else {
+    bgImg.addEventListener('load', init, { once: true });
+  }
+}
+
+/** Subtle parallax fade as the intro scrolls out beneath the hero. */
+export function initIntroParallax() {
+  if (prefersReducedMotion) return;
+  const intro = document.querySelector('.intro');
+  if (!intro) return;
+
+  gsap.to('.intro-reveal, .intro-frame, .intro-canvas', {
+    yPercent: -12,
+    opacity: 0.25,
+    ease: 'none',
+    scrollTrigger: {
+      trigger: intro,
+      start: 'top top',
+      end: 'bottom top',
+      scrub: true,
+    },
+  });
+}
+
 /** Hero entrance timeline — plays once on load, not on scroll. */
 export function initHeroTimeline() {
   const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
@@ -117,5 +328,76 @@ export function initNavOnScroll() {
     start: 'top -80',
     end: 99999,
     toggleClass: { targets: header, className: 'scrolled' },
+  });
+}
+
+/** Buttons pull gently toward the cursor on hover — fine-pointer devices only. */
+export function initMagneticButtons() {
+  if (prefersReducedMotion) return;
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+  document.querySelectorAll<HTMLElement>('.btn').forEach((btn) => {
+    const strength = 0.3;
+    const moveX = gsap.quickTo(btn, 'x', { duration: 0.4, ease: 'power3.out' });
+    const moveY = gsap.quickTo(btn, 'y', { duration: 0.4, ease: 'power3.out' });
+
+    btn.addEventListener('mousemove', (e) => {
+      const rect = btn.getBoundingClientRect();
+      moveX((e.clientX - rect.left - rect.width / 2) * strength);
+      moveY((e.clientY - rect.top - rect.height / 2) * strength);
+    });
+    btn.addEventListener('mouseleave', () => {
+      moveX(0);
+      moveY(0);
+    });
+  });
+}
+
+/** Portfolio lightbox — click a developed frame to view it full-size, arrow/keyboard navigable. */
+export function initPortfolioLightbox() {
+  const lightbox = document.querySelector<HTMLElement>('[data-lightbox]');
+  const data = (window as any).__portfolioPhotos as { photoUrls: string[]; captions: string[] } | undefined;
+  if (!lightbox || !data) return;
+
+  const triggers = gsap.utils.toArray<HTMLElement>('[data-lightbox-trigger]');
+  const img = lightbox.querySelector<HTMLImageElement>('[data-lightbox-img]');
+  const caption = lightbox.querySelector<HTMLElement>('[data-lightbox-caption]');
+  if (!img || !caption) return;
+
+  let index = 0;
+
+  const show = (i: number) => {
+    index = (i + data.photoUrls.length) % data.photoUrls.length;
+    img.src = data.photoUrls[index];
+    img.alt = data.captions[index];
+    caption.textContent = data.captions[index];
+  };
+
+  const open = (i: number) => {
+    show(i);
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+
+  const close = () => {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  triggers.forEach((trigger, i) => {
+    trigger.addEventListener('click', () => open(i));
+  });
+
+  lightbox.querySelector('[data-lightbox-close]')?.addEventListener('click', close);
+  lightbox.querySelector('[data-lightbox-prev]')?.addEventListener('click', () => show(index - 1));
+  lightbox.querySelector('[data-lightbox-next]')?.addEventListener('click', () => show(index + 1));
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox) close();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (!lightbox.classList.contains('open')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowLeft') show(index - 1);
+    if (e.key === 'ArrowRight') show(index + 1);
   });
 }

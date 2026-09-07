@@ -1,40 +1,64 @@
 ---
-const brandName = 'Horizon Vantage';
 ---
 
 <header>
-  <div class="wrap nav">
-    <div class="brand">{brandName} </div>
-    <nav class="navlinks">
-      <a href="#offer">The Offer</a>
-      <a href="#portfolio">Portfolio</a>
-      <a href="#process">Process</a>
-      <a href="#about">About</a>
-      <a href="#contact" class="nav-cta">Book a Shoot</a>
-    </nav>
+  <div class="nav-shell">
+    <div class="wrap nav">
+      <div class="brand"><em>Horizon</em> Vantage</div>
+      <nav class="navlinks">
+        <a href="#offer">The Offer</a>
+        <a href="#portfolio">Portfolio</a>
+        <a href="#process">Process</a>
+        <a href="#about">About</a>
+        <a href="#contact" class="nav-cta">Book a Shoot</a>
+      </nav>
+    </div>
   </div>
 </header>
 
 <style>
   header{
     position: sticky; top: 0; z-index: 50;
-    background: transparent;
-    border-bottom: 1px solid transparent;
-    transition: background .3s ease, border-color .3s ease, backdrop-filter .3s ease;
+    padding: 0;
   }
-  header:global(.scrolled){
-    background: rgba(11,11,9,0.86);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--line);
+  .nav-shell{
+    margin: 0 auto;
+    max-width: 1180px;
+    border-radius: 0;
+    border: 1px solid transparent;
+    background: transparent;
+    box-shadow: none;
+    transition: margin .35s ease, border-radius .35s ease, background .35s ease,
+      border-color .35s ease, box-shadow .35s ease, backdrop-filter .35s ease;
+  }
+  header:global(.scrolled) .nav-shell{
+    margin: 12px auto 0;
+    border-radius: var(--radius-glass);
+    background: rgba(26,32,41,0.55);
+    backdrop-filter: blur(20px) saturate(1.7);
+    -webkit-backdrop-filter: blur(20px) saturate(1.7);
+    border: 1px solid rgba(234,242,248,0.16);
+    box-shadow:
+      0 8px 32px rgba(0,0,0,0.28),
+      inset 0 1px 0 rgba(255,255,255,0.07);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+    header:global(.scrolled) .nav-shell{ background: rgba(10,14,19,0.94); }
   }
   .nav{
     display: flex; align-items: center; justify-content: space-between;
-    padding: 18px 0;
+    padding: 18px 32px;
+  }
+  header:global(.scrolled) .nav{ padding: 14px 28px; }
+  @media (max-width: 640px){
+    .nav{ padding: 18px 20px; }
+    header:global(.scrolled) .nav-shell{ margin: 8px 12px 0; }
   }
   .brand{
-    font-family: 'Instrument Serif', serif;
+    font-family: 'Montserrat', serif;
     font-size: 22px;
     letter-spacing: 0.01em;
+    color: var(--paper);
   }
   .brand em{ color: var(--brass); font-style: italic; }
   .navlinks{ display: flex; gap: 34px; align-items: center; }

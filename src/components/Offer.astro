@@ -49,7 +49,7 @@ const tiers = [
 
     <div class="tiers">
       {tiers.map((t) => (
-        <div class:list={['tier', { core: t.core }]} data-reveal data-reveal-group="tier-cards">
+        <div class:list={['tier', { core: t.core, glass: t.core }]} data-reveal data-reveal-group="tier-cards">
           {t.core && <span class="badge">Core Offer</span>}
           <div class="tier-num mono">{t.num}</div>
           <h3>{t.name}</h3>
@@ -60,7 +60,7 @@ const tiers = [
       ))}
     </div>
 
-    <div class="addon" data-reveal data-reveal-group="offer-head">
+    <div class="addon glass" data-reveal data-reveal-group="offer-head">
       <div class="t"><strong>NFC "Tap to Review" card</strong> — bundled into Tier 2/3, or sold on its own</div>
       <div class="price">€25–35 <span class="unit">/ card</span></div>
     </div>
@@ -80,15 +80,30 @@ const tiers = [
   }
   .tier:hover{ border-color: var(--line-strong); transform: translateY(-4px); }
   .tier.core{ border-color: var(--brass); background: var(--panel-2); }
+  .tier.core.glass{
+    border-radius: var(--radius-glass);
+    background: rgba(44,110,156,0.22);
+    backdrop-filter: blur(20px) saturate(1.7);
+    -webkit-backdrop-filter: blur(20px) saturate(1.7);
+    border-color: rgba(79,168,222,0.5);
+    box-shadow:
+      0 8px 32px rgba(0,0,0,0.28),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+    .tier.core.glass{ background: var(--panel-2); }
+  }
+  .tier.core:hover{ transform: translateY(-6px); }
   .tier .badge{
-    position: absolute; top: -1px; right: -1px;
+    position: absolute; top: 0; right: 0;
     background: var(--brass); color: var(--bg);
     font-family: 'IBM Plex Mono', monospace; font-size: 10px;
     letter-spacing: 0.08em; text-transform: uppercase;
     padding: 6px 12px;
+    border-radius: 0 var(--radius-glass) 0 var(--radius-glass);
   }
   .tier .tier-num{ font-family: 'IBM Plex Mono', monospace; color: var(--brass); font-size: 12px; margin-bottom: 16px; letter-spacing: 0.08em; }
-  .tier h3{ font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 28px; margin: 0 0 10px; }
+  .tier h3{ font-family: 'Montserrat', serif; font-weight: 400; font-size: 28px; margin: 0 0 10px; }
   .tier .price{ font-family: 'IBM Plex Mono', monospace; font-size: 22px; color: var(--brass); margin-bottom: 6px; }
   .tier .price .suffix{ font-size: 14px; opacity: .7; }
   .tier .purpose{ font-size: 13px; color: var(--paper-dim); font-style: italic; margin-bottom: 26px; }
@@ -96,7 +111,7 @@ const tiers = [
 
   .addon{
     margin-top: 28px;
-    border: 1px dashed var(--line-strong);
+    border-radius: var(--radius-glass);
     padding: 22px 24px;
     display: flex; justify-content: space-between; align-items: center;
     gap: 20px; flex-wrap: wrap;

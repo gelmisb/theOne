@@ -42,8 +42,24 @@ const steps = [
     background: var(--line); border: 1px solid var(--line);
   }
   @media (max-width: 760px){ .process{ grid-template-columns: 1fr; } }
-  .step{ background: var(--bg); padding: 40px 34px; }
+  .step{
+    background: var(--bg); padding: 40px 34px;
+    position: relative; z-index: 0;
+    transition: transform .3s ease;
+  }
+  .step:hover{ transform: translateY(-4px); z-index: 1; }
+  .step:hover{
+    background: rgba(26,32,41,0.55);
+    backdrop-filter: blur(20px) saturate(1.7);
+    -webkit-backdrop-filter: blur(20px) saturate(1.7);
+    box-shadow:
+      0 8px 32px rgba(0,0,0,0.28),
+      inset 0 1px 0 rgba(255,255,255,0.07);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+    .step:hover{ background: rgba(18,24,31,0.92); }
+  }
   .step .exif{ margin-bottom: 24px; }
-  .step h3{ font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 26px; margin: 0 0 14px; }
+  .step h3{ font-family: 'Montserrat', serif; font-weight: 400; font-size: 26px; margin: 0 0 14px; }
   .step p{ color: var(--paper-dim); font-size: 15px; line-height: 1.65; margin: 0; }
 </style>

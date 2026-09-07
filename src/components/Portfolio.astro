@@ -1,40 +1,115 @@
 ---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+const photoModules = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/photos/portfolio/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}',
+  { eager: true }
+);
+// Filenames of AI-generated fill-in shots — not real client work, so they're
+// visibly tagged and excluded from the "shown with their permission" claim below.
+const GENERATED_FILES = new Set(['counter-service.jpg', 'training-floor.jpg']);
+
+const photos = Object.entries(photoModules)
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([path, mod]) => {
+    const filename = path.split('/').pop()!.replace(/\.[^.]+$/, '');
+    const caption = filename.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    const generated = GENERATED_FILES.has(path.split('/').pop()!);
+    return { src: mod.default, caption, generated };
+  });
+const hasGenerated = photos.some((p) => p.generated);
+
 const frameCount = 10;
 const frames = Array.from({ length: frameCount }, (_, i) => String(i + 1).padStart(3, '0'));
+const hasPhotos = photos.length > 0;
 ---
 
 <section id="portfolio">
   <div class="wrap">
     <div class="section-head" data-reveal data-reveal-group="portfolio-head">
       <div class="frame-tag"><span class="num">FRAME 003</span> Portfolio</div>
-      <h2 class="section-h">First rolls are <i>developing.</i></h2>
+      {hasPhotos ? (
+        <h2 class="section-h">Shot on location, <i>not in a studio.</i></h2>
+      ) : (
+        <h2 class="section-h">First rolls are <i>developing.</i></h2>
+      )}
       <p class="section-sub">
-        This studio is relaunching, not starting cold — the founder shoots below are being booked
-        now, with real local businesses, shown here with their permission as soon as galleries are
-        delivered.
+        {hasPhotos
+          ? hasGenerated
+            ? 'A selection of founder shoots for real local businesses, shown here with their permission — alongside a couple of AI-generated concept frames, marked below, filling gaps while more real shoots are booked in.'
+            : 'A selection of founder shoots for real local businesses, shown here with their permission.'
+          : "This studio is relaunching, not starting cold — the founder shoots below are being booked now, with real local businesses, shown here with their permission as soon as galleries are delivered."}
       </p>
     </div>
 
     <div class="contact-sheet" data-reveal data-reveal-group="portfolio-head">
       <div class="cs-grid">
-        {frames.map((n, i) => (
-          <div class="frame" style={`--hue-shift:${(i * 11) % 40}deg`}>
-            <span class="fnum">{n}</span>
-            <div class="swatch"></div>
-            <span class="x">—</span>
-          </div>
-        ))}
+        {hasPhotos
+          ? photos.map((p, i) => (
+              <button
+                type="button"
+                class="frame has-photo"
+                data-lightbox-trigger
+                data-lightbox-index={i}
+                aria-label={`Open photo: ${p.caption}${p.generated ? ' (AI-generated concept)' : ''}`}
+              >
+                <span class="fnum">{String(i + 1).padStart(3, '0')}</span>
+                {p.generated && <span class="ai-tag mono">AI Concept</span>}
+                <Image
+                  src={p.src}
+                  alt={p.caption}
+                  class="photo"
+                  widths={[300, 500, 700]}
+                  sizes="(max-width: 560px) 50vw, (max-width: 900px) 33vw, 20vw"
+                  loading={i < 5 ? 'eager' : 'lazy'}
+                />
+                <span class="caption mono">{p.caption}{p.generated && ' — AI concept'}</span>
+              </button>
+            ))
+          : frames.map((n, i) => (
+              <div class="frame" style={`--hue-shift:${(i * 11) % 40}deg`}>
+                <span class="fnum">{n}</span>
+                <div class="swatch"></div>
+                <span class="x">—</span>
+              </div>
+            ))}
       </div>
       <div class="cs-note">
-        <p>
-          <strong>Founder shoots booking now</strong> for cafés, salons, gyms and tradespeople along
-          the commuter belt. First galleries land here as soon as they're delivered.
-        </p>
+        {hasPhotos ? (
+          <p>
+            <strong>More founder shoots booking now</strong> for cafés, salons, gyms and
+            tradespeople along the commuter belt.
+          </p>
+        ) : (
+          <p>
+            <strong>Founder shoots booking now</strong> for cafés, salons, gyms and tradespeople along
+            the commuter belt. First galleries land here as soon as they're delivered.
+          </p>
+        )}
         <a href="#contact" class="btn btn-ghost">Get an early slot</a>
       </div>
     </div>
   </div>
+
+  {hasPhotos && (
+    <div class="lightbox" data-lightbox>
+      <button type="button" class="lb-close" data-lightbox-close aria-label="Close">✕</button>
+      <button type="button" class="lb-nav lb-prev" data-lightbox-prev aria-label="Previous photo">‹</button>
+      <button type="button" class="lb-nav lb-next" data-lightbox-next aria-label="Next photo">›</button>
+      <figure class="lb-figure">
+        <img data-lightbox-img alt="" />
+        <figcaption class="mono" data-lightbox-caption></figcaption>
+      </figure>
+    </div>
+  )}
 </section>
+
+{hasPhotos && (
+  <script is:inline define:vars={{ photoUrls: photos.map((p) => p.src.src), captions: photos.map((p) => p.caption) }}>
+    window.__portfolioPhotos = { photoUrls, captions };
+  </script>
+)}
 
 <style>
   .contact-sheet{ background: var(--panel); border: 1px solid var(--line); padding: 0; }
@@ -52,12 +127,23 @@ const frames = Array.from({ length: frameCount }, (_, i) => String(i + 1).padSta
     position: absolute; top: 8px; left: 10px; z-index: 2;
     font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--paper-dim); opacity: .6;
   }
+  .frame .ai-tag{
+    position: absolute; top: 8px; right: 8px; z-index: 2;
+    font-size: 9px; letter-spacing: 0.05em; text-transform: uppercase;
+    color: var(--paper);
+    background: rgba(10,14,19,0.65);
+    border: 1px solid rgba(234,242,248,0.28);
+    padding: 3px 7px;
+    border-radius: 999px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
   .frame .swatch{
     position: absolute; inset: 0;
-    background: linear-gradient(calc(135deg + var(--hue-shift)), rgba(201,162,39,0.16), rgba(11,11,9,0.9) 60%);
+    background: linear-gradient(calc(135deg + var(--hue-shift)), rgba(79,168,222,0.2), rgba(10,14,19,0.9) 60%);
   }
   .frame .x{
-    font-family: 'Instrument Serif', serif; font-style: italic; font-size: 15px;
+    font-family: 'Montserrat', serif; font-style: italic; font-size: 15px;
     color: var(--paper-dim); opacity: 0.55; z-index: 2;
   }
   .cs-note{
@@ -67,4 +153,75 @@ const frames = Array.from({ length: frameCount }, (_, i) => String(i + 1).padSta
   }
   .cs-note p{ margin: 0; font-size: 15px; color: var(--paper-dim); max-width: 520px; line-height: 1.6; }
   .cs-note p strong{ color: var(--paper); }
+
+  /* Real photo frames */
+  .frame.has-photo{
+    margin: 0; padding: 0; background: none; cursor: zoom-in;
+    font: inherit; color: inherit;
+  }
+  .frame.has-photo :global(.photo){
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .5s ease;
+  }
+  .frame.has-photo:hover :global(.photo),
+  .frame.has-photo:focus-visible :global(.photo){
+    transform: scale(1.06);
+  }
+  .frame.has-photo .caption{
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+    padding: 8px 10px;
+    font-size: 10px; letter-spacing: 0.03em; color: #FFFFFF;
+    background: linear-gradient(0deg, rgba(10,14,19,0.82), transparent);
+    opacity: 0; transform: translateY(6px);
+    transition: opacity .25s ease, transform .25s ease;
+    text-align: left;
+  }
+  .frame.has-photo:hover .caption,
+  .frame.has-photo:focus-visible .caption{ opacity: 1; transform: translateY(0); }
+  .frame.has-photo:focus-visible{ outline: 2px solid var(--brass); outline-offset: -2px; }
+
+  /* Lightbox — deliberately stays a dark viewer regardless of site theme, for photo contrast */
+  .lightbox{
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(10,17,24,0.95);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden;
+    transition: opacity .3s ease;
+  }
+  .lightbox.open{ opacity: 1; visibility: visible; }
+  .lb-figure{ margin: 0; max-width: 88vw; max-height: 84vh; text-align: center; }
+  .lb-figure img{
+    max-width: 88vw; max-height: 76vh;
+    object-fit: contain;
+    border: 1px solid rgba(255,255,255,0.18);
+  }
+  .lb-figure figcaption{
+    margin-top: 14px; font-size: 12px; letter-spacing: 0.04em; color: rgba(255,255,255,0.65);
+  }
+  .lb-close, .lb-nav{
+    position: absolute;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(16px) saturate(1.6);
+    -webkit-backdrop-filter: blur(16px) saturate(1.6);
+    border: 1px solid rgba(255,255,255,0.25); color: #FFFFFF;
+    cursor: pointer; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color .2s ease, color .2s ease, background .2s ease;
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+    .lb-close, .lb-nav{ background: rgba(20,24,30,0.75); }
+  }
+  .lb-close:hover, .lb-nav:hover{ border-color: var(--brass); color: var(--brass); background: rgba(255,255,255,0.14); }
+  .lb-close{ top: 24px; right: 24px; width: 42px; height: 42px; font-size: 16px; }
+  .lb-nav{ top: 50%; transform: translateY(-50%); width: 52px; height: 52px; font-size: 26px; }
+  .lb-prev{ left: 24px; }
+  .lb-next{ right: 24px; }
+  @media (max-width: 640px){
+    .lb-nav{ width: 40px; height: 40px; }
+    .lb-prev{ left: 8px; }
+    .lb-next{ right: 8px; }
+    .lb-close{ top: 12px; right: 12px; }
+  }
 </style>

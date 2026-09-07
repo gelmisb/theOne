@@ -1,17 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 :root{
-  --bg: #0B0B09;
-  --panel: #16150F;
-  --panel-2: #1D1C15;
-  --paper: #F3EEE1;
-  --paper-dim: #C9C3B2;
-  --brass: #C9A227;
-  --brass-dim: #8f7220;
-  --safelight: #B23A2E;
-  --line: rgba(243,238,225,0.14);
-  --line-strong: rgba(243,238,225,0.28);
+  --bg: #0A0E13;
+  --panel: #12181F;
+  --panel-2: #1A2029;
+  --paper: #EAF2F8;
+  --paper-dim: #9FB1C2;
+  --brass: #4FA8DE;
+  --brass-dim: #2C6E9C;
+  --safelight: #E8975A;
+  --line: rgba(234,242,248,0.14);
+  --line-strong: rgba(234,242,248,0.26);
   --radius: 2px;
+  --radius-glass: 20px;
 }
 
 *{ box-sizing: border-box; }
@@ -33,7 +34,7 @@ body{
 
 a{ color: inherit; }
 .mono{ font-family: 'IBM Plex Mono', monospace; }
-.serif{ font-family: 'Instrument Serif', serif; }
+.serif{ font-family: 'Montserrat', serif; }
 
 .wrap{ max-width: 1180px; margin: 0 auto; padding: 0 32px; }
 @media (max-width: 640px){ .wrap{ padding: 0 20px; } }
@@ -42,12 +43,12 @@ a{ color: inherit; }
 .sprockets{
   height: 14px;
   width: 100%;
-  background-image: radial-gradient(circle, rgba(243,238,225,0.35) 1.6px, transparent 1.7px);
+  background-image: radial-gradient(circle, rgba(62,147,204,0.45) 1.6px, transparent 1.7px);
   background-size: 22px 14px;
   background-position: 10px center;
   opacity: 0.55;
 }
-.sprockets.dark{ opacity: 0.18; }
+.sprockets.dark{ opacity: 0.22; }
 
 /* Frame tag — signature element */
 .frame-tag{
@@ -65,7 +66,7 @@ a{ color: inherit; }
   width: 9px; height: 9px;
   border-radius: 50%;
   background: var(--safelight);
-  box-shadow: 0 0 8px 1px rgba(178,58,46,0.7);
+  box-shadow: 0 0 8px 1px rgba(224,141,75,0.6);
   flex-shrink: 0;
 }
 .exif{
@@ -81,7 +82,7 @@ section{ padding: 110px 0; position: relative; }
 
 .section-head{ max-width: 680px; margin-bottom: 60px; }
 h2.section-h{
-  font-family: 'Instrument Serif', serif; font-weight: 400;
+  font-family: 'Montserrat', serif; font-weight: 400;
   font-size: clamp(32px, 4vw, 50px);
   line-height: 1.08;
   margin: 0 0 18px;
@@ -101,10 +102,55 @@ h2.section-h i{ font-style: italic; color: var(--brass); }
   cursor: pointer;
 }
 .btn:focus-visible{ outline: 2px solid var(--brass); outline-offset: 3px; }
-.btn-primary{ background: var(--brass); color: var(--bg); }
-.btn-primary:hover{ transform: translateY(-2px); background: #ddb531; }
+.btn-primary{ background: var(--brass); color: #FFFFFF; }
+.btn-primary:hover{ transform: translateY(-2px); background: #5AAAD9; }
 .btn-ghost{ border-color: var(--line-strong); color: var(--paper); }
 .btn-ghost:hover{ border-color: var(--brass); color: var(--brass); transform: translateY(-2px); }
 
 /* GSAP reveal base state — JS adds .gsap-ready and animates via ScrollTrigger */
 .reveal{ opacity: 0; transform: translateY(24px); }
+
+/* Film grain + vignette — signature atmosphere, sits above everything */
+.grain{
+  position: fixed; inset: -10%;
+  z-index: 999; pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain-shift 1s steps(6) infinite;
+}
+.vignette{
+  position: fixed; inset: 0;
+  z-index: 998; pointer-events: none;
+  background: radial-gradient(ellipse 120% 80% at 50% 40%, transparent 55%, rgba(0,0,0,0.4) 100%);
+}
+@keyframes grain-shift{
+  0%{ transform: translate(0,0); }
+  20%{ transform: translate(-2%,-3%); }
+  40%{ transform: translate(-3%,2%); }
+  60%{ transform: translate(2%,-2%); }
+  80%{ transform: translate(3%,3%); }
+  100%{ transform: translate(0,0); }
+}
+@media (prefers-reduced-motion: reduce){
+  .grain{ animation: none; }
+}
+
+/* Magnetic buttons — cursor pull, disabled on touch */
+@media (hover: hover) and (pointer: fine){
+  .btn{ will-change: transform; }
+}
+
+/* Glass — frosted-dark surfaces for floating UI, iOS16-style blur adapted to the dark theme */
+.glass{
+  background: rgba(26,32,41,0.55);
+  backdrop-filter: blur(20px) saturate(1.7);
+  -webkit-backdrop-filter: blur(20px) saturate(1.7);
+  border: 1px solid rgba(234,242,248,0.16);
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.28),
+    inset 0 1px 0 rgba(255,255,255,0.07);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+  .glass{ background: rgba(18,24,31,0.92); }
+}
