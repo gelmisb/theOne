@@ -401,3 +401,34 @@ export function initPortfolioLightbox() {
     if (e.key === 'ArrowRight') show(index + 1);
   });
 }
+
+/**
+ * Numbered scroll-nav dots — one ScrollTrigger per tracked section, toggling
+ * the matching dot's .active class as that section becomes the current one
+ * in view. Clicking a dot relies on the plain anchor href + the existing
+ * global `html{scroll-behavior:smooth}` (already reduced-motion-safe) rather
+ * than a bespoke scroll routine, so it still works if this script fails.
+ */
+export function initScrollNav() {
+  const nav = document.querySelector<HTMLElement>('[data-scroll-nav]');
+  if (!nav) return;
+
+  const links = gsap.utils.toArray<HTMLAnchorElement>('[data-scroll-nav-link]', nav);
+  if (!links.length) return;
+
+  links.forEach((link) => {
+    const id = link.dataset.target;
+    const target = id ? document.getElementById(id) : null;
+    if (!target) return;
+
+    ScrollTrigger.create({
+      trigger: target,
+      start: 'top center',
+      end: 'bottom center',
+      onToggle: (self) => {
+        if (self.isActive) link.classList.add('active');
+        else link.classList.remove('active');
+      },
+    });
+  });
+}

@@ -1,0 +1,93 @@
+---
+const sections = [
+  { id: 'intro', label: 'Intro' },
+  { id: 'hero', label: 'Hero' },
+  { id: 'offer-intro', label: 'The Gap' },
+  { id: 'offer', label: 'The Offer' },
+  { id: 'portfolio', label: 'Portfolio' },
+  { id: 'process', label: 'Process' },
+  { id: 'about', label: 'About' },
+  { id: 'seo', label: 'Local SEO' },
+  { id: 'contact', label: 'Contact' },
+];
+---
+
+<nav class="scroll-nav" data-scroll-nav aria-label="Section navigation">
+  <ul>
+    {sections.map((s, i) => (
+      <li>
+        <a href={`#${s.id}`} data-scroll-nav-link data-target={s.id} aria-label={s.label}>
+          <span class="dot"></span>
+          <span class="num mono">{String(i + 1).padStart(2, '0')}</span>
+          <span class="label mono">{s.label}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  .scroll-nav{
+    position: fixed;
+    right: 22px; top: 50%;
+    transform: translateY(-50%);
+    z-index: 60;
+  }
+  .scroll-nav ul{ list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+  .scroll-nav a{
+    position: relative;
+    display: flex; align-items: center; justify-content: flex-end;
+    gap: 10px;
+    text-decoration: none;
+    padding: 4px 2px;
+  }
+  .scroll-nav .dot{
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    border: 1px solid var(--paper-dim);
+    background: transparent;
+    transition: background .25s ease, border-color .25s ease, transform .25s ease;
+    flex-shrink: 0;
+  }
+  .scroll-nav .num{
+    font-size: 10px; letter-spacing: 0.06em;
+    color: var(--paper-dim);
+    opacity: 0;
+    transform: translateX(4px);
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .scroll-nav .label{
+    font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--paper-dim);
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateX(4px);
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .scroll-nav a:hover .num,
+  .scroll-nav a:hover .label,
+  .scroll-nav a:focus-visible .num,
+  .scroll-nav a:focus-visible .label{
+    opacity: 0.85;
+    transform: translateX(0);
+  }
+  .scroll-nav a:hover .dot,
+  .scroll-nav a:focus-visible .dot{
+    border-color: var(--brass);
+  }
+  .scroll-nav a:focus-visible{ outline: 2px solid var(--brass); outline-offset: 4px; border-radius: 2px; }
+
+  .scroll-nav a.active .dot{
+    background: var(--brass);
+    border-color: var(--brass);
+    transform: scale(1.35);
+  }
+  .scroll-nav a.active .num{ color: var(--brass); opacity: 0.85; transform: translateX(0); }
+
+  @media (max-width: 900px){
+    .scroll-nav{ display: none; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .scroll-nav .dot, .scroll-nav .num, .scroll-nav .label{ transition: none; }
+  }
+</style>

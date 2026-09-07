@@ -16,7 +16,7 @@ const heroImages = import.meta.glob<{ default: ImageMetadata }>(
 const heroImage = Object.values(heroImages)[0]?.default;
 ---
 
-<section class="hero">
+<section class="hero" id="hero">
   {heroImage && (
     <Image
       src={heroImage}
