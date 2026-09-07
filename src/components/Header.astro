@@ -26,7 +26,11 @@
     max-width: 1180px;
     border-radius: 0;
     border: 1px solid transparent;
-    background: transparent;
+    /* Not fully transparent: Layout.astro's persistent fixed background sits
+       behind every section, so a plain "transparent" here would let it show
+       through raw and unmoderated at the very top of the page, before
+       .scrolled applies the solid glass background below. */
+    background: linear-gradient(180deg, rgba(10,14,19,0.6), transparent);
     box-shadow: none;
     transition: margin .35s ease, border-radius .35s ease, background .35s ease,
       border-color .35s ease, box-shadow .35s ease, backdrop-filter .35s ease;
