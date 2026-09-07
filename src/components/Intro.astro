@@ -7,6 +7,16 @@ const heroImages = import.meta.glob<{ default: ImageMetadata }>(
   { eager: true }
 );
 const heroImage = Object.values(heroImages)[0]?.default;
+
+// Foreground "porthole" layer — a dark window opening onto the hero photo.
+// The pinned scroll timeline zooms this dramatically toward the viewer,
+// while the hero.jpg background beneath scales subtly, so it reads as
+// flying through the window into the photo beyond.
+const windowImages = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/photos/intro-window.{jpg,jpeg,png,webp}',
+  { eager: true }
+);
+const windowImage = Object.values(windowImages)[0]?.default;
 ---
 
 <section class="intro" id="intro">
@@ -23,6 +33,20 @@ const heroImage = Object.values(heroImages)[0]?.default;
     />
   )}
   <div class="intro-scrim" aria-hidden="true"></div>
+
+  {windowImage && (
+    <div class="intro-image-container" aria-hidden="true">
+      <Image
+        src={windowImage}
+        alt=""
+        class="intro-feature"
+        data-intro-feature
+        widths={[640, 960, 1280, 1920]}
+        sizes="100vw"
+        loading="eager"
+      />
+    </div>
+  )}
 
   <div class="intro-frame" aria-hidden="true">
     <span class="ic-corner tl"></span>
@@ -71,7 +95,20 @@ const heroImage = Object.values(heroImages)[0]?.default;
       linear-gradient(180deg, rgba(10,14,19,0.55), rgba(10,14,19,0.75) 60%, var(--bg) 100%);
   }
 
-  .intro-frame{ position: absolute; inset: 28px; pointer-events: none; z-index: 1; }
+  .intro-image-container{
+    position: absolute; inset: 0;
+    z-index: 1;
+    perspective: 500px;
+    overflow: hidden;
+  }
+  .intro-image-container :global(.intro-feature){
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    will-change: transform;
+  }
+
+  .intro-frame{ position: absolute; inset: 28px; pointer-events: none; z-index: 2; }
   .ic-corner{
     position: absolute; width: 34px; height: 34px;
     border-color: var(--paper-dim);

@@ -64,16 +64,24 @@ export function initIntroTimeline() {
 }
 
 /**
- * Pinned "fly into the photo" scroll transition, ported from GreenSock's
- * official pinned-zoom demo (codepen.io/GreenSock/pen/YzbPYMx): the intro
- * photo scales up and pushes toward the viewer via 3D perspective while the
- * section stays pinned for a fixed scroll distance, before releasing into
+ * Pinned "fly through the window" scroll transition, ported from GreenSock's
+ * official pinned-zoom demo (codepen.io/GreenSock/pen/YzbPYMx): a foreground
+ * "porthole" photo (a dark window opening) scales up and pushes toward the
+ * viewer via CSS 3D perspective while the section stays pinned for a fixed
+ * scroll distance, its opening growing to reveal the hero photo underneath
+ * — which itself scales up subtly at the same time — before releasing into
  * Hero. Replaces the old mosaic-lens effect, which didn't read well here.
+ *
+ * `end` is a function (not a fixed string) so the pin covers a consistent
+ * 1.5 viewport-heights of scroll regardless of the visitor's screen height —
+ * a fixed "+=150%" would otherwise scale off the section's own height
+ * instead, behaving inconsistently on very short or very tall viewports.
  */
 export function initIntroZoomTransition() {
   const intro = document.querySelector<HTMLElement>('.intro');
   const bg = document.querySelector<HTMLElement>('.intro-bg');
-  if (!intro || !bg) return;
+  const feature = document.querySelector<HTMLElement>('[data-intro-feature]');
+  if (!intro || !bg || !feature) return;
 
   if (prefersReducedMotion) return; // no pin, no zoom — plain scroll past
 
@@ -82,13 +90,15 @@ export function initIntroZoomTransition() {
       scrollTrigger: {
         trigger: intro,
         start: 'top top',
-        end: '+=150%',
+        end: () => '+=' + window.innerHeight * 1.5,
         pin: true,
         scrub: true,
+        invalidateOnRefresh: true,
       },
     })
     .to('.intro-reveal, .intro-frame, .intro-scroll', { opacity: 0, ease: 'power1.inOut' }, 0)
-    .to(bg, { scale: 2, z: 350, transformOrigin: 'center center', ease: 'power1.inOut' }, 0);
+    .to(feature, { scale: 2, z: 350, transformOrigin: 'center center', ease: 'power1.inOut' }, 0)
+    .to(bg, { scale: 1.1, transformOrigin: 'center center', ease: 'power1.inOut' }, 0);
 }
 
 /**
