@@ -1,8 +1,9 @@
 ---
 import '../styles/global.css';
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import CookieBanner from '../components/CookieBanner.astro';
+import introWindow from '../assets/photos/intro-window.png';
 
 interface Props {
   title?: string;
@@ -13,6 +14,47 @@ const {
   title = 'Horizon Vantage — Photography, Video, Websites & Local SEO for Irish Businesses',
   description = 'On-site photography and video, a custom website, and local SEO — bundled into one package for Irish small businesses. Shot, built and optimised by a working photographer and software engineer.',
 } = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+
+// Portal artwork doubles as the social share preview until a proper
+// branded OG card (with the actual logo mark) exists as an asset — swap
+// this for that once it's available.
+const ogImageAsset = await getImage({ src: introWindow, width: 1200, height: 630 });
+const ogImageURL = new URL(ogImageAsset.src, Astro.site);
+
+// LocalBusiness structured data — this is what feeds Google's map-pack/
+// knowledge-panel understanding of the business, not just the meta tags.
+// Site-wide (every page gets the same entity), matching terms.astro's
+// registered address and the founder's confirmed Wicklow + Dublin/Leinster
+// service area.
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfessionalService',
+  '@id': `${Astro.site}#business`,
+  name: 'Horizon Vantage',
+  url: Astro.site,
+  image: ogImageURL.toString(),
+  description:
+    'On-site photography, videography, website development, and local SEO for small and medium-sized businesses in Ireland.',
+  telephone: '+353894939050',
+  email: 'info@horizonvantage.ie',
+  priceRange: '€350-€2500',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Wicklow',
+    addressCountry: 'IE',
+  },
+  areaServed: [
+    { '@type': 'AdministrativeArea', name: 'County Wicklow' },
+    { '@type': 'AdministrativeArea', name: 'County Dublin' },
+    { '@type': 'AdministrativeArea', name: 'Leinster' },
+  ],
+  founder: {
+    '@type': 'Person',
+    name: 'Gelmis Bartulis',
+  },
+};
 
 // Persistent journey background: revealed through Intro's portal, stays
 // fixed behind Hero, then fades out on scroll as Gap comes into view (see
@@ -35,6 +77,8 @@ const persistImage = Object.values(persistImages)[0]?.default;
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={canonicalURL} />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -43,6 +87,20 @@ const persistImage = Object.values(persistImages)[0]?.default;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:site_name" content="Horizon Vantage" />
+    <meta property="og:locale" content="en_IE" />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} is:inline />
   </head>
   <body>
     {persistImage && (
