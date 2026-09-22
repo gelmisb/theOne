@@ -64,10 +64,6 @@ un-smoothed scroll position felt choppy.
 - Portfolio section has real client photos now (`src/assets/photos/portfolio/`)
   but no video content wired into the video lightbox yet, if that's still
   planned.
-- Business name (currently "Horizon Vantage" in copy) — confirm this is
-  the final registered name before any public launch; earlier options
-  (Vantage Studio, Northlight Media, etc.) were ruled out for existing
-  trademark/business-name collisions.
 - `package-lock.json` — regenerate with `npm install` after pulling if
   it looks out of sync; don't hand-edit it.
 
