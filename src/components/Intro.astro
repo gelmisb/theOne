@@ -17,24 +17,31 @@ const windowImages = import.meta.glob<{ default: ImageMetadata }>(
 );
 const windowImage = Object.values(windowImages)[0]?.default;
 
-// Video porthole (see intro-video-spec.md) — an idle ambient loop that
-// crossfades into a scroll-scrubbed push-through clip once real footage
-// exists. Until both files for a clip are dropped in (any of mp4/webm is
-// enough per clip), Intro silently falls back to the static-image zoom
-// transform below, so the site is never broken waiting on assets.
-const introVideos = import.meta.glob<string>(
-  '/src/assets/videos/intro-{idle,scroll}.{mp4,webm}',
-  { eager: true, import: 'default' }
-);
-function findClip(name: string, ext: 'mp4' | 'webm') {
-  const key = Object.keys(introVideos).find((k) => k.endsWith(`${name}.${ext}`));
-  return key ? introVideos[key] : undefined;
-}
-const idleMp4 = findClip('intro-idle', 'mp4');
-const idleWebm = findClip('intro-idle', 'webm');
-const scrollMp4 = findClip('intro-scroll', 'mp4');
-const scrollWebm = findClip('intro-scroll', 'webm');
-const hasVideo = Boolean((idleMp4 || idleWebm) && (scrollMp4 || scrollWebm));
+// Video porthole — a single clip that plays as an ambient loop before the
+// visitor scrolls, then gets scrubbed by scroll position once the pinned
+// intro range is entered (initIntroZoomTransition in animations.ts). Until
+// a file is dropped in, Intro silently falls back to the static-image zoom
+// transform below, so the site is never broken waiting on the asset.
+//
+// This folder holds nothing but that one clip, so any .mp4 dropped in here
+// is picked up regardless of its exact filename — a mismatched name (e.g.
+// intro_bg.mp4 vs. intro-bg.mp4) has silently fallen back to the static
+// image before; matching the whole folder means that can't happen again.
+//
+// Re-encode raw footage with tools/encode-intro-video.sh before dropping it
+// in here — scroll-scrubbing needs every frame to be a keyframe, which a
+// normal export won't have; an un-encoded drop will still play, just with
+// visible stutter once scroll-scrubbing kicks in. mp4/H.264 only,
+// deliberately: all-intra encoding (required for the scroll-scrub) defeats
+// VP9's inter-frame compression, so a webm here would be dead weight —
+// larger than the mp4 with no reach benefit, since H.264 already covers
+// effectively every browser this site targets.
+const introVideos = import.meta.glob<string>('/src/assets/videos/*.mp4', {
+  eager: true,
+  import: 'default',
+});
+const bgMp4 = Object.values(introVideos)[0];
+const hasVideo = Boolean(bgMp4);
 ---
 
 <section class="intro" id="intro">
@@ -43,27 +50,14 @@ const hasVideo = Boolean((idleMp4 || idleWebm) && (scrollMp4 || scrollWebm));
   {hasVideo ? (
     <div class="intro-image-container" aria-hidden="true">
       <video
-        class="intro-feature intro-clip-a"
-        data-intro-clip-a
-        muted
-        loop
-        playsinline
-        preload="auto"
-        poster={windowImage?.src}
-      >
-        {idleWebm && <source src={idleWebm} type="video/webm" />}
-        {idleMp4 && <source src={idleMp4} type="video/mp4" />}
-      </video>
-      <video
-        class="intro-feature intro-clip-b"
-        data-intro-clip-b
+        class="intro-feature"
+        data-intro-video
         muted
         playsinline
         preload="auto"
         poster={windowImage?.src}
       >
-        {scrollWebm && <source src={scrollWebm} type="video/webm" />}
-        {scrollMp4 && <source src={scrollMp4} type="video/mp4" />}
+        <source src={bgMp4} type="video/mp4" />
       </video>
     </div>
   ) : (
@@ -91,8 +85,9 @@ const hasVideo = Boolean((idleMp4 || idleWebm) && (scrollMp4 || scrollWebm));
 
   <div class="intro-reveal">
     <div class="wrap intro-inner">
-      <div class="frame-tag" data-intro-el><span class="num">FRAME 000</span> Horizon Vantage</div>
+      <div class="frame-tag" data-intro-el><span class="num1">FRAME 000</span></div>
       <div class="intro-word"><em>Horizon</em> Vantage</div>
+      <p class="intro-slogan mono" data-intro-el>See Further. Show It Better.</p>
       <p class="intro-tag mono" data-intro-el>Photography · Video · Websites · Local SEO — Ireland</p>
     </div>
   </div>
@@ -116,7 +111,7 @@ const hasVideo = Boolean((idleMp4 || idleWebm) && (scrollMp4 || scrollWebm));
   .intro-scrim{
     position: absolute; inset: 0; z-index: 0;
     background:
-      radial-gradient(ellipse 900px 600px at 50% 45%, rgba(62,147,204,0.14), transparent 60%),
+      radial-gradient(ellipse 900px 600px at 50% 45%, rgba(212,175,55,0.14), transparent 60%),
       linear-gradient(180deg, rgba(10,14,19,0.5), rgba(10,14,19,0.65) 100%);
   }
 
@@ -132,12 +127,6 @@ const hasVideo = Boolean((idleMp4 || idleWebm) && (scrollMp4 || scrollWebm));
     object-fit: cover;
     will-change: transform;
   }
-  /* Clip B (the scroll-scrubbed push-through) starts invisible, stacked
-     above Clip A (the idle loop) — initIntroZoomTransition crossfades
-     between them via GSAP opacity tweens, not CSS. */
-  .intro-image-container :global(.intro-clip-a){ opacity: 1; }
-  .intro-image-container :global(.intro-clip-b){ opacity: 0; }
-
   .intro-frame{ position: absolute; inset: 28px; pointer-events: none; z-index: 2; }
   .ic-corner{
     position: absolute; width: 34px; height: 34px;
@@ -162,8 +151,14 @@ const hasVideo = Boolean((idleMp4 || idleWebm) && (scrollMp4 || scrollWebm));
     line-height: 1;
     letter-spacing: -0.01em;
     margin: 8px 0 22px;
+    text-shadow: 2px 3px 10px black;
   }
   .intro-word em{ color: var(--brass); font-style: italic; }
+  .intro-slogan{
+    font-size: 14px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--brass);
+    margin: 0 0 16px;
+  }
   .intro-tag{
     font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase;
     color: var(--paper-dim);

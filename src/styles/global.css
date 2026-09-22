@@ -6,8 +6,9 @@
   --panel-2: #1A2029;
   --paper: #EAF2F8;
   --paper-dim: #9FB1C2;
-  --brass: #4FA8DE;
-  --brass-dim: #2C6E9C;
+  --brass: #E6C468;
+  --brass-dim: #A3822F;
+  --brass-light: #F3DD9A;
   --safelight: #E8975A;
   --line: rgba(234,242,248,0.14);
   --line-strong: rgba(234,242,248,0.26);
@@ -44,7 +45,7 @@ a{ color: inherit; }
 .sprockets{
   height: 14px;
   width: 100%;
-  background-image: radial-gradient(circle, rgba(62,147,204,0.45) 1.6px, transparent 1.7px);
+  background-image: radial-gradient(circle, rgba(230,196,104,0.45) 1.6px, transparent 1.7px);
   background-size: 22px 14px;
   background-position: 10px center;
   opacity: 0.55;
@@ -62,6 +63,7 @@ a{ color: inherit; }
   text-transform: uppercase;
 }
 .frame-tag .num{ color: var(--paper); opacity: 0.9; }
+.num1, .intro-tag { color: #000 !important; opacity: 0.9; }
 .frame-tag::before{
   content: "";
   width: 9px; height: 9px;
@@ -106,8 +108,8 @@ h2.section-h i{ font-style: italic; color: var(--brass); }
   cursor: pointer;
 }
 .btn:focus-visible{ outline: 2px solid var(--brass); outline-offset: 3px; }
-.btn-primary{ background: var(--brass); color: #FFFFFF; }
-.btn-primary:hover{ transform: translateY(-2px); background: #5AAAD9; }
+.btn-primary{ background: var(--brass); color: var(--bg); }
+.btn-primary:hover{ transform: translateY(-2px); background: var(--brass-light); }
 .btn-ghost{ border-color: var(--line-strong); color: var(--paper); }
 .btn-ghost:hover{ border-color: var(--brass); color: var(--brass); transform: translateY(-2px); }
 

@@ -126,10 +126,9 @@ export function initIntroZoomTransition() {
   const intro = document.querySelector<HTMLElement>('.intro');
   if (!intro) return;
 
-  const clipA = document.querySelector<HTMLVideoElement>('[data-intro-clip-a]');
-  const clipB = document.querySelector<HTMLVideoElement>('[data-intro-clip-b]');
-  if (clipA && clipB) {
-    initIntroVideoZoomTransition(intro, clipA, clipB);
+  const video = document.querySelector<HTMLVideoElement>('[data-intro-video]');
+  if (video) {
+    initIntroVideoZoomTransition(intro, video);
     return;
   }
 
@@ -163,43 +162,22 @@ export function initIntroZoomTransition() {
 }
 
 /**
- * Video porthole state machine — see intro-video-spec.md Section 3. Clip A
- * (idle ambient loop) plays until the visitor first scrolls into the pinned
- * range, crossfading to Clip B (one-way scroll-scrubbed dolly push) whose
- * `currentTime` is driven by scroll progress; scrolling back to the very
- * top crossfades back to Clip A and restarts its loop. Reuses the same
- * pin/start/end/scrub ScrollTrigger shape as the image-transform version
- * above — only what happens inside the timeline differs.
+ * Single-clip video porthole: plays once, unlooped, the moment the page
+ * loads — no `loop` attribute, so it naturally holds its last frame once
+ * done. If the visitor scrolls into the pinned range (whether or not that
+ * initial play has finished), scroll takes over: `currentTime` is driven
+ * directly by scroll progress, same mechanism the pin/scrub setup already
+ * uses. Scrolling back up past the start just pauses on the first frame —
+ * this is a one-shot intro, not a loop, so it doesn't replay itself.
+ * Reuses the same pin/start/end/scrub ScrollTrigger shape as the
+ * image-transform version above — only what happens inside differs.
  */
-function initIntroVideoZoomTransition(intro: HTMLElement, clipA: HTMLVideoElement, clipB: HTMLVideoElement) {
-  if (prefersReducedMotion) return; // both clips sit on their poster (first) frame, unplayed
+function initIntroVideoZoomTransition(intro: HTMLElement, video: HTMLVideoElement) {
+  if (prefersReducedMotion) return; // sits on its poster (first) frame, unplayed
 
-  clipA.play().catch(() => {});
+  video.play().catch(() => {});
 
-  let onClipB = false;
-  const crossfadeDuration = 0.3;
-
-  function toClipB() {
-    if (onClipB) return;
-    onClipB = true;
-    gsap.to(clipA, { opacity: 0, duration: crossfadeDuration, ease: 'power1.inOut', onComplete: () => clipA.pause() });
-    gsap.to(clipB, { opacity: 1, duration: crossfadeDuration, ease: 'power1.inOut' });
-  }
-
-  function toClipA() {
-    if (!onClipB) return;
-    onClipB = false;
-    gsap.to(clipB, { opacity: 0, duration: crossfadeDuration, ease: 'power1.inOut' });
-    gsap.to(clipA, {
-      opacity: 1,
-      duration: crossfadeDuration,
-      ease: 'power1.inOut',
-      onStart: () => {
-        clipA.currentTime = 0;
-        clipA.play().catch(() => {});
-      },
-    });
-  }
+  let scrubbing = false;
 
   gsap
     .timeline({
@@ -212,12 +190,18 @@ function initIntroVideoZoomTransition(intro: HTMLElement, clipA: HTMLVideoElemen
         invalidateOnRefresh: true,
         onUpdate: (self) => {
           if (self.progress <= 0) {
-            toClipA();
+            if (!scrubbing) return;
+            scrubbing = false;
+            video.pause();
+            video.currentTime = 0;
             return;
           }
-          toClipB();
-          if (clipB.readyState >= 1 && clipB.duration) {
-            clipB.currentTime = self.progress * clipB.duration;
+          if (!scrubbing) {
+            scrubbing = true;
+            video.pause();
+          }
+          if (video.readyState >= 1 && video.duration) {
+            video.currentTime = self.progress * video.duration;
           }
         },
       },
