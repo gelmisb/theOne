@@ -70,7 +70,7 @@ const hasVideos = videos.length > 0;
                   class="photo"
                   widths={[300, 500, 700]}
                   sizes="(max-width: 560px) 50vw, (max-width: 900px) 33vw, 20vw"
-                  loading={i < 5 ? 'eager' : 'lazy'}
+                  loading="lazy"
                 />
                 <span class="caption mono">{p.caption}{p.generated && ' - AI concept'}</span>
               </button>

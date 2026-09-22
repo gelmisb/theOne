@@ -76,7 +76,6 @@ a{ color: inherit; }
   text-transform: uppercase;
 }
 .frame-tag .num{ color: var(--paper); opacity: 0.9; }
-.num1, .intro-tag { color: #000 !important; opacity: 0.9; }
 .frame-tag::before{
   content: "";
   width: 9px; height: 9px;

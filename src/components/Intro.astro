@@ -1,5 +1,5 @@
 ---
-import { Image } from 'astro:assets';
+import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
 // No background image of its own anymore - the portal below reveals
@@ -16,6 +16,28 @@ const windowImages = import.meta.glob<{ default: ImageMetadata }>(
   { eager: true }
 );
 const windowImage = Object.values(windowImages)[0]?.default;
+
+// This same photo is the desktop video's poster AND the mobile fallback
+// image (below 641px, matching the video's own breakpoint) - but unlike
+// the video, a plain <Image> has no way to skip fetching itself above a
+// breakpoint; CSS display:none hides it without stopping the request. A
+// hand-rolled <picture> gets the same "browser evaluates media before
+// fetching" behavior the video's <source media> already uses: desktop
+// matches the first <source> and gets a zero-byte inline placeholder
+// instead of silently downloading an image it never shows.
+const introFallbackWidths = [640, 960, 1280, 1456];
+const introFallbackSrcset = windowImage
+  ? (
+      await Promise.all(
+        introFallbackWidths.map(async (w) => {
+          const img = await getImage({ src: windowImage, width: w });
+          return `${img.src} ${w}w`;
+        })
+      )
+    ).join(', ')
+  : '';
+const introFallbackSrc = windowImage ? (await getImage({ src: windowImage, width: 1280 })).src : '';
+const BLANK_GIF = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
 
 // Video porthole - desktop only. All-intra encoding (required so
 // ScrollTrigger can scrub currentTime without stutter) makes this file
@@ -65,15 +87,20 @@ const hasVideo = Boolean(bgMp4);
       </video>
     )}
     {windowImage && (
-      <Image
-        src={windowImage}
-        alt=""
-        class="intro-feature intro-feature-image"
-        data-intro-feature
-        widths={[640, 960, 1280, 1456]}
-        sizes="100vw"
-        loading="eager"
-      />
+      <picture>
+        <source media="(min-width: 641px)" srcset={BLANK_GIF} />
+        <img
+          src={introFallbackSrc}
+          srcset={introFallbackSrcset}
+          sizes="100vw"
+          alt=""
+          class="intro-feature intro-feature-image"
+          data-intro-feature
+          loading="eager"
+          width={windowImage.width}
+          height={windowImage.height}
+        />
+      </picture>
     )}
   </div>
 
