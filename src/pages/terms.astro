@@ -1,0 +1,240 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Footer from '../components/Footer.astro';
+
+// Copy lives here, separate from markup, matching the rest of the site's
+// convention (see e.g. Offer.astro's `tiers` array) — content sourced
+// verbatim from terms-of-service.md at the repo root. Paragraphs/list items
+// may contain inline HTML (bold, mailto/tel links) since this is static,
+// author-written copy, not user input.
+type Section = { heading: string; paragraphs?: string[]; list?: string[] };
+
+const effectiveDate = '7 September 2026';
+
+const sections: Section[] = [
+  {
+    heading: 'Who We Are',
+    paragraphs: [
+      'Horizon Vantage ("we", "us", "our") is a sole trader business registered with the Companies Registration Office (CRO) in Ireland under business name registration number <strong>SR9692490</strong>, a trading name of <strong>Horizon Vantage</strong>. We provide on-site photography, videography, website development, and local search engine optimisation (SEO) services to small and medium-sized businesses.',
+    ],
+    list: [
+      'Contact: <a href="mailto:info@horizonvantage.ie">info@horizonvantage.ie</a>',
+      'Website: <a href="https://horizonvantage.ie">https://horizonvantage.ie</a>',
+      'Registered/contact address: <strong>Wicklow, Ireland</strong>',
+    ],
+  },
+  {
+    heading: '',
+    paragraphs: [
+      'By engaging Horizon Vantage for any service, or by using this website, you ("the Client", "you") agree to be bound by these Terms of Service ("Terms").',
+    ],
+  },
+  {
+    heading: 'Services',
+    paragraphs: [
+      'We offer the following service tiers, with the specific scope for each engagement confirmed in a written quote or proposal before work begins:',
+    ],
+    list: [
+      '<strong>Visual Refresh</strong> — on-site photography package',
+      '<strong>Growth Retainer</strong> — ongoing monthly content and SEO support',
+      '<strong>Visual Visibility</strong> — website design and build',
+      '<strong>Complete Local Presence</strong> — combined photography, video, website, and SEO package',
+    ],
+  },
+  {
+    heading: '',
+    paragraphs: ['Anything not explicitly listed in your quote is out of scope and will be quoted separately.'],
+  },
+  {
+    heading: 'Quotes, Fees & Payment',
+    list: [
+      'All quotes are valid for 30 days from the date issued.',
+      'A non-refundable deposit of <strong>50%</strong> of the total project fee is required to secure a booking or begin work, unless otherwise agreed in writing. The remaining balance is due on delivery/completion, or per the payment schedule stated in your quote.',
+      'Monthly retainer services (e.g. the Growth Retainer) are billed in advance on a recurring monthly basis and continue until cancelled with <strong>30 days\'</strong> written notice.',
+      'Prices are quoted in EUR. Horizon Vantage is not currently VAT-registered; if this changes, VAT will be added at the applicable rate and clients will be notified in advance.',
+      'Payments not settled within 14 days of the invoice due date may incur statutory interest under the European Communities (Late Payment in Commercial Transactions) Regulations 2012.',
+      'Third-party costs (domain registration, hosting, stock licensing, paid ad spend, etc.) are not included in service fees unless explicitly stated, and are billed at cost or as separately agreed.',
+    ],
+  },
+  {
+    heading: 'Bookings, Rescheduling & Cancellations',
+    list: [
+      'Shoot dates are confirmed once the deposit is received.',
+      'Rescheduling requests made more than <strong>5 business days</strong> before the shoot date are accommodated free of charge, subject to availability.',
+      'Cancellations or rescheduling within <strong>48 hours</strong> of a confirmed shoot may incur a fee of up to 50% of the project fee to cover reserved time and any logistics already booked.',
+      'Horizon Vantage reserves the right to reschedule due to illness, equipment failure, or circumstances beyond our control, and will offer the next available date at no extra cost.',
+    ],
+  },
+  {
+    heading: 'Client Responsibilities',
+    paragraphs: ['You agree to:'],
+    list: [
+      'Provide safe and reasonable access to premises for on-site shoots.',
+      'Supply any content (logos, text, branding assets, login credentials) needed for website or SEO work in a timely manner — delays in providing materials may delay project timelines.',
+      'Obtain any necessary consents or model releases for staff, customers, or third parties who may appear in photography or video captured on your premises, unless Horizon Vantage has agreed in writing to arrange these.',
+      'Review and approve deliverables within the timeframe stated in your quote; feedback not received within that window may be treated as approved.',
+    ],
+  },
+  {
+    heading: 'Intellectual Property & Usage Rights',
+    list: [
+      '<strong>Photography &amp; video</strong> — Horizon Vantage retains copyright in all images and footage produced. Upon full payment, the Client receives a non-exclusive, perpetual licence to use the delivered images/video for their own business marketing purposes (website, social media, print, advertising). Resale, sublicensing, or use by third parties is not permitted without written agreement.',
+      '<strong>Portfolio use</strong> — unless the Client opts out in writing, Horizon Vantage may use delivered work (images, video, website screenshots) in its own portfolio, marketing materials, and social media, with credit to the Client where appropriate.',
+      '<strong>Websites</strong> — ownership of the final website code and content transfers to the Client upon receipt of full payment. Any third-party themes, plugins, stock assets, or licensed tools used remain subject to their own licence terms and are not owned by Horizon Vantage or the Client.',
+      '<strong>Raw files</strong> — unedited photo or video files are not included in deliverables unless purchased separately.',
+    ],
+  },
+  {
+    heading: 'Website Development Terms',
+    list: [
+      'The number of design revisions included is as stated in your quote; additional rounds are billed at an hourly or fixed rate to be agreed.',
+      "Domain registration and hosting are the Client's responsibility unless a managed-hosting add-on has been agreed; Horizon Vantage is not liable for third-party outages (e.g. hosting provider or registrar downtime).",
+      'Estimated delivery timeframes are provided in good faith but depend on the timely supply of Client content and feedback; delays caused by the Client will extend the delivery date accordingly.',
+      'Post-launch support beyond an agreed warranty period (e.g. 14 days post-launch) is billed separately unless covered under a retainer.',
+    ],
+  },
+  {
+    heading: 'SEO & Growth Retainer Terms',
+    list: [
+      'SEO involves factors outside our control (search engine algorithm changes, competitor activity, market conditions). Horizon Vantage does not guarantee specific rankings, traffic increases, or timeframes for results.',
+      'Retainer services are a rolling monthly engagement; either party may cancel with <strong>30 days\'</strong> written notice. Work already completed for the current billing period is non-refundable.',
+      "Reports and recommendations provided under a retainer are advisory; implementation of third-party recommendations (e.g. ad spend, platform changes) is at the Client's discretion and risk.",
+    ],
+  },
+  {
+    heading: 'Data Protection',
+    paragraphs: [
+      'Horizon Vantage processes personal data (e.g. client contact details, images or video containing identifiable people) in accordance with the General Data Protection Regulation (GDPR) and the Data Protection Act 2018. Full details of how we collect, use, and store data are set out in our separate Privacy Policy.',
+    ],
+  },
+  {
+    heading: 'Limitation of Liability',
+    list: [
+      "To the fullest extent permitted by law, Horizon Vantage's total liability for any claim arising from services provided is limited to the total fees paid by the Client for the specific project giving rise to the claim.",
+      'Horizon Vantage is not liable for indirect or consequential losses, including loss of profits, business, or data, arising from delivered work, websites, or SEO advice.',
+      'Nothing in these Terms limits liability for death, personal injury caused by negligence, fraud, or any other liability that cannot be excluded under Irish law.',
+    ],
+  },
+  {
+    heading: 'Force Majeure',
+    paragraphs: [
+      'Horizon Vantage is not liable for delays or failure to perform obligations caused by events beyond reasonable control, including illness, extreme weather, power or internet outages, or third-party service failures.',
+    ],
+  },
+  {
+    heading: 'Termination',
+    paragraphs: [
+      'Either party may terminate a project agreement in writing if the other party materially breaches these Terms and fails to remedy the breach within 14 days of written notice. Fees for work completed up to the point of termination remain payable.',
+    ],
+  },
+  {
+    heading: 'Governing Law',
+    paragraphs: [
+      'These Terms are governed by the laws of Ireland, and any disputes shall be subject to the exclusive jurisdiction of the Irish courts.',
+    ],
+  },
+  {
+    heading: 'Complaints',
+    paragraphs: [
+      'If you are unsatisfied with any aspect of our service, please contact us at <a href="mailto:info@horizonvantage.ie">info@horizonvantage.ie</a> in the first instance. We aim to acknowledge complaints within 5 business days.',
+    ],
+  },
+  {
+    heading: 'Changes to These Terms',
+    paragraphs: [
+      'Horizon Vantage may update these Terms from time to time. The current version will always be available at horizonvantage.ie/terms. Continued use of our services after changes take effect constitutes acceptance of the updated Terms.',
+    ],
+  },
+];
+---
+
+<Layout title="Terms of Service — Horizon Vantage" description="Terms of Service for Horizon Vantage's photography, video, website, and local SEO services.">
+  <header class="legal-header">
+    <div class="wrap">
+      <a class="brand" href="/"><em>Horizon</em> Vantage</a>
+      <a class="back-link" href="/">← Back to site</a>
+    </div>
+  </header>
+
+  <main class="legal-doc">
+    <div class="wrap">
+      <div class="frame-tag"><span class="num">LEGAL</span> Terms of Service</div>
+      <h1>Terms of Service</h1>
+      <p class="effective-date mono">Effective date: {effectiveDate}</p>
+
+      {sections.map((section) => (
+        <div class="legal-section">
+          {section.heading && <h2>{section.heading}</h2>}
+          {section.paragraphs?.map((p) => <p set:html={p} />)}
+          {section.list && (
+            <ul>
+              {section.list.map((item) => <li set:html={item} />)}
+            </ul>
+          )}
+        </div>
+      ))}
+
+      <div class="legal-section">
+        <h2>Contact</h2>
+        <p>
+          Horizon Vantage<br />
+          Email: <a href="mailto:info@horizonvantage.ie">info@horizonvantage.ie</a><br />
+          Website: <a href="https://horizonvantage.ie">https://horizonvantage.ie</a><br />
+          Gelmis Bartulis<br />
+          <a href="tel:+353894939050">+353 89 493 9050</a>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .legal-header{
+    padding: 24px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .legal-header .wrap{
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+  .legal-header .brand{
+    font-family: 'Montserrat', serif; font-size: 20px; text-decoration: none; color: var(--paper);
+  }
+  .legal-header .brand em{ color: var(--brass); font-style: italic; }
+  .back-link{
+    font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.04em;
+    color: var(--paper-dim); text-decoration: none; transition: color 0.2s ease;
+  }
+  .back-link:hover{ color: var(--brass); }
+
+  .legal-doc{ padding: 70px 0 110px; }
+  .legal-doc h1{
+    font-family: 'Montserrat', serif; font-weight: 400;
+    font-size: clamp(32px, 5vw, 56px);
+    line-height: 1.08;
+    margin: 0 0 10px;
+  }
+  .effective-date{
+    color: var(--paper-dim); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase;
+    margin: 0 0 50px;
+  }
+  .legal-section{ max-width: 720px; margin-bottom: 34px; }
+  .legal-section h2{
+    font-family: 'Montserrat', serif; font-weight: 400;
+    font-size: 22px; color: var(--brass);
+    margin: 0 0 12px;
+  }
+  .legal-section p{
+    color: var(--paper-dim); font-size: 15px; line-height: 1.7; margin: 0 0 12px;
+  }
+  .legal-section p a{ color: var(--brass); }
+  .legal-section ul{
+    margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .legal-section li{
+    color: var(--paper-dim); font-size: 15px; line-height: 1.7;
+  }
+  .legal-section li a, .legal-section li strong{ color: var(--paper); }
+  .legal-section p strong{ color: var(--paper); }
+</style>

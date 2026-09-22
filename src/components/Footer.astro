@@ -7,7 +7,7 @@ const year = new Date().getFullYear();
     <div class="foot-grid">
       <div class="foot-brand">
         <div class="brand"><em>Horizon</em> Vantage</div>
-        <p>Photography, videography, websites and local SEO for Irish small businesses — shot, built and optimised by one person.</p>
+        <p>Photography, videography, websites and local SEO for Irish small businesses - shot, built and optimised by one person.</p>
       </div>
       <div class="foot-cols">
         <div class="foot-col">
@@ -28,6 +28,7 @@ const year = new Date().getFullYear();
     <div class="foot-bottom">
       <span>© {year} Horizon Vantage </span>
       <span>Dublin, Ireland</span>
+      <a href="/terms">Terms of Service</a>
     </div>
   </div>
 </footer>
@@ -56,4 +57,6 @@ const year = new Date().getFullYear();
     display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
     font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--paper-dim); opacity: 0.6;
   }
+  .foot-bottom a{ text-decoration: none; transition: color 0.2s ease; }
+  .foot-bottom a:hover{ color: var(--paper); }
 </style>
