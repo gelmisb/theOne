@@ -1,5 +1,6 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { getLenis } from './lenis';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -30,7 +31,14 @@ export function initScrollHashFix() {
   window.addEventListener('load', () => {
     requestAnimationFrame(() => {
       ScrollTrigger.refresh();
-      document.querySelector(hash)?.scrollIntoView();
+      const target = document.querySelector<HTMLElement>(hash);
+      if (!target) return;
+      const lenis = getLenis();
+      if (lenis) {
+        lenis.scrollTo(target, { immediate: true });
+      } else {
+        target.scrollIntoView();
+      }
     });
   });
 }
@@ -386,9 +394,11 @@ export function initPortfolioLightbox() {
 /**
  * Numbered scroll-nav dots — one ScrollTrigger per tracked section, toggling
  * the matching dot's .active class as that section becomes the current one
- * in view. Clicking a dot relies on the plain anchor href + the existing
- * global `html{scroll-behavior:smooth}` (already reduced-motion-safe) rather
- * than a bespoke scroll routine, so it still works if this script fails.
+ * in view. Clicking a dot is a plain anchor href — Lenis's own click handler
+ * (src/scripts/lenis.ts) intercepts it and animates the scroll; if that
+ * script fails to load, it falls back to a plain instant jump rather than
+ * native smooth-scroll, since `scroll-behavior: smooth` is intentionally
+ * disabled globally to avoid fighting Lenis's own easing.
  */
 export function initScrollNav() {
   const nav = document.querySelector<HTMLElement>('[data-scroll-nav]');

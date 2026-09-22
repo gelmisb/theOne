@@ -54,7 +54,9 @@ import Footer from '../components/Footer.astro';
     initHeadingSplitReveal,
     initSectionTransitions,
   } from '../scripts/animations';
+  import { initSmoothScroll } from '../scripts/lenis';
 
+  initSmoothScroll();
   initScrollHashFix();
   initIntroTimeline();
   initIntroZoomTransition();
