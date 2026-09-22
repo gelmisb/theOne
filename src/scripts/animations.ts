@@ -112,8 +112,8 @@ export function initIntroTimeline() {
  * effect, which didn't read well here.
  *
  * `end` is a function (not a fixed string) so the pin covers a consistent
- * 1.5 viewport-heights of scroll regardless of the visitor's screen height —
- * a fixed "+=150%" would otherwise scale off the section's own height
+ * 0.15 viewport-heights of scroll regardless of the visitor's screen height —
+ * a fixed "+=15%" would otherwise scale off the section's own height
  * instead, behaving inconsistently on very short or very tall viewports.
  */
 export function initIntroZoomTransition() {
@@ -128,7 +128,7 @@ export function initIntroZoomTransition() {
       scrollTrigger: {
         trigger: intro,
         start: 'top top',
-        end: () => '+=' + window.innerHeight * 1.5,
+        end: () => '+=' + window.innerHeight * 0.9,
         pin: true,
         scrub: true,
         invalidateOnRefresh: true,
