@@ -6,7 +6,7 @@ const photoModules = import.meta.glob<{ default: ImageMetadata }>(
   '/src/assets/photos/portfolio/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}',
   { eager: true }
 );
-// Filenames of AI-generated fill-in shots — not real client work, so they're
+// Filenames of AI-generated fill-in shots - not real client work, so they're
 // visibly tagged and excluded from the "shown with their permission" claim below.
 const GENERATED_FILES = new Set(['counter-service.jpg', 'training-floor.jpg']);
 
@@ -25,7 +25,7 @@ const frames = Array.from({ length: frameCount }, (_, i) => String(i + 1).padSta
 const hasPhotos = photos.length > 0;
 
 // On-site video clips. Add entries here the same way photos live in
-// src/assets/photos/portfolio — poster is optional (falls back to a plain
+// src/assets/photos/portfolio - poster is optional (falls back to a plain
 // swatch tile like the photo grid's empty state). Example:
 // { id: 'cafe-walkthrough', title: 'Café Walkthrough', type: 'youtube', src: 'dQw4w9WgXcQ' }
 // { id: 'salon-reel', title: 'Salon Reel', type: 'file', src: '/videos/salon-reel.mp4', poster: '/videos/salon-reel-poster.jpg' }
@@ -45,9 +45,9 @@ const hasVideos = videos.length > 0;
       <p class="section-sub">
         {hasPhotos
           ? hasGenerated
-            ? 'A selection of founder shoots for real local businesses, shown here with their permission — alongside a couple of AI-generated concept frames, marked below, filling gaps while more real shoots are booked in.'
+            ? 'A selection of founder shoots for real local businesses, shown here with their permission - alongside a couple of AI-generated concept frames, marked below, filling gaps while more real shoots are booked in.'
             : 'A selection of founder shoots for real local businesses, shown here with their permission.'
-          : "This studio is relaunching, not starting cold — the founder shoots below are being booked now, with real local businesses, shown here with their permission as soon as galleries are delivered."}
+          : "This studio is relaunching, not starting cold - the founder shoots below are being booked now, with real local businesses, shown here with their permission as soon as galleries are delivered."}
       </p>
     </div>
 
@@ -72,14 +72,14 @@ const hasVideos = videos.length > 0;
                   sizes="(max-width: 560px) 50vw, (max-width: 900px) 33vw, 20vw"
                   loading={i < 5 ? 'eager' : 'lazy'}
                 />
-                <span class="caption mono">{p.caption}{p.generated && ' — AI concept'}</span>
+                <span class="caption mono">{p.caption}{p.generated && ' - AI concept'}</span>
               </button>
             ))
           : frames.map((n, i) => (
               <div class="frame" style={`--hue-shift:${(i * 11) % 40}deg`}>
                 <span class="fnum">{n}</span>
                 <div class="swatch"></div>
-                <span class="x">—</span>
+                <span class="x">-</span>
               </div>
             ))}
       </div>
@@ -168,6 +168,11 @@ const hasVideos = videos.length > 0;
   .cs-grid{ display: grid; grid-template-columns: repeat(5, 1fr); }
   @media (max-width: 900px){ .cs-grid{ grid-template-columns: repeat(3,1fr); } }
   @media (max-width: 560px){ .cs-grid{ grid-template-columns: repeat(2,1fr); } }
+  /* Assumes exactly 6 photos: 5-wide desktop grid stays one clean row by
+     hiding the 6th tile there, while the 3-wide and 2-wide breakpoints
+     below both divide 6 evenly (two rows of 3, three rows of 2) and show
+     all of them. Revisit this rule if the photo count changes again. */
+  @media (min-width: 901px){ .cs-grid .frame:nth-child(6){ display: none; } }
   .frame{
     aspect-ratio: 1/1;
     border: 1px solid var(--line);
@@ -295,7 +300,7 @@ const hasVideos = videos.length > 0;
     background: #000;
   }
 
-  /* Lightbox — deliberately stays a dark viewer regardless of site theme, for photo contrast */
+  /* Lightbox - deliberately stays a dark viewer regardless of site theme, for photo contrast */
   .lightbox{
     position: fixed; inset: 0; z-index: 1000;
     background: rgba(10,17,24,0.95);
