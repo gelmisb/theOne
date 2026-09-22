@@ -17,11 +17,16 @@ const windowImages = import.meta.glob<{ default: ImageMetadata }>(
 );
 const windowImage = Object.values(windowImages)[0]?.default;
 
-// Video porthole — a single clip that plays as an ambient loop before the
-// visitor scrolls, then gets scrubbed by scroll position once the pinned
-// intro range is entered (initIntroZoomTransition in animations.ts). Until
-// a file is dropped in, Intro silently falls back to the static-image zoom
-// transform below, so the site is never broken waiting on the asset.
+// Video porthole — desktop only. All-intra encoding (required so
+// ScrollTrigger can scrub currentTime without stutter) makes this file
+// dramatically more expensive to decode than normal video, which is
+// exactly the kind of thing that overwhelms weaker phone GPUs — on mobile
+// it read as janky, not just slow to load. The <source media> query below
+// means phones never fetch a single byte of it: the browser evaluates
+// that query before requesting anything, same mechanism <picture> uses for
+// responsive images. Below that breakpoint, and any time this folder is
+// empty, Intro falls back to the static-image zoom transform — a plain
+// CSS transform, cheap enough for any device.
 //
 // This folder holds nothing but that one clip, so any .mp4 dropped in here
 // is picked up regardless of its exact filename — a mismatched name (e.g.
@@ -29,13 +34,12 @@ const windowImage = Object.values(windowImages)[0]?.default;
 // image before; matching the whole folder means that can't happen again.
 //
 // Re-encode raw footage with tools/encode-intro-video.sh before dropping it
-// in here — scroll-scrubbing needs every frame to be a keyframe, which a
-// normal export won't have; an un-encoded drop will still play, just with
+// in here — an un-encoded drop will still play on desktop, just with
 // visible stutter once scroll-scrubbing kicks in. mp4/H.264 only,
-// deliberately: all-intra encoding (required for the scroll-scrub) defeats
-// VP9's inter-frame compression, so a webm here would be dead weight —
-// larger than the mp4 with no reach benefit, since H.264 already covers
-// effectively every browser this site targets.
+// deliberately: all-intra encoding defeats VP9's inter-frame compression,
+// so a webm here would be dead weight — larger than the mp4 with no reach
+// benefit, since H.264 already covers effectively every browser this site
+// targets.
 const introVideos = import.meta.glob<string>('/src/assets/videos/*.mp4', {
   eager: true,
   import: 'default',
@@ -47,34 +51,31 @@ const hasVideo = Boolean(bgMp4);
 <section class="intro" id="intro">
   <div class="intro-scrim" aria-hidden="true"></div>
 
-  {hasVideo ? (
-    <div class="intro-image-container" aria-hidden="true">
+  <div class:list={['intro-image-container', { 'has-video': hasVideo }]} aria-hidden="true">
+    {hasVideo && (
       <video
-        class="intro-feature"
+        class="intro-feature intro-feature-video"
         data-intro-video
         muted
         playsinline
         preload="auto"
         poster={windowImage?.src}
       >
-        <source src={bgMp4} type="video/mp4" />
+        <source src={bgMp4} type="video/mp4" media="(min-width: 641px)" />
       </video>
-    </div>
-  ) : (
-    windowImage && (
-      <div class="intro-image-container" aria-hidden="true">
-        <Image
-          src={windowImage}
-          alt=""
-          class="intro-feature"
-          data-intro-feature
-          widths={[640, 960, 1280, 1456]}
-          sizes="100vw"
-          loading="eager"
-        />
-      </div>
-    )
-  )}
+    )}
+    {windowImage && (
+      <Image
+        src={windowImage}
+        alt=""
+        class="intro-feature intro-feature-image"
+        data-intro-feature
+        widths={[640, 960, 1280, 1456]}
+        sizes="100vw"
+        loading="eager"
+      />
+    )}
+  </div>
 
   <div class="intro-frame" aria-hidden="true">
     <span class="ic-corner tl"></span>
@@ -126,6 +127,16 @@ const hasVideo = Boolean(bgMp4);
     width: 100%; height: 100%;
     object-fit: cover;
     will-change: transform;
+  }
+  /* Below 641px: image only, video layer hidden (and, thanks to the
+     <source media> query in the markup, never fetched at all). At and
+     above it: video takes over, image hides. Scoped to .has-video so a
+     site with no video asset yet just always shows the image, at every
+     width, matching the old fallback-only behavior. */
+  .intro-image-container.has-video :global(.intro-feature-video){ display: none; }
+  @media (min-width: 641px){
+    .intro-image-container.has-video :global(.intro-feature-video){ display: block; }
+    .intro-image-container.has-video :global(.intro-feature-image){ display: none; }
   }
   .intro-frame{ position: absolute; inset: 28px; pointer-events: none; z-index: 2; }
   .ic-corner{

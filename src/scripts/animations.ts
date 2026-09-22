@@ -121,12 +121,19 @@ export function initIntroTimeline() {
  * 0.15 viewport-heights of scroll regardless of the visitor's screen height —
  * a fixed "+=15%" would otherwise scale off the section's own height
  * instead, behaving inconsistently on very short or very tall viewports.
+ *
+ * Video is desktop-only (see the matching `min-width: 641px` breakpoint on
+ * both the CSS in Intro.astro and the <source media> query that stops
+ * mobile from ever fetching the file) — below that, this always takes the
+ * image-transform path below, even when a video element exists in the DOM,
+ * since on mobile it has no loaded source to play.
  */
 export function initIntroZoomTransition() {
   const intro = document.querySelector<HTMLElement>('.intro');
   if (!intro) return;
 
-  const video = document.querySelector<HTMLVideoElement>('[data-intro-video]');
+  const isDesktop = window.matchMedia('(min-width: 641px)').matches;
+  const video = isDesktop ? document.querySelector<HTMLVideoElement>('[data-intro-video]') : null;
   if (video) {
     initIntroVideoZoomTransition(intro, video);
     return;
