@@ -1,4 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+/* Self-hosted (via @fontsource) instead of Google Fonts' CSS API — that
+   was a render-blocking multi-hop waterfall (HTML → this stylesheet →
+   Google's font CSS → the font files themselves, each a separate
+   cross-origin round-trip), flagged as the single largest opportunity
+   (~2.4s) in a mobile PageSpeed audit. Bundled at build time instead, so
+   the fonts ship from the same origin as everything else with no extra
+   round-trips. Latin-only subsets and just the weights actually used in
+   this file (no italic Inter or IBM Plex Mono — nothing here sets
+   font-style: italic on either). */
+@import '@fontsource-variable/inter/wght.css';
+@import '@fontsource/instrument-serif/latin.css';
+@import '@fontsource/instrument-serif/latin-italic.css';
+@import '@fontsource/ibm-plex-mono/latin-400.css';
+@import '@fontsource/ibm-plex-mono/latin-500.css';
 
 :root{
   --bg: #0A0E13;
