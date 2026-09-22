@@ -9,7 +9,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 /**
  * Fixes a real bug: loading the page directly at a URL hash (e.g. /#offer)
  * makes the browser jump there natively, often before ScrollTrigger has
- * measured the pinned Intro section — if that jump lands past Intro's
+ * measured the pinned Intro section - if that jump lands past Intro's
  * trigger range before GSAP has anything to measure against, the pin can
  * get stuck in its pinned (position: fixed) state indefinitely, leaving
  * Intro's portal artwork rendered fixed at the top of the viewport no
@@ -17,8 +17,8 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
  *
  * Must run before any other init function sets up a pinned ScrollTrigger.
  * Forces the page to start at the top (so every pin measures correctly),
- * then — once the rest of this module's init functions have run and the
- * page has settled — refreshes ScrollTrigger against the real layout and
+ * then - once the rest of this module's init functions have run and the
+ * page has settled - refreshes ScrollTrigger against the real layout and
  * scrolls to the original hash target.
  */
 export function initScrollHashFix() {
@@ -82,11 +82,11 @@ export function initScrollReveals() {
 }
 
 /**
- * Intro reveal — plays once on load. The grid materializes, then the iris
+ * Intro reveal - plays once on load. The grid materializes, then the iris
  * opens onto the wordmark.
  *
  * The hidden starting state (clip-path, opacity, y) is set in Intro.astro's
- * CSS, not here — CSS paints hidden before this script even runs, so there's
+ * CSS, not here - CSS paints hidden before this script even runs, so there's
  * no flash of the fully-visible heading followed by a JS-driven snap to
  * hidden. This function only needs to animate back *out* of that state.
  */
@@ -118,13 +118,13 @@ export function initIntroTimeline() {
  * effect, which didn't read well here.
  *
  * `end` is a function (not a fixed string) so the pin covers a consistent
- * 0.15 viewport-heights of scroll regardless of the visitor's screen height —
+ * 0.15 viewport-heights of scroll regardless of the visitor's screen height -
  * a fixed "+=15%" would otherwise scale off the section's own height
  * instead, behaving inconsistently on very short or very tall viewports.
  *
  * Video is desktop-only (see the matching `min-width: 641px` breakpoint on
  * both the CSS in Intro.astro and the <source media> query that stops
- * mobile from ever fetching the file) — below that, this always takes the
+ * mobile from ever fetching the file) - below that, this always takes the
  * image-transform path below, even when a video element exists in the DOM,
  * since on mobile it has no loaded source to play.
  */
@@ -142,7 +142,7 @@ export function initIntroZoomTransition() {
   const feature = document.querySelector<HTMLElement>('[data-intro-feature]');
   if (!feature) return;
 
-  if (prefersReducedMotion) return; // no pin, no zoom — plain scroll past
+  if (prefersReducedMotion) return; // no pin, no zoom - plain scroll past
 
   gsap
     .timeline({
@@ -156,12 +156,12 @@ export function initIntroZoomTransition() {
       },
     })
     .to('.intro-reveal, .intro-frame, .intro-scroll', { opacity: 0, ease: 'power1.inOut' }, 0)
-    // scale + z (via the 500px perspective) compound multiplicatively —
+    // scale + z (via the 500px perspective) compound multiplicatively -
     // at scale:6 / z:350 that was ~6 × (500/(500-350)) ≈ 20x total
     // magnification, far beyond what the 1456px-wide source image
     // (src/assets/photos/intro-window.png) can hold up to, hence the
     // blocky/blurred look. Dialed back to a combined ~3.4x (2 × 500/300)
-    // — still a real "push toward camera" zoom, just within what this
+    // - still a real "push toward camera" zoom, just within what this
     // source resolution can render cleanly. Raise this again if a
     // higher-resolution source image is swapped in.
     .to(feature, { scale: 2, z: 200, transformOrigin: 'center center', ease: 'power1.inOut' }, 0)
@@ -170,14 +170,14 @@ export function initIntroZoomTransition() {
 
 /**
  * Single-clip video porthole: plays once, unlooped, the moment the page
- * loads — no `loop` attribute, so it naturally holds its last frame once
+ * loads - no `loop` attribute, so it naturally holds its last frame once
  * done. If the visitor scrolls into the pinned range (whether or not that
  * initial play has finished), scroll takes over: `currentTime` is driven
  * directly by scroll progress, same mechanism the pin/scrub setup already
- * uses. Scrolling back up past the start just pauses on the first frame —
+ * uses. Scrolling back up past the start just pauses on the first frame -
  * this is a one-shot intro, not a loop, so it doesn't replay itself.
  * Reuses the same pin/start/end/scrub ScrollTrigger shape as the
- * image-transform version above — only what happens inside differs.
+ * image-transform version above - only what happens inside differs.
  */
 function initIntroVideoZoomTransition(intro: HTMLElement, video: HTMLVideoElement) {
   if (prefersReducedMotion) return; // sits on its poster (first) frame, unplayed
@@ -219,7 +219,7 @@ function initIntroVideoZoomTransition(intro: HTMLElement, video: HTMLVideoElemen
 /**
  * Fades Layout.astro's persistent journey background (revealed through
  * Intro's portal, visible through Hero) out as Gap scrolls through the
- * viewport, scrubbed to scroll position — fully faded by the time Gap has
+ * viewport, scrubbed to scroll position - fully faded by the time Gap has
  * passed, handing off cleanly to Gap's own background photo.
  */
 export function initPersistBgFade() {
@@ -276,7 +276,7 @@ export function splitIntoWordSpans(el: HTMLElement): HTMLElement[] {
   return Array.from(el.querySelectorAll<HTMLElement>('.split-word'));
 }
 
-/** Hero entrance timeline — plays once on load, not on scroll. */
+/** Hero entrance timeline - plays once on load, not on scroll. */
 export function initHeroTimeline() {
   const heading = document.querySelector<HTMLElement>('.hero-h');
   const words = heading ? splitIntoWordSpans(heading) : [];
@@ -397,7 +397,7 @@ export function initNavOnScroll() {
   });
 }
 
-/** Buttons pull gently toward the cursor on hover — fine-pointer devices only. */
+/** Buttons pull gently toward the cursor on hover - fine-pointer devices only. */
 export function initMagneticButtons() {
   if (prefersReducedMotion) return;
   if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
@@ -419,7 +419,7 @@ export function initMagneticButtons() {
   });
 }
 
-/** Portfolio lightbox — click a developed frame to view it full-size, arrow/keyboard navigable. */
+/** Portfolio lightbox - click a developed frame to view it full-size, arrow/keyboard navigable. */
 export function initPortfolioLightbox() {
   const lightbox = document.querySelector<HTMLElement>('[data-lightbox]');
   const data = (window as any).__portfolioPhotos as { photoUrls: string[]; captions: string[] } | undefined;
@@ -469,9 +469,9 @@ export function initPortfolioLightbox() {
 }
 
 /**
- * Numbered scroll-nav dots — one ScrollTrigger per tracked section, toggling
+ * Numbered scroll-nav dots - one ScrollTrigger per tracked section, toggling
  * the matching dot's .active class as that section becomes the current one
- * in view. Clicking a dot is a plain anchor href — Lenis's own click handler
+ * in view. Clicking a dot is a plain anchor href - Lenis's own click handler
  * (src/scripts/lenis.ts) intercepts it and animates the scroll; if that
  * script fails to load, it falls back to a plain instant jump rather than
  * native smooth-scroll, since `scroll-behavior: smooth` is intentionally
@@ -505,7 +505,7 @@ const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea, input, select, iframe, video, [tabindex]:not([tabindex="-1"])';
 
 /**
- * Portfolio video grid — click a poster tile to open a modal playing either
+ * Portfolio video grid - click a poster tile to open a modal playing either
  * a YouTube embed or a local file, fading/scaling in with GSAP, closing on
  * backdrop click or Escape, and trapping focus while open. Closing removes
  * the player element entirely (rather than pausing) so audio/video reliably
@@ -564,7 +564,7 @@ export function initVideoLightbox() {
     document.removeEventListener('keydown', onKeydown);
 
     const finish = () => {
-      wrap!.innerHTML = ''; // stops playback — iframe/video removed, not just hidden
+      wrap!.innerHTML = ''; // stops playback - iframe/video removed, not just hidden
       lightbox!.classList.remove('open');
       lightbox!.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
@@ -617,7 +617,7 @@ export function initVideoLightbox() {
  * scales down as it's scrolled past, so moving between sections reads as a
  * continuous flow rather than a hard cut. Scroll-scrubbed (tied directly to
  * scroll position, not a fixed-duration tween), so it never scroll-jacks.
- * Intro is excluded — it already has its own bespoke exit parallax
+ * Intro is excluded - it already has its own bespoke exit parallax
  * (initIntroParallax) covering essentially its whole visible content, so a
  * second wrapper-level effect there would just compound rather than add.
  */

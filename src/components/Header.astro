@@ -26,12 +26,6 @@
     max-width: 1180px;
     border-radius: 0;
     border: 1px solid transparent;
-    /* Light scrim for nav-text legibility only — not compensating for a
-       mismatched background anymore. Now that header is position:fixed
-       (see above) rather than sticky, it no longer reserves its own flow
-       space, so Intro's own artwork extends fully behind it from the true
-       top of the page instead of exposing Layout.astro's persistent
-       background here. Safe to stay close to transparent. */
     background: linear-gradient(180deg, rgba(10,14,19,0.35), rgba(10,14,19,0.05));
     box-shadow: none;
     transition: margin .35s ease, border-radius .35s ease, background .35s ease,

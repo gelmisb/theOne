@@ -4,7 +4,7 @@
 # Usage:
 #   tools/encode-intro-video.sh <raw-clip>
 #
-# Output lands in src/assets/videos/intro-bg.mp4 — muted, scaled to 1280px
+# Output lands in src/assets/videos/intro-bg.mp4 - muted, scaled to 1280px
 # wide (plenty sharp for a background video; keeps file size sane), and
 # all-intra (-g 1, keyframe every frame) so ScrollTrigger can seek
 # currentTime during scroll-scrubbing without stutter/blockiness.
@@ -30,4 +30,4 @@ fi
 echo "Encoding -> $OUT_DIR/intro-bg.mp4"
 ffmpeg -y -i "$RAW" -vf scale=1280:-2 -c:v libx264 -g 1 -crf 20 -pix_fmt yuv420p -an "$OUT_DIR/intro-bg.mp4"
 
-echo "Done. Intro.astro will pick this up automatically on next dev/build — no code changes needed."
+echo "Done. Intro.astro will pick this up automatically on next dev/build - no code changes needed."

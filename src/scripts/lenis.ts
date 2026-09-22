@@ -17,12 +17,12 @@ export function getLenis(): Lenis | null {
  * Smooth (inertia) scrolling, synced to GSAP's ticker so every existing
  * scrub-tied ScrollTrigger animation (hero parallax, section fades, the
  * pinned intro zoom) reads from an eased scroll position instead of the
- * raw, discretely-stepped native wheel/trackpad delta — this is what
+ * raw, discretely-stepped native wheel/trackpad delta - this is what
  * actually removes the "choppy" feel; CSS `scroll-behavior: smooth` only
  * ever affected anchor-jump scrolling, never manual scrolling.
  *
  * Skipped entirely under prefers-reduced-motion, consistent with every
- * other animation in this codebase — inertia scrolling is exactly the kind
+ * other animation in this codebase - inertia scrolling is exactly the kind
  * of motion that setting is meant to suppress.
  */
 export function initSmoothScroll() {

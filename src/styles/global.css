@@ -1,11 +1,11 @@
-/* Self-hosted (via @fontsource) instead of Google Fonts' CSS API — that
+/* Self-hosted (via @fontsource) instead of Google Fonts' CSS API - that
    was a render-blocking multi-hop waterfall (HTML → this stylesheet →
    Google's font CSS → the font files themselves, each a separate
    cross-origin round-trip), flagged as the single largest opportunity
    (~2.4s) in a mobile PageSpeed audit. Bundled at build time instead, so
    the fonts ship from the same origin as everything else with no extra
    round-trips. Latin-only subsets and just the weights actually used in
-   this file (no italic Inter or IBM Plex Mono — nothing here sets
+   this file (no italic Inter or IBM Plex Mono - nothing here sets
    font-style: italic on either). */
 @import '@fontsource-variable/inter/wght.css';
 @import '@fontsource/instrument-serif/latin.css';
@@ -54,7 +54,7 @@ a{ color: inherit; }
 .wrap{ max-width: 1180px; margin: 0 auto; padding: 0 32px; }
 @media (max-width: 640px){ .wrap{ padding: 0 20px; } }
 
-/* Sprocket divider — signature texture */
+/* Sprocket divider - signature texture */
 .sprockets{
   height: 14px;
   width: 100%;
@@ -65,7 +65,7 @@ a{ color: inherit; }
 }
 .sprockets.dark{ opacity: 0.22; }
 
-/* Frame tag — signature element */
+/* Frame tag - signature element */
 .frame-tag{
   display: flex; align-items: baseline; gap: 14px;
   font-family: 'IBM Plex Mono', monospace;
@@ -96,7 +96,7 @@ a{ color: inherit; }
 section{ padding: 110px 0; position: relative; }
 @media (max-width: 640px){ section{ padding: 70px 0; } }
 
-/* Word-by-word heading reveal — spans created at runtime by splitIntoWordSpans() */
+/* Word-by-word heading reveal - spans created at runtime by splitIntoWordSpans() */
 .split-word{ display: inline-block; will-change: transform, opacity; }
 
 .section-head{ max-width: 680px; margin-bottom: 60px; }
@@ -126,10 +126,10 @@ h2.section-h i{ font-style: italic; color: var(--brass); }
 .btn-ghost{ border-color: var(--line-strong); color: var(--paper); }
 .btn-ghost:hover{ border-color: var(--brass); color: var(--brass); transform: translateY(-2px); }
 
-/* GSAP reveal base state — JS adds .gsap-ready and animates via ScrollTrigger */
+/* GSAP reveal base state - JS adds .gsap-ready and animates via ScrollTrigger */
 .reveal{ opacity: 0; transform: translateY(24px); }
 
-/* Film grain + vignette — signature atmosphere, sits above everything */
+/* Film grain + vignette - signature atmosphere, sits above everything */
 .grain{
   position: fixed; inset: -10%;
   z-index: 999; pointer-events: none;
@@ -155,12 +155,12 @@ h2.section-h i{ font-style: italic; color: var(--brass); }
   .grain{ animation: none; }
 }
 
-/* Magnetic buttons — cursor pull, disabled on touch */
+/* Magnetic buttons - cursor pull, disabled on touch */
 @media (hover: hover) and (pointer: fine){
   .btn{ will-change: transform; }
 }
 
-/* Glass — frosted-dark surfaces for floating UI, iOS16-style blur adapted to the dark theme */
+/* Glass - frosted-dark surfaces for floating UI, iOS16-style blur adapted to the dark theme */
 .glass{
   background: rgba(26,32,41,0.55);
   backdrop-filter: blur(20px) saturate(1.7);

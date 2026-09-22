@@ -1,4 +1,4 @@
-# Terms of Service — Horizon Vantage
+# Terms of Service - Horizon Vantage
 
 **Effective Date:** [07 Sept 2026]
 
@@ -16,10 +16,10 @@ By engaging Horizon Vantage for any service, or by using this website, you ("the
 
 We offer the following service tiers, with the specific scope for each engagement confirmed in a written quote or proposal before work begins:
 
-- **Visual Refresh** — on-site photography package
-- **Growth Retainer** — ongoing monthly content and SEO support
-- **Visual Visibility** — website design and build
-- **Complete Local Presence** — combined photography, video, website, and SEO package
+- **Visual Refresh** - on-site photography package
+- **Growth Retainer** - ongoing monthly content and SEO support
+- **Visual Visibility** - website design and build
+- **Complete Local Presence** - combined photography, video, website, and SEO package
 
 Anything not explicitly listed in your quote is out of scope and will be quoted separately.
 
@@ -44,16 +44,16 @@ Anything not explicitly listed in your quote is out of scope and will be quoted 
 You agree to:
 
 - Provide safe and reasonable access to premises for on-site shoots.
-- Supply any content (logos, text, branding assets, login credentials) needed for website or SEO work in a timely manner — delays in providing materials may delay project timelines.
+- Supply any content (logos, text, branding assets, login credentials) needed for website or SEO work in a timely manner - delays in providing materials may delay project timelines.
 - Obtain any necessary consents or model releases for staff, customers, or third parties who may appear in photography or video captured on your premises, unless Horizon Vantage has agreed in writing to arrange these.
 - Review and approve deliverables within the timeframe stated in your quote; feedback not received within that window may be treated as approved.
 
 ## 6. Intellectual Property & Usage Rights
 
-- **Photography & video** — Horizon Vantage retains copyright in all images and footage produced. Upon full payment, the Client receives a non-exclusive, perpetual licence to use the delivered images/video for their own business marketing purposes (website, social media, print, advertising). Resale, sublicensing, or use by third parties is not permitted without written agreement.
-- **Portfolio use** — unless the Client opts out in writing, Horizon Vantage may use delivered work (images, video, website screenshots) in its own portfolio, marketing materials, and social media, with credit to the Client where appropriate.
-- **Websites** — ownership of the final website code and content transfers to the Client upon receipt of full payment. Any third-party themes, plugins, stock assets, or licensed tools used remain subject to their own licence terms and are not owned by Horizon Vantage or the Client.
-- **Raw files** — unedited photo or video files are not included in deliverables unless purchased separately.
+- **Photography & video** - Horizon Vantage retains copyright in all images and footage produced. Upon full payment, the Client receives a non-exclusive, perpetual licence to use the delivered images/video for their own business marketing purposes (website, social media, print, advertising). Resale, sublicensing, or use by third parties is not permitted without written agreement.
+- **Portfolio use** - unless the Client opts out in writing, Horizon Vantage may use delivered work (images, video, website screenshots) in its own portfolio, marketing materials, and social media, with credit to the Client where appropriate.
+- **Websites** - ownership of the final website code and content transfers to the Client upon receipt of full payment. Any third-party themes, plugins, stock assets, or licensed tools used remain subject to their own licence terms and are not owned by Horizon Vantage or the Client.
+- **Raw files** - unedited photo or video files are not included in deliverables unless purchased separately.
 
 ## 7. Website Development Terms
 

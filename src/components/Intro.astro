@@ -2,12 +2,12 @@
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
-// No background image of its own anymore — the portal below reveals
+// No background image of its own anymore - the portal below reveals
 // Layout.astro's persistent site background (.persist-bg) directly, since
 // Intro's own section background is transparent. See initPersistBgFade in
 // animations.ts for where that shared backdrop eventually fades out.
 
-// Foreground "porthole" layer — a dark window opening onto the persistent
+// Foreground "porthole" layer - a dark window opening onto the persistent
 // background. The pinned scroll timeline zooms this dramatically toward
 // the viewer, so it reads as flying through the window into the photo
 // beyond.
@@ -17,27 +17,27 @@ const windowImages = import.meta.glob<{ default: ImageMetadata }>(
 );
 const windowImage = Object.values(windowImages)[0]?.default;
 
-// Video porthole — desktop only. All-intra encoding (required so
+// Video porthole - desktop only. All-intra encoding (required so
 // ScrollTrigger can scrub currentTime without stutter) makes this file
 // dramatically more expensive to decode than normal video, which is
-// exactly the kind of thing that overwhelms weaker phone GPUs — on mobile
+// exactly the kind of thing that overwhelms weaker phone GPUs - on mobile
 // it read as janky, not just slow to load. The <source media> query below
 // means phones never fetch a single byte of it: the browser evaluates
 // that query before requesting anything, same mechanism <picture> uses for
 // responsive images. Below that breakpoint, and any time this folder is
-// empty, Intro falls back to the static-image zoom transform — a plain
+// empty, Intro falls back to the static-image zoom transform - a plain
 // CSS transform, cheap enough for any device.
 //
 // This folder holds nothing but that one clip, so any .mp4 dropped in here
-// is picked up regardless of its exact filename — a mismatched name (e.g.
+// is picked up regardless of its exact filename - a mismatched name (e.g.
 // intro_bg.mp4 vs. intro-bg.mp4) has silently fallen back to the static
 // image before; matching the whole folder means that can't happen again.
 //
 // Re-encode raw footage with tools/encode-intro-video.sh before dropping it
-// in here — an un-encoded drop will still play on desktop, just with
+// in here - an un-encoded drop will still play on desktop, just with
 // visible stutter once scroll-scrubbing kicks in. mp4/H.264 only,
 // deliberately: all-intra encoding defeats VP9's inter-frame compression,
-// so a webm here would be dead weight — larger than the mp4 with no reach
+// so a webm here would be dead weight - larger than the mp4 with no reach
 // benefit, since H.264 already covers effectively every browser this site
 // targets.
 const introVideos = import.meta.glob<string>('/src/assets/videos/*.mp4', {
@@ -89,7 +89,7 @@ const hasVideo = Boolean(bgMp4);
       <div class="frame-tag" data-intro-el><span class="num1">FRAME 000</span></div>
       <div class="intro-word"><em>Horizon</em> Vantage</div>
       <p class="intro-slogan mono" data-intro-el>See Further. Show It Better.</p>
-      <p class="intro-tag mono" data-intro-el>Photography · Video · Websites · Local SEO — Ireland</p>
+      <p class="intro-tag mono" data-intro-el>Photography · Video · Websites · Local SEO - Ireland</p>
     </div>
   </div>
 
@@ -200,7 +200,7 @@ const hasVideo = Boolean(bgMp4);
   }
 
   /* Pre-hide the reveal in CSS, matching initIntroTimeline's starting
-     tween values (animations.ts) — without this, the heading paints
+     tween values (animations.ts) - without this, the heading paints
      fully visible on first load, then GSAP snaps it hidden the instant
      the script runs, then animates it back in: a visible → hidden →
      visible flash that reads as a double blink. Gated to no-preference

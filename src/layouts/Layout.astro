@@ -11,19 +11,19 @@ interface Props {
 }
 
 const {
-  title = 'Horizon Vantage — Photography, Video, Websites & Local SEO for Irish Businesses',
-  description = 'On-site photography and video, a custom website, and local SEO — bundled into one package for Irish small businesses. Shot, built and optimised by a working photographer and software engineer.',
+  title = 'Horizon Vantage - Photography, Video, Websites & Local SEO for Irish Businesses',
+  description = 'On-site photography and video, a custom website, and local SEO - bundled into one package for Irish small businesses. Shot, built and optimised by a working photographer and software engineer.',
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
 // Portal artwork doubles as the social share preview until a proper
-// branded OG card (with the actual logo mark) exists as an asset — swap
+// branded OG card (with the actual logo mark) exists as an asset - swap
 // this for that once it's available.
 const ogImageAsset = await getImage({ src: introWindow, width: 1200, height: 630 });
 const ogImageURL = new URL(ogImageAsset.src, Astro.site);
 
-// LocalBusiness structured data — this is what feeds Google's map-pack/
+// LocalBusiness structured data - this is what feeds Google's map-pack/
 // knowledge-panel understanding of the business, not just the meta tags.
 // Site-wide (every page gets the same entity), matching terms.astro's
 // registered address and the founder's confirmed Wicklow + Dublin/Leinster
