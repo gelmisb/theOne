@@ -135,7 +135,15 @@ export function initIntroZoomTransition() {
       },
     })
     .to('.intro-reveal, .intro-frame, .intro-scroll', { opacity: 0, ease: 'power1.inOut' }, 0)
-    .to(feature, { scale: 6, z: 350, transformOrigin: 'center center', ease: 'power1.inOut' }, 0)
+    // scale + z (via the 500px perspective) compound multiplicatively —
+    // at scale:6 / z:350 that was ~6 × (500/(500-350)) ≈ 20x total
+    // magnification, far beyond what the 1456px-wide source image
+    // (src/assets/photos/intro-window.png) can hold up to, hence the
+    // blocky/blurred look. Dialed back to a combined ~3.4x (2 × 500/300)
+    // — still a real "push toward camera" zoom, just within what this
+    // source resolution can render cleanly. Raise this again if a
+    // higher-resolution source image is swapped in.
+    .to(feature, { scale: 2, z: 200, transformOrigin: 'center center', ease: 'power1.inOut' }, 0)
     .to(feature, { opacity: 0, ease: 'power1.in' }, 0.5);
 }
 
