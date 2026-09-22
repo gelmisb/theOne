@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.astro/
+.env
+.DS_Store
+.agents/
+.astro/
+.claude/
+.vscode/
+AGENTS.md
+CLAUDE (1).md
+CLAUDE.md
+astro.config.mjs
+skills-lock.json
+tsconfig.json
