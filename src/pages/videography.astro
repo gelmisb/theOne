@@ -1,0 +1,109 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import PageHero from '../components/PageHero.astro';
+import Sprockets from '../components/Sprockets.astro';
+import Footer from '../components/Footer.astro';
+
+// No example reels yet - this page ships copy-only until real client
+// video work exists to show. Revisit once footage is available and add
+// a video grid here (same pattern as Portfolio.astro's `videos` array).
+
+const deliverables = [
+  { k: 'Short-form clips', v: 'Vertical-friendly cuts built for Instagram, TikTok, and Google Business Profile posts.' },
+  { k: 'One promo video', v: "Bundled into every Visual Refresh shoot — a 15–30 second clip alongside the stills." },
+  { k: 'Shot on-site', v: 'Same visit as your photography, so it captures the same real space, staff, and product.' },
+];
+---
+
+<Layout
+  title="Business Video in Wicklow — Horizon Vantage"
+  description="On-site video for cafés, salons, gyms, clinics and tradespeople in Wicklow — short-form clips and promo video, shot alongside your photography."
+>
+  <Header />
+
+  <PageHero
+    frameNum="011"
+    frameLabel="Videography"
+    title="Motion adds what a photo can't — and it's shot the same visit."
+    subtitle="A short promo clip and a handful of vertical cuts, filmed during the same on-site shoot as your photography — no separate booking, no separate crew."
+  />
+
+  <section id="video-included">
+    <div class="wrap">
+      <div class="section-head" data-reveal data-reveal-group="video-head">
+        <div class="frame-tag"><span class="num">FRAME 012</span> What's Included</div>
+        <h2 class="section-h" data-split-reveal>Built for how people actually watch local business video.</h2>
+        <p class="section-sub">
+          Short, vertical, and native to the platform — not a polished ad, a real clip of a real
+          business that stops a scroll.
+        </p>
+      </div>
+      <div class="video-strip glass">
+        {deliverables.map((s) => (
+          <div>
+            <span class="k">{s.k}</span>
+            <span class="v">{s.v}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <Sprockets />
+
+  <section id="video-note">
+    <div class="wrap">
+      <div class="section-head" data-reveal data-reveal-group="video-note">
+        <div class="frame-tag"><span class="num">FRAME 013</span> A Note</div>
+        <h2 class="section-h" data-split-reveal>This is a new service — the examples are still being <i>shot.</i></h2>
+      </div>
+      <p class="note-body" data-reveal data-reveal-group="video-note">
+        Horizon Vantage is booking founder shoots now, and video examples will be added here as real
+        client work is delivered. If you'd rather see the process described than wait for a gallery,
+        get in touch — happy to talk through exactly what a shoot looks like before you book.
+      </p>
+      <a href="/#contact" class="btn btn-primary" data-reveal data-reveal-group="video-note">Book a Founder Shoot</a>
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<script>
+  import {
+    initScrollReveals,
+    initNavOnScroll,
+    initMagneticButtons,
+    initHeadingSplitReveal,
+    initSectionTransitions,
+  } from '../scripts/animations';
+  import { initSmoothScroll } from '../scripts/lenis';
+
+  initSmoothScroll();
+  initScrollReveals();
+  initNavOnScroll();
+  initMagneticButtons();
+  initHeadingSplitReveal();
+  initSectionTransitions();
+</script>
+
+<style>
+  .video-strip{
+    margin-top: 44px;
+    display: flex; flex-wrap: wrap; gap: 0;
+    padding: 26px 28px;
+    border-radius: var(--radius-glass);
+  }
+  .video-strip > div{ flex: 1; min-width: 220px; padding-right: 24px; }
+  .video-strip .k{
+    font-family: 'Montserrat', serif; font-style: italic;
+    font-size: 20px; color: var(--brass); display: block; margin-bottom: 8px;
+  }
+  .video-strip .v{ font-size: 14px; color: var(--paper-dim); line-height: 1.5; }
+
+  .note-body{
+    max-width: 720px; font-size: 17px; line-height: 1.75; color: var(--paper-dim);
+    margin: 0 0 30px;
+  }
+</style>

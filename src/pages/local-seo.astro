@@ -1,0 +1,120 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import PageHero from '../components/PageHero.astro';
+import Sprockets from '../components/Sprockets.astro';
+import Footer from '../components/Footer.astro';
+
+const rows = [
+  { lbl: 'Category', val: 'Set & verified' },
+  { lbl: 'Service area', val: 'Correctly defined' },
+  { lbl: 'Photos', val: 'Shot on-site, not stock' },
+  { lbl: 'NAP consistency', val: 'Matched across listings' },
+  { lbl: 'Reviews', val: 'NFC tap-to-review card' },
+];
+
+const steps = [
+  { n: '01', t: 'Claim & verify', d: "Confirm the listing is claimed, verified, and set to the correct business category — the single most common thing local listings get wrong." },
+  { n: '02', t: 'Fix NAP consistency', d: "Name, address, and phone number matched exactly across your website, Google listing, and any other directories you're on. Mismatches quietly hurt ranking." },
+  { n: '03', t: 'Load it with real photos', d: "Listings with real, recent, on-site photos consistently out-perform ones leaning on a logo and a stock banner — this is where the photography work does double duty." },
+  { n: '04', t: 'Build a review habit', d: "An NFC tap-to-review card makes asking a happy customer for a review a five-second, no-typing action instead of an awkward request." },
+];
+---
+
+<Layout
+  title="Local SEO & Google Business Profile Setup — Wicklow — Horizon Vantage"
+  description="Google Business Profile setup and local SEO for small businesses in Wicklow — category, service area, photos, and review systems done properly, not left to default settings."
+>
+  <Header />
+
+  <PageHero
+    frameNum="014"
+    frameLabel="Local SEO"
+    title="Your Google listing is doing more selling than your homepage."
+    subtitle="Most local searches never make it past the map pack. A finished, verified, correctly categorised Google Business Profile is worth more than another homepage redesign."
+  />
+
+  <section id="local-seo-checklist">
+    <div class="wrap">
+      <div class="section-head" data-reveal data-reveal-group="seo-check-head">
+        <div class="frame-tag"><span class="num">FRAME 015</span> What Gets Fixed</div>
+        <h2 class="section-h" data-split-reveal>Worked into every Tier 2 and 3 package, not treated as an afterthought.</h2>
+      </div>
+      <div class="gbp-card glass" data-reveal data-reveal-group="seo-check-head">
+        {rows.map((r) => (
+          <div class="gbp-row">
+            <span class="lbl">{r.lbl}</span>
+            <span class="val">{r.val}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <Sprockets />
+
+  <section id="local-seo-process">
+    <div class="wrap">
+      <div class="section-head" data-reveal data-reveal-group="seo-steps-head">
+        <div class="frame-tag"><span class="num">FRAME 016</span> The Process</div>
+        <h2 class="section-h" data-split-reveal>Four things, done properly instead of left on default settings.</h2>
+      </div>
+      <div class="seo-steps">
+        {steps.map((s) => (
+          <div class="seo-step" data-reveal data-reveal-group="seo-steps">
+            <span class="seo-step-n mono">{s.n}</span>
+            <h3>{s.t}</h3>
+            <p>{s.d}</p>
+          </div>
+        ))}
+      </div>
+      <a href="/#contact" class="btn btn-primary" data-reveal data-reveal-group="seo-steps-head">Get Your Listing Fixed</a>
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<script>
+  import {
+    initScrollReveals,
+    initNavOnScroll,
+    initMagneticButtons,
+    initHeadingSplitReveal,
+    initSectionTransitions,
+  } from '../scripts/animations';
+  import { initSmoothScroll } from '../scripts/lenis';
+
+  initSmoothScroll();
+  initScrollReveals();
+  initNavOnScroll();
+  initMagneticButtons();
+  initHeadingSplitReveal();
+  initSectionTransitions();
+</script>
+
+<style>
+  .gbp-card{
+    margin-top: 44px; max-width: 560px;
+    padding: 32px;
+    border-radius: var(--radius-glass);
+  }
+  .gbp-row{ display: flex; justify-content: space-between; padding: 14px 0; border-top: 1px solid var(--line); font-size: 14px; }
+  .gbp-row:first-child{ border-top: none; }
+  .gbp-row .lbl{ color: var(--paper-dim); }
+  .gbp-row .val{ color: var(--brass); font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
+
+  .seo-steps{
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px;
+    margin: 44px 0 40px;
+  }
+  @media (max-width: 700px){ .seo-steps{ grid-template-columns: 1fr; } }
+  .seo-step{
+    padding: 26px; border: 1px solid var(--line); background: var(--panel);
+  }
+  .seo-step-n{
+    display: block; font-size: 12px; color: var(--brass); letter-spacing: 0.08em; margin-bottom: 10px;
+  }
+  .seo-step h3{ font-family: 'Montserrat', serif; font-weight: 400; font-size: 20px; margin: 0 0 10px; }
+  .seo-step p{ font-size: 14px; line-height: 1.6; color: var(--paper-dim); margin: 0; }
+</style>

@@ -1,0 +1,118 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import PageHero from '../components/PageHero.astro';
+import Sprockets from '../components/Sprockets.astro';
+import Footer from '../components/Footer.astro';
+import type { ImageMetadata } from 'astro';
+
+const heroImages = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/photos/portfolio/Barbershops.jpg',
+  { eager: true }
+);
+const heroImage = Object.values(heroImages)[0]?.default;
+
+const included = [
+  { k: 'Half-day on-site shoot', v: 'Shot at your business, not a studio — real premises, real staff, real product.' },
+  { k: '15–20 edited photos', v: 'Colour-graded and delivered ready for your website, social channels, and Google Business Profile.' },
+  { k: '5-day turnaround', v: 'From shoot day to delivered gallery — fast enough to fit around a launch or a seasonal push.' },
+  { k: 'No web work required', v: "Works as a standalone refresh for existing listings, or as the foundation for a full website build." },
+];
+---
+
+<Layout
+  title="Business Photography in Wicklow — Horizon Vantage"
+  description="On-site business photography for cafés, salons, gyms, clinics and tradespeople in Wicklow — shot by a working photographer, edited and delivered in 5 days."
+>
+  <Header />
+
+  <PageHero
+    frameNum="008"
+    frameLabel="Photography"
+    title="Real photos of your actual business, not another stock library."
+    subtitle="Half a day on-site is enough to replace every generic stock photo on your website, your Google listing, and your social feeds with something that's actually yours."
+    image={heroImage}
+  />
+
+  <section id="photography-included">
+    <div class="wrap">
+      <div class="section-head" data-reveal data-reveal-group="photo-head">
+        <div class="frame-tag"><span class="num">FRAME 009</span> What's Included</div>
+        <h2 class="section-h" data-split-reveal>One visit covers everything a local listing actually needs.</h2>
+        <p class="section-sub">
+          This is the Visual Refresh tier — the fastest, lowest-commitment way to fix the single
+          biggest thing hurting most local business pages: photos that could belong to any business,
+          anywhere.
+        </p>
+      </div>
+      <div class="photo-strip glass">
+        {included.map((s) => (
+          <div>
+            <span class="k">{s.k}</span>
+            <span class="v">{s.v}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <Sprockets />
+
+  <section id="photography-why">
+    <div class="wrap">
+      <div class="section-head" data-reveal data-reveal-group="photo-why">
+        <div class="frame-tag"><span class="num">FRAME 010</span> Why It Matters</div>
+        <h2 class="section-h" data-split-reveal>Stock photos are why your website looks like <i>everyone else's.</i></h2>
+      </div>
+      <p class="why-body" data-reveal data-reveal-group="photo-why">
+        Every competitor using the same stock library looks identical to a customer scrolling
+        search results — same lighting, same staged smiles, same generic interiors. A real photo of
+        your actual counter, your actual staff, your actual space is the fastest way to look like a
+        real, trustworthy, currently-open business rather than a placeholder page. It's also what
+        Google Business Profile rewards: listings with real, recent photos consistently outperform
+        ones leaning on a logo and a stock banner.
+      </p>
+      <a href="/#contact" class="btn btn-primary" data-reveal data-reveal-group="photo-why">Book a Founder Shoot</a>
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<script>
+  import {
+    initScrollReveals,
+    initNavOnScroll,
+    initMagneticButtons,
+    initHeadingSplitReveal,
+    initSectionTransitions,
+  } from '../scripts/animations';
+  import { initSmoothScroll } from '../scripts/lenis';
+
+  initSmoothScroll();
+  initScrollReveals();
+  initNavOnScroll();
+  initMagneticButtons();
+  initHeadingSplitReveal();
+  initSectionTransitions();
+</script>
+
+<style>
+  .photo-strip{
+    margin-top: 44px;
+    display: flex; flex-wrap: wrap; gap: 0;
+    padding: 26px 28px;
+    border-radius: var(--radius-glass);
+  }
+  .photo-strip > div{ flex: 1; min-width: 220px; padding-right: 24px; }
+  .photo-strip .k{
+    font-family: 'Montserrat', serif; font-style: italic;
+    font-size: 20px; color: var(--brass); display: block; margin-bottom: 8px;
+  }
+  .photo-strip .v{ font-size: 14px; color: var(--paper-dim); line-height: 1.5; }
+
+  .why-body{
+    max-width: 720px; font-size: 17px; line-height: 1.75; color: var(--paper-dim);
+    margin: 0 0 30px;
+  }
+</style>

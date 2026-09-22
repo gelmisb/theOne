@@ -1,0 +1,124 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import PageHero from '../components/PageHero.astro';
+import Footer from '../components/Footer.astro';
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+// Real project entries go here once work is ready to show - same
+// scaffold-then-fill pattern as Portfolio.astro's `videos` array. Each
+// entry needs a screenshot dropped in src/assets/photos/web-projects/
+// alongside a title, short description, and (optional) live link.
+type Project = {
+  title: string;
+  description: string;
+  href?: string;
+  screenshot?: ImageMetadata;
+};
+const projects: Project[] = [];
+const hasProjects = projects.length > 0;
+---
+
+<Layout
+  title="Web Design Work — Horizon Vantage"
+  description="Website builds for local businesses in Wicklow, designed around real on-site photography instead of a template."
+>
+  <Header />
+
+  <PageHero
+    frameNum="017"
+    frameLabel="Web Projects"
+    title="Websites built around real photography, not a template."
+    subtitle="Every build starts from the same on-site shoot as the photography and video work — the site is designed around the images, not the other way around."
+  />
+
+  <section id="web-projects-grid">
+    <div class="wrap">
+      <div class="section-head" data-reveal data-reveal-group="wp-head">
+        <div class="frame-tag"><span class="num">FRAME 018</span> Case Studies</div>
+        {hasProjects ? (
+          <h2 class="section-h" data-split-reveal>A few recent builds.</h2>
+        ) : (
+          <h2 class="section-h" data-split-reveal>The first case studies are <i>in progress.</i></h2>
+        )}
+        <p class="section-sub">
+          {hasProjects
+            ? 'Live sites and recent builds, shown here with permission.'
+            : "This page is launching ahead of its first finished galleries - a few builds are underway now, with real case studies landing here as they're delivered."}
+        </p>
+      </div>
+
+      {hasProjects ? (
+        <div class="wp-grid">
+          {projects.map((p) => (
+            <div class="wp-card glass">
+              {p.screenshot && (
+                <Image src={p.screenshot} alt={p.title} class="wp-shot" widths={[400, 600, 800]} sizes="(max-width: 700px) 100vw, 33vw" loading="lazy" />
+              )}
+              <div class="wp-body">
+                <h3>{p.title}</h3>
+                <p>{p.description}</p>
+                {p.href && <a href={p.href} target="_blank" rel="noopener noreferrer">Visit site →</a>}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div class="wp-empty glass" data-reveal data-reveal-group="wp-head">
+          <p>
+            <strong>Founder builds booking now</strong> alongside photography and video shoots — a
+            website designed around real on-site imagery from day one, not stock photos dropped
+            into a template afterward.
+          </p>
+          <a href="/#contact" class="btn btn-ghost">Start a Project</a>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<script>
+  import {
+    initScrollReveals,
+    initNavOnScroll,
+    initMagneticButtons,
+    initHeadingSplitReveal,
+    initSectionTransitions,
+  } from '../scripts/animations';
+  import { initSmoothScroll } from '../scripts/lenis';
+
+  initSmoothScroll();
+  initScrollReveals();
+  initNavOnScroll();
+  initMagneticButtons();
+  initHeadingSplitReveal();
+  initSectionTransitions();
+</script>
+
+<style>
+  .wp-grid{
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    margin-top: 44px;
+  }
+  @media (max-width: 900px){ .wp-grid{ grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px){ .wp-grid{ grid-template-columns: 1fr; } }
+  .wp-card{ border-radius: var(--radius-glass); overflow: hidden; }
+  .wp-shot{ width: 100%; aspect-ratio: 16/10; object-fit: cover; display: block; }
+  .wp-body{ padding: 20px; }
+  .wp-body h3{ font-family: 'Montserrat', serif; font-weight: 400; font-size: 19px; margin: 0 0 8px; }
+  .wp-body p{ font-size: 14px; line-height: 1.55; color: var(--paper-dim); margin: 0 0 12px; }
+  .wp-body a{ font-size: 13px; color: var(--brass); text-decoration: none; }
+  .wp-body a:hover{ color: var(--brass-light); }
+
+  .wp-empty{
+    margin-top: 44px; max-width: 620px;
+    padding: 32px;
+    border-radius: var(--radius-glass);
+    display: flex; flex-direction: column; gap: 20px; align-items: flex-start;
+  }
+  .wp-empty p{ margin: 0; font-size: 16px; line-height: 1.65; color: var(--paper-dim); }
+  .wp-empty strong{ color: var(--paper); }
+</style>

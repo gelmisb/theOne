@@ -1,16 +1,22 @@
 ---
+// Homepage-section anchors (used by Footer's Studio column, not here
+// anymore now that this nav points at standalone pages) need a leading
+// "/" when rendered off the homepage, or they're dead links - there's no
+// #offer element on e.g. /photography. See Footer.astro for the same fix.
+const homePrefix = Astro.url.pathname === '/' ? '' : '/';
 ---
 
 <header>
   <div class="nav-shell">
     <div class="wrap nav">
-      <div class="brand"><em>Horizon</em> Vantage</div>
+      <a class="brand" href="/"><em>Horizon</em> Vantage</a>
       <nav class="navlinks">
-        <a href="#offer">The Offer</a>
-        <a href="#portfolio">Portfolio</a>
-        <a href="#process">Process</a>
-        <a href="#about">About</a>
-        <a href="#contact" class="nav-cta">Book a Shoot</a>
+        <a href="/photography">Photography</a>
+        <a href="/videography">Videography</a>
+        <a href="/local-seo">Local SEO</a>
+        <a href="/web-projects">Websites</a>
+        <a href="/about">About</a>
+        <a href={`${homePrefix}#contact`} class="nav-cta">Book a Shoot</a>
       </nav>
     </div>
   </div>
@@ -59,6 +65,7 @@
     font-size: 22px;
     letter-spacing: 0.01em;
     color: var(--paper);
+    text-decoration: none;
   }
   .brand em{ color: var(--brass); font-style: italic; }
   .navlinks{ display: flex; gap: 34px; align-items: center; }

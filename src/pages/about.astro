@@ -1,0 +1,135 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import PageHero from '../components/PageHero.astro';
+import Sprockets from '../components/Sprockets.astro';
+import Footer from '../components/Footer.astro';
+import type { ImageMetadata } from 'astro';
+
+const aboutImages = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/photos/about.{jpg,jpeg,png,webp}',
+  { eager: true }
+);
+const aboutImage = Object.values(aboutImages)[0]?.default;
+
+const timeline = [
+  { k: '10+ yrs', v: 'Senior software engineering — production systems, not side projects' },
+  { k: '5+ yrs', v: 'Professional photography & videography experience' },
+  { k: '2026', v: 'Horizon Vantage launches — the two combined into one offer' },
+];
+---
+
+<Layout
+  title="About Horizon Vantage — Why This Business Exists"
+  description="Why Horizon Vantage exists: 10+ years of software engineering and 5+ years of professional photography, combined into one offer for local Irish businesses."
+>
+  <Header />
+
+  <PageHero
+    frameNum="019"
+    frameLabel="About"
+    title="Two skill sets that almost never end up in the same business."
+    subtitle="Most web studios have never held a camera on a paid job. Most photographers can't ship production-grade software. Horizon Vantage exists because doing both, properly, changes what's actually possible for a small business's online presence."
+    image={aboutImage}
+  />
+
+  <section id="about-story">
+    <div class="wrap">
+      <div class="about-layout">
+        <div class="about-timeline" data-reveal data-reveal-group="about-timeline">
+          {timeline.map((t) => (
+            <div>
+              <span class="at-k">{t.k}</span>
+              <span class="at-v">{t.v}</span>
+            </div>
+          ))}
+        </div>
+        <div class="about-copy" data-reveal data-reveal-group="about-copy">
+          <div class="frame-tag"><span class="num">FRAME 020</span> The Story</div>
+          <h2 class="section-h" data-split-reveal>Why this, why now.</h2>
+          <p>
+            The software side came first — over a decade building and shipping production systems,
+            the unglamorous kind of engineering work that has to actually run correctly, not just
+            demo well. Photography and video came alongside it, not after it: five-plus years
+            shooting professionally, learning the same lesson twice from two different angles —
+            that most small local businesses are being sold generic, templated versions of both.
+          </p>
+          <p>
+            A website built from a template and filled with stock photography can look finished in a
+            screenshot and still fail the only test that matters: does it make a stranger trust this
+            business enough to call, book, or walk in? Most local web studios have never held a
+            camera on a paid job, so the photography is an afterthought — a stock library plugged
+            into a template. Most photographers can't ship a website that actually works, so the
+            photos end up sitting in a folder, or bolted onto a site that was never built around
+            them.
+          </p>
+          <p>
+            Horizon Vantage exists to close that gap directly: on-site photography and video, a
+            website designed around those specific images rather than a generic layout, and the
+            Google Business Profile work that actually gets a local business found — done by one
+            person with production-grade engineering experience behind the build and real camera
+            experience behind the lens. Not a studio managing a template, and not a freelancer with
+            a camera and no engineering background. Both, in the same shoot.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Sprockets />
+
+  <section id="about-cta">
+    <div class="wrap about-cta-inner">
+      <h2 class="section-h" data-reveal data-reveal-group="about-cta">Founder shoots are booking now.</h2>
+      <p class="section-sub" data-reveal data-reveal-group="about-cta">
+        No obligation, no generic pitch — just a direct conversation about what a shoot would
+        actually involve for your business.
+      </p>
+      <a href="/#contact" class="btn btn-primary" data-reveal data-reveal-group="about-cta">Get In Touch</a>
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<script>
+  import {
+    initScrollReveals,
+    initNavOnScroll,
+    initMagneticButtons,
+    initHeadingSplitReveal,
+    initSectionTransitions,
+  } from '../scripts/animations';
+  import { initSmoothScroll } from '../scripts/lenis';
+
+  initSmoothScroll();
+  initScrollReveals();
+  initNavOnScroll();
+  initMagneticButtons();
+  initHeadingSplitReveal();
+  initSectionTransitions();
+</script>
+
+<style>
+  .about-layout{ display: grid; grid-template-columns: 0.8fr 1.6fr; gap: 60px; align-items: start; }
+  @media (max-width: 860px){ .about-layout{ grid-template-columns: 1fr; gap: 36px; } }
+
+  .about-timeline{
+    display: flex; flex-direction: column; gap: 0;
+    border: 1px solid var(--line);
+    background: var(--panel);
+  }
+  .about-timeline > div{ padding: 22px; border-top: 1px solid var(--line); }
+  .about-timeline > div:first-child{ border-top: none; }
+  .at-k{
+    display: block; font-family: 'Montserrat', serif; font-style: italic;
+    font-size: 24px; color: var(--brass); margin-bottom: 6px;
+  }
+  .at-v{ font-size: 13px; color: var(--paper-dim); line-height: 1.45; }
+
+  .about-copy p{ font-size: 17px; line-height: 1.75; color: var(--paper-dim); margin: 0 0 22px; }
+
+  .about-cta-inner{ text-align: center; }
+  .about-cta-inner .section-h{ max-width: 700px; margin: 0 auto 18px; }
+  .about-cta-inner .section-sub{ max-width: 480px; margin: 0 auto 32px; }
+</style>
