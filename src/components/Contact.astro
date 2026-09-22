@@ -10,7 +10,20 @@
       Founder shoots are booking now — first come, first slotted. No obligation, no generic pitch.
     </p>
 
-    <form class="cta-form glass" id="enquiry-form" data-reveal data-reveal-group="contact-head">
+    <form
+      class="cta-form glass"
+      id="enquiry-form"
+      name="enquiry-form"
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      data-reveal
+      data-reveal-group="contact-head"
+    >
+      <input type="hidden" name="form-name" value="enquiry-form" />
+      <p style="display:none;">
+        <label>Leave this field blank: <input name="bot-field" /></label>
+      </p>
       <div class="row2">
         <div>
           <label for="name">Your name</label>
@@ -42,24 +55,53 @@
       </div>
       <button type="submit" class="btn btn-primary">Send Enquiry</button>
       <p class="form-note form-success" id="form-success" hidden>
-        Thanks — this is a demo form for now. Wire it up to an email address or booking tool before launch.
+        Thanks — your enquiry is in. We'll reply within one business day.
       </p>
-      <p class="form-note">Usually replies within one business day.</p>
+      <p class="form-note form-error" id="form-error" hidden>
+        Something went wrong sending that — please email us directly instead.
+      </p>
+      <p class="form-note" id="form-hint">Usually replies within one business day.</p>
     </form>
   </div>
 </section>
 
 <script>
+  // Netlify Forms: the <form>'s data-netlify="true" attribute (see markup
+  // above) makes Netlify's build bot detect and provision this form from
+  // the static HTML alone — no server code needed. Submissions land in the
+  // Netlify dashboard and, once a notification is configured there
+  // (Site settings > Forms > Form notifications), get emailed to
+  // info@horizonvantage.ie. Posting via fetch instead of a native submit
+  // keeps the page from navigating away, so we can show the inline
+  // success/error state below.
   const form = document.getElementById('enquiry-form') as HTMLFormElement | null;
   const success = document.getElementById('form-success');
+  const error = document.getElementById('form-error');
+  const hint = document.getElementById('form-hint');
   const submitBtn = form?.querySelector('button[type="submit"]');
 
-  form?.addEventListener('submit', (e) => {
+  form?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    // TODO: replace with a real endpoint (Formspree, a serverless function, etc.)
-    // before launch — this is a front-end-only demo state.
-    success?.removeAttribute('hidden');
-    submitBtn?.setAttribute('style', 'display:none;');
+    if (!form) return;
+
+    const params = new URLSearchParams();
+    new FormData(form).forEach((value, key) => params.append(key, value.toString()));
+
+    try {
+      const res = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString(),
+      });
+      if (!res.ok) throw new Error(`Form submission failed: ${res.status}`);
+
+      success?.removeAttribute('hidden');
+      error?.setAttribute('hidden', '');
+      hint?.setAttribute('hidden', '');
+      submitBtn?.setAttribute('style', 'display:none;');
+    } catch {
+      error?.removeAttribute('hidden');
+    }
   });
 </script>
 

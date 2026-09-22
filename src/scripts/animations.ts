@@ -81,7 +81,15 @@ export function initScrollReveals() {
   });
 }
 
-/** Intro reveal — plays once on load. The grid materializes, then the iris opens onto the wordmark. */
+/**
+ * Intro reveal — plays once on load. The grid materializes, then the iris
+ * opens onto the wordmark.
+ *
+ * The hidden starting state (clip-path, opacity, y) is set in Intro.astro's
+ * CSS, not here — CSS paints hidden before this script even runs, so there's
+ * no flash of the fully-visible heading followed by a JS-driven snap to
+ * hidden. This function only needs to animate back *out* of that state.
+ */
 export function initIntroTimeline() {
   const intro = document.querySelector('.intro');
   if (!intro) return;
@@ -90,8 +98,6 @@ export function initIntroTimeline() {
     gsap.set('.intro-reveal', { clipPath: 'circle(150% at 50% 50%)' });
     return;
   }
-
-  gsap.set('.intro-reveal', { clipPath: 'circle(0% at 50% 50%)' });
 
   const tl = gsap.timeline({ defaults: { ease: 'power2.inOut' } });
 
@@ -118,8 +124,17 @@ export function initIntroTimeline() {
  */
 export function initIntroZoomTransition() {
   const intro = document.querySelector<HTMLElement>('.intro');
+  if (!intro) return;
+
+  const clipA = document.querySelector<HTMLVideoElement>('[data-intro-clip-a]');
+  const clipB = document.querySelector<HTMLVideoElement>('[data-intro-clip-b]');
+  if (clipA && clipB) {
+    initIntroVideoZoomTransition(intro, clipA, clipB);
+    return;
+  }
+
   const feature = document.querySelector<HTMLElement>('[data-intro-feature]');
-  if (!intro || !feature) return;
+  if (!feature) return;
 
   if (prefersReducedMotion) return; // no pin, no zoom — plain scroll past
 
@@ -145,6 +160,69 @@ export function initIntroZoomTransition() {
     // higher-resolution source image is swapped in.
     .to(feature, { scale: 2, z: 200, transformOrigin: 'center center', ease: 'power1.inOut' }, 0)
     .to(feature, { opacity: 0, ease: 'power1.in' }, 0.5);
+}
+
+/**
+ * Video porthole state machine — see intro-video-spec.md Section 3. Clip A
+ * (idle ambient loop) plays until the visitor first scrolls into the pinned
+ * range, crossfading to Clip B (one-way scroll-scrubbed dolly push) whose
+ * `currentTime` is driven by scroll progress; scrolling back to the very
+ * top crossfades back to Clip A and restarts its loop. Reuses the same
+ * pin/start/end/scrub ScrollTrigger shape as the image-transform version
+ * above — only what happens inside the timeline differs.
+ */
+function initIntroVideoZoomTransition(intro: HTMLElement, clipA: HTMLVideoElement, clipB: HTMLVideoElement) {
+  if (prefersReducedMotion) return; // both clips sit on their poster (first) frame, unplayed
+
+  clipA.play().catch(() => {});
+
+  let onClipB = false;
+  const crossfadeDuration = 0.3;
+
+  function toClipB() {
+    if (onClipB) return;
+    onClipB = true;
+    gsap.to(clipA, { opacity: 0, duration: crossfadeDuration, ease: 'power1.inOut', onComplete: () => clipA.pause() });
+    gsap.to(clipB, { opacity: 1, duration: crossfadeDuration, ease: 'power1.inOut' });
+  }
+
+  function toClipA() {
+    if (!onClipB) return;
+    onClipB = false;
+    gsap.to(clipB, { opacity: 0, duration: crossfadeDuration, ease: 'power1.inOut' });
+    gsap.to(clipA, {
+      opacity: 1,
+      duration: crossfadeDuration,
+      ease: 'power1.inOut',
+      onStart: () => {
+        clipA.currentTime = 0;
+        clipA.play().catch(() => {});
+      },
+    });
+  }
+
+  gsap
+    .timeline({
+      scrollTrigger: {
+        trigger: intro,
+        start: 'top top',
+        end: () => '+=' + window.innerHeight * 0.9,
+        pin: true,
+        scrub: true,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          if (self.progress <= 0) {
+            toClipA();
+            return;
+          }
+          toClipB();
+          if (clipB.readyState >= 1 && clipB.duration) {
+            clipB.currentTime = self.progress * clipB.duration;
+          }
+        },
+      },
+    })
+    .to('.intro-reveal, .intro-frame, .intro-scroll', { opacity: 0, ease: 'power1.inOut' }, 0);
 }
 
 /**
