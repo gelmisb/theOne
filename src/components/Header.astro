@@ -18,7 +18,7 @@
 
 <style>
   header{
-    position: sticky; top: 0; z-index: 50;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
     padding: 0;
   }
   .nav-shell{
@@ -26,11 +26,13 @@
     max-width: 1180px;
     border-radius: 0;
     border: 1px solid transparent;
-    /* Never fades to fully transparent: Layout.astro's persistent fixed
-       background sits behind every section, so a gradient that reaches 0
-       opacity would still let it show through raw at the bottom of the nav
-       bar, before .scrolled applies the solid glass background below. */
-    background: linear-gradient(180deg, rgba(10,14,19,0.75), rgba(10,14,19,0.4));
+    /* Light scrim for nav-text legibility only — not compensating for a
+       mismatched background anymore. Now that header is position:fixed
+       (see above) rather than sticky, it no longer reserves its own flow
+       space, so Intro's own artwork extends fully behind it from the true
+       top of the page instead of exposing Layout.astro's persistent
+       background here. Safe to stay close to transparent. */
+    background: linear-gradient(180deg, rgba(10,14,19,0.35), rgba(10,14,19,0.05));
     box-shadow: none;
     transition: margin .35s ease, border-radius .35s ease, background .35s ease,
       border-color .35s ease, box-shadow .35s ease, backdrop-filter .35s ease;
