@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import CookieBanner from '../components/CookieBanner.astro';
 
 interface Props {
   title?: string;
@@ -53,6 +54,7 @@ const persistImage = Object.values(persistImages)[0]?.default;
     <slot />
     <div class="grain" aria-hidden="true"></div>
     <div class="vignette" aria-hidden="true"></div>
+    <CookieBanner />
   </body>
 </html>
 
