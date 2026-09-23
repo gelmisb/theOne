@@ -10,12 +10,46 @@ const photoModules = import.meta.glob<{ default: ImageMetadata }>(
 // visibly tagged and excluded from the "shown with their permission" claim below.
 const GENERATED_FILES = new Set(['counter-service.jpg', 'training-floor.jpg']);
 
+// This wildcard glob means anything dropped into the portfolio folder goes
+// live here automatically - unlike FilmRollIntro.astro, which explicitly
+// enumerates its photo pool for exactly this reason. Caught two real
+// problems this way: IMG_8621.jpg/IMG_8760.jpg carry a visible third-party
+// "gb Captured Photography" watermark (confirmed as the founder's own old
+// brand, but not cropped yet - see FilmRollIntro.astro's comment on the
+// same two files), and the section copy below makes a specific factual
+// claim ("founder shoots for real local businesses, shown here with their
+// permission") that a personal portrait shoot doesn't obviously satisfy.
+// Excluded until either is resolved.
+const EXCLUDED_FILES = new Set([
+  'IMG_8621.jpg', // gb Captured watermark, pending crop
+  'IMG_8760.jpg', // gb Captured watermark, pending crop
+  'gelmis-bartulis-XIfXPCAzR0Q-unsplash.jpg', // personal portrait shoot, not local-business client work
+]);
+
+// Auto-derived captions from filenames read fine for hand-named files
+// (Barbershops.jpg -> "Barbershops") but not for camera-roll or stock-export
+// names (IMG_0839.jpg -> "IMG 0839", gelmis-bartulis-aFjxblNID7Y-unsplash.jpg
+// -> "Gelmis Bartulis AFjxblNID7Y Unsplash") - override those specifically
+// rather than reworking the derivation for every possible filename shape.
+const CAPTION_OVERRIDES: Record<string, string> = {
+  'IMG_0839.jpg': 'Gym Coaching Session',
+  'IMG_0863.jpg': 'Café Culture',
+  'IMG_1643.jpg': 'Strength Training',
+  'IMG_3033.jpg': 'Motorcycle Feature',
+  'IMG_8758.jpg': 'Car Feature',
+  'gelmis-bartulis-aFjxblNID7Y-unsplash.jpg': 'Portrait Session',
+  'gelmis-bartulis-UaFUhxyGNFY-unsplash.jpg': 'Touring Motorcycle',
+};
+
 const photos = Object.entries(photoModules)
+  .filter(([path]) => !EXCLUDED_FILES.has(path.split('/').pop()!))
   .sort(([a], [b]) => a.localeCompare(b))
   .map(([path, mod]) => {
-    const filename = path.split('/').pop()!.replace(/\.[^.]+$/, '');
-    const caption = filename.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-    const generated = GENERATED_FILES.has(path.split('/').pop()!);
+    const rawName = path.split('/').pop()!;
+    const filename = rawName.replace(/\.[^.]+$/, '');
+    const caption =
+      CAPTION_OVERRIDES[rawName] ?? filename.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    const generated = GENERATED_FILES.has(rawName);
     return { src: mod.default, caption, generated };
   });
 const hasGenerated = photos.some((p) => p.generated);

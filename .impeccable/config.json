@@ -20,6 +20,15 @@
         "value": "rgba(0,0,0,0.8)",
         "createdAt": "2026-09-23T11:22:35.172Z",
         "reason": "Standard text-shadow legibility utility on .fr-fnum over photos, not a brand/palette color - confirmed false positive during /impeccable polish sweep of critique findings"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/components/Portfolio.astro"
+        ],
+        "createdAt": "2026-09-23T13:26:28.793Z",
+        "reason": "Lightbox template img, deliberately empty until initPortfolioLightbox (animations.ts) sets src on open - pre-existing pattern, not a forgotten image"
       }
     ]
   }
