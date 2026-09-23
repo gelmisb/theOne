@@ -1,8 +1,34 @@
 ---
-// FILM-STRIP-RIBBON-BRIEF.md Phase A: a throwaway spike page, not linked
-// from anywhere in the site nav, noindex, deleted in Phase E's cleanup.
-// Validates the curve + twist + gate shape only - no photos yet (Phase B),
-// no scroll-driven feed (Phase C), no DOM handoff (Phase D).
+// FILM-STRIP-RIBBON-BRIEF.md - throwaway spike page, not linked from
+// anywhere in the site nav, noindex, deleted in Phase E's cleanup.
+// Phase A: curve + twist + gate shape, no photos.
+// Phase B (this pass): real photos via a runtime texture atlas, correct
+// 35mm proportions, back-side rendering, edge print baked into the atlas.
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+// Same 9-photo pool and hero pick as FilmRollIntro.astro (section 9 Q1
+// was answered as "reuse the DOM intro's own curated pool" rather than
+// picking a separate set for the WebGL version) - keeps continuity for
+// Phase D's eventual handoff, where the ribbon's hero cell needs to be
+// the same photo the DOM intro locks on.
+const rollPhotoEntries = Object.entries(
+  import.meta.glob<{ default: ImageMetadata }>(
+    '/src/assets/photos/portfolio/{Barbershops,consumables,product advertisement,IMG_0839,IMG_0863,IMG_1643,IMG_3033,IMG_8758,motorcycle-rider}.jpg',
+    { eager: true }
+  )
+);
+const heroPath = rollPhotoEntries.find(([path]) => path.includes('motorcycle-rider'))?.[0];
+
+// 512px source is plenty for a ~340px-tall atlas cell (Phase B builds the
+// atlas at runtime in the browser, not at build time, since it's drawn
+// into a canvas alongside baked edge-print text - see buildAtlas() below).
+const atlasPhotos = await Promise.all(
+  rollPhotoEntries.map(async ([path, mod], i) => {
+    const img = await getImage({ src: mod.default, width: 512, format: 'webp' });
+    return { src: img.src, isHero: path === heroPath, index: i };
+  })
+);
 ---
 
 <!doctype html>
@@ -61,6 +87,8 @@
     </div>
     <div id="stats"></div>
 
+    <script type="application/json" id="atlas-photo-data" set:html={JSON.stringify(atlasPhotos)} />
+
     <script>
       import * as THREE from 'three';
       import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -73,6 +101,30 @@
       const PERFS_PER_FRAME = 8;
       const FRAME_PITCH_MM = PERF_PITCH_MM * PERFS_PER_FRAME; // 38mm - matches 36mm image + ~2mm gap
       const MM_TO_UNIT = 1 / 10; // 1 scene unit = 10mm = 1cm, keeps numbers readable
+
+      // Shared between the procedural perforation/gap shader math AND the
+      // atlas bake below, so the image area and edge-print bands line up
+      // with the real holes rather than drifting if one gets tuned later.
+      const PERF_PITCH_U = PERF_PITCH_MM / FRAME_PITCH_MM;
+      // See the note by uPerfHalfW below (real KS perforation proportions).
+      const PERF_HALF_W_U = PERF_PITCH_U * 0.21;
+      const PERF_HALF_H_V = 0.045;
+      const PERF_MARGIN_V = 0.07;
+      const GAP_HALF_U = 0.012;
+      // Image area inset from each frame's u edges - real 135 film has ~1mm
+      // of clear film either side of the 36mm image within the 38mm pitch
+      // (~0.026 of the pitch); a bit more here reads as a cleaner border.
+      const IMAGE_MARGIN_U = 0.035;
+      const IMAGE_U_MIN = GAP_HALF_U + IMAGE_MARGIN_U;
+      const IMAGE_U_MAX = 1 - GAP_HALF_U - IMAGE_MARGIN_U;
+      // Image area sits centred between the two perforation rows, leaving a
+      // thin band above/below each row for the edge print / frame number.
+      const IMAGE_V_MIN = PERF_MARGIN_V + PERF_HALF_H_V + 0.045;
+      const IMAGE_V_MAX = 1 - IMAGE_V_MIN;
+      // Vertical centre (in cell-local v) of the two edge-print bands that
+      // sit between each perforation row and the image area.
+      const FRAME_NUM_BAND_V = (PERF_MARGIN_V + PERF_HALF_H_V + IMAGE_V_MIN) / 2;
+      const SITE_NAME_BAND_V = (IMAGE_V_MAX + (1 - PERF_MARGIN_V - PERF_HALF_H_V)) / 2;
 
       // ---- Tunable params, wired to the dev panel. Values below are the
       // founder's own tuning pass over Phase A's shape (2026-09-23) -
@@ -180,7 +232,10 @@
         varying vec3 vNormalW;
         varying vec3 vViewDir;
 
-        uniform vec3 uBaseFront;
+        uniform sampler2D uAtlas;
+        uniform float uAtlasCols;
+        uniform float uAtlasRows;
+        uniform float uAtlasFrames;
         uniform vec3 uBaseBack;
         uniform vec3 uGapColor;
         uniform float uPerfPitchU;   // perforation pitch, in u (frame) units
@@ -196,18 +251,38 @@
 
         void main() {
           bool front = gl_FrontFacing;
-          vec3 base = front ? uBaseFront : uBaseBack;
+          float uInFrame = fract(vUv.x);
+
+          // Atlas cell for this frame: each cell already bakes the base
+          // film colour, the photo in its image-area rect, and the edge
+          // print text (see buildAtlas() in main()) - the shader just picks
+          // the right cell and, on the back face, mirrors + darkens it
+          // rather than sampling a second baked "back" atlas.
+          float frameIndex = floor(vUv.x);
+          float frameInAtlas = mod(frameIndex, uAtlasFrames);
+          float col = mod(frameInAtlas, uAtlasCols);
+          float row = floor(frameInAtlas / uAtlasCols);
+          float sampleU = front ? uInFrame : (1.0 - uInFrame);
+          // Small inset guards against bilinear bleed from the neighbouring cell.
+          sampleU = clamp(sampleU, 0.004, 0.996);
+          float sampleV = clamp(vUv.y, 0.004, 0.996);
+          vec2 cellUv = vec2((col + sampleU) / uAtlasCols, (row + sampleV) / uAtlasRows);
+          vec3 color = texture2D(uAtlas, cellUv).rgb;
+
+          if (!front) {
+            color = mix(color, uBaseBack, 0.55);
+            color *= 0.8;
+          }
+
+          // Frame gap: a thin darker band at each frame boundary (u is in frame units).
+          float gap = step(uInFrame, uGapHalfU) + step(1.0 - uGapHalfU, uInFrame);
+          color = mix(color, uGapColor, clamp(gap, 0.0, 1.0));
 
           // Perforations: repeat along u at uPerfPitchU, two rows near v=0 and v=1.
           float uCell = fract(vUv.x / uPerfPitchU) * uPerfPitchU - uPerfPitchU * 0.5;
           float dTop = sdRoundRect(vec2(uCell, vUv.y - uPerfMarginV), vec2(uPerfHalfW, uPerfHalfH), uPerfHalfH * 0.4);
           float dBot = sdRoundRect(vec2(uCell, vUv.y - (1.0 - uPerfMarginV)), vec2(uPerfHalfW, uPerfHalfH), uPerfHalfH * 0.4);
           if (dTop < 0.0 || dBot < 0.0) discard;
-
-          // Frame gap: a thin darker band at each frame boundary (u is in frame units).
-          float uInFrame = fract(vUv.x);
-          float gap = step(uInFrame, uGapHalfU) + step(1.0 - uGapHalfU, uInFrame);
-          vec3 color = mix(base, uGapColor, clamp(gap, 0.0, 1.0));
 
           // Fake lighting: darken as the surface turns edge-on to the camera,
           // so the curl and twist read as real 3D rather than a flat texture.
@@ -221,13 +296,14 @@
 
       // Orange-brown colour-negative base (section 9 Q3) - ties into the
       // existing DOM develop effect's warm cast once Phase D hands off.
+      // uAtlas/uAtlasCols/uAtlasRows/uAtlasFrames are filled in once the
+      // runtime atlas finishes building - see buildAtlas() and main() below.
       const material = new THREE.ShaderMaterial({
         side: THREE.DoubleSide,
         uniforms: {
-          uBaseFront: { value: new THREE.Color(0x8a4d24) },
           uBaseBack: { value: new THREE.Color(0x4a2c1a) },
           uGapColor: { value: new THREE.Color(0x120a06) },
-          uPerfPitchU: { value: PERF_PITCH_MM / FRAME_PITCH_MM },
+          uPerfPitchU: { value: PERF_PITCH_U },
           // Real KS perforations are ~1.98mm wide within a 4.75mm pitch
           // (~42% of the pitch, so half-width ~0.21x pitch) and ~2.79mm
           // tall within the 35mm strip width (~8%, half-height ~0.04).
@@ -235,10 +311,14 @@
           // perforations covered a majority of each cell instead of a
           // minority - confirmed by disabling the discard entirely and
           // comparing the raw (solid) ribbon against the perforated one.
-          uPerfHalfW: { value: (PERF_PITCH_MM / FRAME_PITCH_MM) * 0.21 },
-          uPerfHalfH: { value: 0.045 },
-          uPerfMarginV: { value: 0.07 },
-          uGapHalfU: { value: 0.012 },
+          uPerfHalfW: { value: PERF_HALF_W_U },
+          uPerfHalfH: { value: PERF_HALF_H_V },
+          uPerfMarginV: { value: PERF_MARGIN_V },
+          uGapHalfU: { value: GAP_HALF_U },
+          uAtlas: { value: null as THREE.CanvasTexture | null },
+          uAtlasCols: { value: 1 },
+          uAtlasRows: { value: 1 },
+          uAtlasFrames: { value: 1 },
         },
         vertexShader,
         fragmentShader,
@@ -318,6 +398,93 @@
         return group;
       }
 
+      // ---- Phase B: texture atlas ----
+      // Loads the real portfolio photos and bakes each into its own atlas
+      // cell alongside the base film colour and edge-print text, so the
+      // fragment shader can do one texture2D() lookup per pixel instead of
+      // rendering text or compositing layers at runtime. Each cell covers
+      // one FULL frame (u: 0..1 across the frame pitch, v: 0..1 across the
+      // strip width) - the shader still does perforations/gaps procedurally
+      // via SDF on top, since those need to stay pixel-sharp at any zoom.
+      type AtlasPhoto = { src: string; isHero: boolean; index: number };
+
+      function loadImage(src: string): Promise<HTMLImageElement> {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = src;
+        });
+      }
+
+      async function buildAtlas(photos: AtlasPhoto[]) {
+        const cols = Math.ceil(Math.sqrt(photos.length));
+        const rows = Math.ceil(photos.length / cols);
+        const cellW = 512;
+        const cellH = Math.round(cellW * (FILM_WIDTH_MM / FRAME_PITCH_MM)); // full-frame aspect (35/38)
+
+        const canvas = document.createElement('canvas');
+        canvas.width = cellW * cols;
+        canvas.height = cellH * rows;
+        const ctx = canvas.getContext('2d')!;
+
+        const images = await Promise.all(photos.map((p) => loadImage(p.src)));
+
+        photos.forEach((photo, i) => {
+          const cx = (i % cols) * cellW;
+          const cy = Math.floor(i / cols) * cellH;
+
+          // Base film colour fill - same orange-brown as the old flat base.
+          ctx.fillStyle = '#8a4d24';
+          ctx.fillRect(cx, cy, cellW, cellH);
+
+          // Image area rect, in this cell's own pixels.
+          const ix = cx + IMAGE_U_MIN * cellW;
+          const iy = cy + IMAGE_V_MIN * cellH;
+          const iw = (IMAGE_U_MAX - IMAGE_U_MIN) * cellW;
+          const ih = (IMAGE_V_MAX - IMAGE_V_MIN) * cellH;
+
+          // Cover-fit the photo into the image area (photo is ~36:24 = 3:2
+          // already from the Astro pipeline crop, so this is close to a
+          // straight draw, but cover-fit guards against any source that isn't).
+          const img = images[i];
+          const srcAspect = img.width / img.height;
+          const dstAspect = iw / ih;
+          let sx = 0, sy = 0, sw = img.width, sh = img.height;
+          if (srcAspect > dstAspect) {
+            sw = img.height * dstAspect;
+            sx = (img.width - sw) / 2;
+          } else {
+            sh = img.width / dstAspect;
+            sy = (img.height - sh) / 2;
+          }
+          ctx.drawImage(img, sx, sy, sw, sh, ix, iy, iw, ih);
+
+          // Edge print, baked - no real film-brand trademarks (brief section 7).
+          ctx.fillStyle = 'rgba(234, 242, 248, 0.55)';
+          ctx.textBaseline = 'middle';
+
+          // Band below the image area, above the bottom perf row: site name.
+          ctx.font = `${Math.round(cellH * 0.038)}px 'Courier New', monospace`;
+          ctx.textAlign = 'left';
+          ctx.fillText('HORIZON VANTAGE 400', ix, cy + SITE_NAME_BAND_V * cellH);
+
+          // Band above the image area, below the top perf row: frame number.
+          ctx.textAlign = 'right';
+          const frameNum = String(photo.index + 1).padStart(3, '0');
+          ctx.fillText(`FRAME ${frameNum}`, ix + iw, cy + FRAME_NUM_BAND_V * cellH);
+        });
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.ClampToEdgeWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.needsUpdate = true;
+
+        return { texture, cols, rows, frames: photos.length };
+      }
+
       function rebuild() {
         const controlPoints = buildControlPoints(params);
         curve = new THREE.CatmullRomCurve3(controlPoints, false, 'catmullrom', 0.5);
@@ -340,8 +507,6 @@
         controlPointDots.visible = params.showControls;
         scene.add(controlPointDots);
       }
-
-      rebuild();
 
       // ---- Dev panel wiring ----
       function bindRange(id: string, key: keyof typeof params, fmt: (v: number) => string = (v) => v.toFixed(2)) {
@@ -395,7 +560,20 @@
           lastFpsTime = now;
         }
       }
-      animate();
+      // ---- Init: build the atlas first, then start rendering ----
+      async function main() {
+        const dataEl = document.getElementById('atlas-photo-data')!;
+        const photos: AtlasPhoto[] = JSON.parse(dataEl.textContent || '[]');
+        const atlas = await buildAtlas(photos);
+        material.uniforms.uAtlas.value = atlas.texture;
+        material.uniforms.uAtlasCols.value = atlas.cols;
+        material.uniforms.uAtlasRows.value = atlas.rows;
+        material.uniforms.uAtlasFrames.value = atlas.frames;
+
+        rebuild();
+        animate();
+      }
+      main();
     </script>
   </body>
 </html>
