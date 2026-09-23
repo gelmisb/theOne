@@ -204,7 +204,8 @@ export function initFilmRollIntro() {
   measure();
 
   // Beat 0: a slow, small back-and-forth so the strip reads as alive before
-  // anyone scrolls. Paused off-screen and when the tab is hidden.
+  // anyone scrolls. gsap.to() plays immediately on creation, so no extra
+  // "start playing" step is needed here.
   const idleTween = gsap.to(track, {
     x: '+=22',
     duration: 5,
@@ -213,19 +214,24 @@ export function initFilmRollIntro() {
     repeat: -1,
   });
 
-  const idleVisibility = ScrollTrigger.create({
-    trigger: section,
-    start: 'top bottom',
-    end: 'bottom top',
-    onToggle: (self) => {
-      if (self.isActive) idleTween.play();
-      else idleTween.pause();
-    },
-  });
+  // Tracks whether idle drift SHOULD be playing once the tab is visible
+  // again - onEnter/onLeaveBack below are the single source of truth for
+  // that, not a separate visibility-based ScrollTrigger. An earlier version
+  // used a second ScrollTrigger (watching "is this section anywhere near
+  // the viewport") that independently called idleTween.play()/.pause(),
+  // racing with onEnter/onLeaveBack's own play()/pause() calls on the exact
+  // same tween - on this page that second trigger had no scenario to handle
+  // that onEnter/onLeaveBack didn't already cover (this section is the very
+  // first thing on the page, so there's no "scrolled above it" case), it
+  // just added a second, occasionally-conflicting writer. Two independent
+  // controllers fighting over one tween's play state is a plausible cause
+  // of the reported glitch: scrolling to a stop, then the strip visibly
+  // juddering side to side for a moment before settling.
+  let idleShouldPlay = true;
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) idleTween.pause();
-    else if (idleVisibility.isActive) idleTween.play();
+    else if (idleShouldPlay) idleTween.play();
   });
 
   ScrollTrigger.create({
@@ -244,10 +250,14 @@ export function initFilmRollIntro() {
     invalidateOnRefresh: true,
     onRefresh: measure,
     onEnter: () => {
+      idleShouldPlay = false;
       idleTween.pause();
       baseX = Number(gsap.getProperty(track, 'x')) || 0;
     },
-    onLeaveBack: () => idleTween.play(),
+    onLeaveBack: () => {
+      idleShouldPlay = true;
+      idleTween.play();
+    },
     onUpdate: (self) => {
       const p = self.progress;
 
