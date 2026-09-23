@@ -1,4 +1,7 @@
 ---
+import { Image } from 'astro:assets';
+import logoMark from '../assets/photos/logo/logo_transparent.png';
+
 // Homepage-section anchors (used by Footer's Studio column, not here
 // anymore now that this nav points at standalone pages) need a leading
 // "/" when rendered off the homepage, or they're dead links - there's no
@@ -9,7 +12,10 @@ const homePrefix = Astro.url.pathname === '/' ? '' : '/';
 <header>
   <div class="nav-shell">
     <div class="wrap nav">
-      <a class="brand" href="/"><em>Horizon</em> Vantage</a>
+      <a class="brand" href="/">
+        <Image src={logoMark} alt="" class="brand-mark" width={64} height={64} />
+        <span><em>Horizon</em> Vantage</span>
+      </a>
       <nav class="navlinks">
         <a href="/photography">Photography</a>
         <a href="/videography">Videography</a>
@@ -61,6 +67,7 @@ const homePrefix = Astro.url.pathname === '/' ? '' : '/';
     header:global(.scrolled) .nav-shell{ margin: 8px 12px 0; }
   }
   .brand{
+    display: flex; align-items: center; gap: 10px;
     font-family: 'Montserrat', serif;
     font-size: 22px;
     letter-spacing: 0.01em;
@@ -68,6 +75,7 @@ const homePrefix = Astro.url.pathname === '/' ? '' : '/';
     text-decoration: none;
   }
   .brand em{ color: var(--brass); font-style: italic; }
+  .brand :global(.brand-mark){ width: 30px; height: 30px; object-fit: contain; flex-shrink: 0; }
   .navlinks{ display: flex; gap: 34px; align-items: center; }
   .navlinks a{
     text-decoration: none; color: var(--paper-dim);

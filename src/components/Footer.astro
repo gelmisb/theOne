@@ -1,4 +1,7 @@
 ---
+import { Image } from 'astro:assets';
+import logoMark from '../assets/photos/logo/logo_transparent.png';
+
 const year = new Date().getFullYear();
 // Same fix as Header.astro: these are homepage-section anchors, dead
 // links from any of the new standalone pages without this prefix.
@@ -9,7 +12,10 @@ const homePrefix = Astro.url.pathname === '/' ? '' : '/';
   <div class="wrap">
     <div class="foot-grid">
       <div class="foot-brand">
-        <div class="brand"><em>Horizon</em> Vantage</div>
+        <div class="brand">
+          <Image src={logoMark} alt="" class="brand-mark" width={64} height={64} />
+          <span><em>Horizon</em> Vantage</span>
+        </div>
         <p>Photography, videography, websites and local SEO for Irish small businesses - shot, built and optimised by one person.</p>
       </div>
       <div class="foot-cols">
@@ -43,8 +49,9 @@ const homePrefix = Astro.url.pathname === '/' ? '' : '/';
     padding-bottom: 36px; border-bottom: 1px solid var(--line);
     margin-bottom: 26px;
   }
-  .foot-brand .brand{ font-family: 'Instrument Serif', serif; font-size: 22px; margin-bottom: 12px; }
+  .foot-brand .brand{ display: flex; align-items: center; gap: 10px; font-family: 'Instrument Serif', serif; font-size: 22px; margin-bottom: 12px; }
   .foot-brand .brand em{ color: var(--brass); font-style: italic; }
+  .foot-brand .brand :global(.brand-mark){ width: 28px; height: 28px; object-fit: contain; flex-shrink: 0; }
   .foot-brand p{ color: var(--paper-dim); font-size: 14px; max-width: 280px; line-height: 1.6; }
   .foot-cols{ display: flex; gap: 60px; flex-wrap: wrap; }
   .foot-col h3{
