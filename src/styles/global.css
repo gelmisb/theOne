@@ -6,12 +6,23 @@
    the fonts ship from the same origin as everything else with no extra
    round-trips. Latin-only subsets and just the weights actually used in
    this file (no italic Inter or IBM Plex Mono - nothing here sets
-   font-style: italic on either). */
+   font-style: italic on either).
+
+   Montserrat is the display font for the wordmark and every H2 (.serif,
+   h2.section-h, and per-component headings that repeat that font-family
+   declaration) - it was referenced throughout the CSS but never actually
+   imported anywhere, so every browser was silently falling back to its
+   generic serif instead of Montserrat. 400 + 400-italic only: every
+   Montserrat usage in this codebase is font-weight: 400, and the italic
+   is used for the brass-accented word/phrase inside headings (e.g.
+   FilmRollIntro's `<em>Horizon</em>`, Header's `.brand em`). */
 @import '@fontsource-variable/inter/wght.css';
 @import '@fontsource/instrument-serif/latin.css';
 @import '@fontsource/instrument-serif/latin-italic.css';
 @import '@fontsource/ibm-plex-mono/latin-400.css';
 @import '@fontsource/ibm-plex-mono/latin-500.css';
+@import '@fontsource/montserrat/latin-400.css';
+@import '@fontsource/montserrat/latin-400-italic.css';
 
 :root{
   --bg: #0A0E13;
