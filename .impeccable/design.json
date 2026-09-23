@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-23T10:20:00Z",
+  "title": "Design System: Horizon Vantage",
+  "extensions": {
+    "colorMeta": {
+      "brass": {
+        "role": "primary",
+        "displayName": "Brass",
+        "canonical": "#E6C468",
+        "tonalRamp": ["#2E2510", "#4D3D1A", "#725A26", "#A3822F", "#C7A44A", "#E6C468", "#F0D585", "#F9EBC5"]
+      },
+      "safelight": {
+        "role": "secondary",
+        "displayName": "Safelight Amber",
+        "canonical": "#E8975A",
+        "tonalRamp": ["#331E10", "#5C3A1E", "#875629", "#B87538", "#D6864A", "#E8975A", "#F0B384", "#F8D9C0"]
+      },
+      "bg": {
+        "role": "neutral",
+        "displayName": "Darkroom Black",
+        "canonical": "#0A0E13",
+        "tonalRamp": ["#05070A", "#0A0E13", "#12181F", "#1A2029", "#2B333F", "#4A5666", "#7C8B9C", "#B8C4D0"]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Proof Paper",
+        "canonical": "#EAF2F8",
+        "tonalRamp": ["#3A4650", "#5A6A76", "#7E8F9C", "#9FB1C2", "#C2D0DA", "#DCE7EF", "#EAF2F8", "#F7FBFD"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display (Montserrat)", "purpose": "Wordmark and every H2 section heading. 400 weight only; italic reserved for the brass-accented word." },
+      "body": { "displayName": "Body (Inter)", "purpose": "Paragraph copy and form field text." },
+      "label": { "displayName": "Label (IBM Plex Mono)", "purpose": "Navigation, buttons, frame tags, prices, form labels, captions - always uppercase and letter-spaced. Never body copy or headings." },
+      "accent-serif": { "displayName": "Accent Serif (Instrument Serif)", "purpose": "Narrow secondary use: Footer and one Gap comparison-card heading. Not a primary hierarchy role." }
+    },
+    "shadows": [
+      { "name": "glass-ambient", "value": "0 8px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.07)", "purpose": "The one shadow recipe in the system, applied only to glass/floating surfaces." }
+    ],
+    "motion": [
+      { "name": "hover-lift", "value": "transform: translateY(-2px) to -6px depending on component, transition ~0.18-0.2s ease", "purpose": "Standard hover response for buttons and cards - a small upward lift, never scale." },
+      { "name": "glass-state-transition", "value": "margin, border-radius, background, border-color, box-shadow, backdrop-filter all transition ~0.35s ease together", "purpose": "The header's flat-to-glass transition on scroll - every property animates in lockstep so the glass state reads as one coherent shift, not a snap." }
+    ],
+    "breakpoints": [
+      { "name": "form-row-collapse", "value": "560px" },
+      { "name": "mobile", "value": "640px" },
+      { "name": "card-grid-collapse", "value": "760px" },
+      { "name": "frame-narrow", "value": "900px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Brass-filled CTA - the site's primary action button (e.g. \"Book a Founder Shoot\").",
+      "html": "<a href=\"#\" class=\"ds-btn-primary\">Book a Founder Shoot</a>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 10px; padding: 15px 28px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; border-radius: 2px; border: 1px solid transparent; background: #E6C468; color: #0A0E13; transition: transform .18s ease, background .18s ease; cursor: pointer; } .ds-btn-primary:hover { transform: translateY(-2px); background: #F3DD9A; } .ds-btn-primary:focus-visible { outline: 2px solid #E6C468; outline-offset: 3px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary action button - bordered, no fill.",
+      "html": "<a href=\"#\" class=\"ds-btn-ghost\">See the Tiers</a>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; gap: 10px; padding: 15px 28px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; border-radius: 2px; border: 1px solid rgba(234,242,248,0.26); color: #EAF2F8; transition: transform .18s ease, color .18s ease, border-color .18s ease; cursor: pointer; } .ds-btn-ghost:hover { border-color: #E6C468; color: #E6C468; transform: translateY(-2px); } .ds-btn-ghost:focus-visible { outline: 2px solid #E6C468; outline-offset: 3px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Contact form field - ink-navy fill, hairline border, brass focus.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-label\">Full name</span><input type=\"text\" placeholder=\"Full name\" /></label>",
+      "css": ".ds-field { display: block; } .ds-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #9FB1C2; margin-bottom: 6px; display: block; } .ds-field input { width: 100%; background: #0A0E13; border: 1px solid rgba(234,242,248,0.26); color: #EAF2F8; padding: 13px 14px; font-family: 'Inter', sans-serif; font-size: 14px; border-radius: 2px; } .ds-field input:focus { outline: none; border-color: #E6C468; }"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "refersTo": "nav-shell",
+      "description": "Site header - transparent/flat at rest, becomes a glass pill once scrolled (.scrolled class).",
+      "html": "<nav class=\"ds-nav ds-nav-scrolled\"><a class=\"ds-brand\">Horizon <em>Vantage</em></a><div class=\"ds-navlinks\"><a href=\"#\">Photography</a><a href=\"#\">Videography</a><a href=\"#\">Local SEO</a></div></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; padding: 18px 32px; } .ds-nav-scrolled { margin: 12px auto 0; border-radius: 20px; background: rgba(26,32,41,0.55); backdrop-filter: blur(20px) saturate(1.7); -webkit-backdrop-filter: blur(20px) saturate(1.7); border: 1px solid rgba(234,242,248,0.16); box-shadow: 0 8px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.07); padding: 14px 28px; } .ds-brand { font-family: 'Montserrat', serif; font-size: 22px; color: #EAF2F8; text-decoration: none; } .ds-brand em { color: #E6C468; font-style: italic; } .ds-navlinks { display: flex; gap: 34px; align-items: center; } .ds-navlinks a { text-decoration: none; color: #9FB1C2; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; font-family: 'IBM Plex Mono', monospace; }"
+    },
+    {
+      "name": "Featured Pricing Tier",
+      "kind": "card",
+      "refersTo": "tier-card-featured",
+      "description": "The one emphasized pricing card - blue-tinted glass fill, brass border, diagonal-corner badge.",
+      "html": "<div class=\"ds-tier-featured\"><span class=\"ds-badge\">Most Popular</span><div class=\"ds-tier-num\">TIER 03</div><h3>Visual Visibility</h3><div class=\"ds-price\">&euro;600&ndash;1,500</div><p class=\"ds-desc\">Website design and build, around your own real photography.</p></div>",
+      "css": ".ds-tier-featured { position: relative; border: 1px solid rgba(79,168,222,0.5); background: rgba(44,110,156,0.22); backdrop-filter: blur(20px) saturate(1.7); -webkit-backdrop-filter: blur(20px) saturate(1.7); border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.08); padding: 38px 32px; color: #EAF2F8; } .ds-badge { position: absolute; top: 0; right: 0; background: #E6C468; color: #0A0E13; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; padding: 6px 12px; border-radius: 0 20px 0 20px; } .ds-tier-num { font-family: 'IBM Plex Mono', monospace; color: #E6C468; font-size: 12px; margin-bottom: 16px; letter-spacing: 0.08em; } .ds-tier-featured h3 { font-family: 'Montserrat', serif; font-weight: 400; font-size: 28px; margin: 0 0 10px; } .ds-price { font-family: 'IBM Plex Mono', monospace; font-size: 22px; color: #E6C468; margin-bottom: 6px; } .ds-desc { font-size: 15px; line-height: 1.6; color: #9FB1C2; margin: 0; }"
+    },
+    {
+      "name": "Frame Tag",
+      "kind": "custom",
+      "refersTo": "frame-tag",
+      "description": "Signature section-header label - safelight dot + numbered mono tag, like a contact-sheet frame number.",
+      "html": "<div class=\"ds-frame-tag\"><span class=\"ds-num\">FRAME 001</span> The Gap</div>",
+      "css": ".ds-frame-tag { display: flex; align-items: baseline; gap: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: #E6C468; text-transform: uppercase; } .ds-frame-tag .ds-num { color: #EAF2F8; opacity: 0.9; } .ds-frame-tag::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: #E8975A; box-shadow: 0 0 8px 1px rgba(224,141,75,0.6); flex-shrink: 0; display: inline-block; }"
+    },
+    {
+      "name": "Sprockets Divider",
+      "kind": "custom",
+      "refersTo": "sprockets",
+      "description": "Signature film-sprocket-hole texture used as a divider between major sections.",
+      "html": "<div class=\"ds-sprockets\"></div>",
+      "css": ".ds-sprockets { height: 14px; width: 100%; background-image: radial-gradient(circle, rgba(230,196,104,0.45) 1.6px, transparent 1.7px); background-size: 22px 14px; background-position: 10px center; opacity: 0.55; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Darkroom Ledger",
+    "overview": "Horizon Vantage's site reads like a photography darkroom crossed with a precise engineering logbook - which is literally who built it: one person with 10+ years of software engineering and 5+ years behind the camera. Everything sits on near-black ink navy, lit by two signals borrowed straight from a darkroom: warm brass (the accent that carries value - CTAs, prices, the wordmark's italic half) and a dimmer safelight amber (reserved exclusively for \"this is live\" markers - the REC dot, the frame-tag indicator - never used on text or buttons). Structure is stated in mono-labelled, uppercase frame tags (\"FRAME 001\", \"TIER 02\") the way a contact sheet or a lab notebook numbers its entries.\n\nThe system is flat and sharp at rest - thin hairline borders, near-flush 2px corners - and turns to frosted glass only when something is floating above the page: the header once you've scrolled past Hero, the stat strip, the featured pricing tier, the contact form. That's a deliberate signal, not decoration: glass means \"this surface is doing something,\" flat means \"this is just content.\" Real, on-site photography is the whole premise, so photography motifs aren't skin-deep ornament - sprocket-hole dividers, viewfinder corner brackets, a contact-sheet frame grid, and a working film-strip intro are structural, load-bearing parts of the page, not one-off flourishes.",
+    "keyCharacteristics": [
+      "Near-black ink navy base, lit by exactly two accents: brass (value/action) and safelight amber (live/active signal only).",
+      "Flat and sharp by default; glass/frosted surfaces appear only on floating or scroll-activated elements.",
+      "Everything structural is mono-labelled and numbered, like frames on a contact sheet.",
+      "Photography/darkroom motifs (sprockets, viewfinder brackets, frame tags, film grain) are structural components, not decoration.",
+      "No stock photography, no AI-generated imagery presented as real - the visual system's central and non-negotiable rule (see PRODUCT.md)."
+    ],
+    "rules": [
+      { "name": "The One-Accent Rule", "body": "Brass is the only accent used for value, action, or emphasis anywhere on the site. There is no second competing \"brand color\" - variety comes from brass's own light/dim steps, never a new hue.", "section": "colors" },
+      { "name": "The Live-Signal Rule", "body": "Safelight amber never appears on text, buttons, or large surfaces - it marks \"this is live/active\" and nothing else.", "section": "colors" },
+      { "name": "The Mono Label Rule", "body": "IBM Plex Mono is reserved exclusively for short, uppercase, letter-spaced labels - navigation, buttons, tags, prices, captions. It never sets body copy or a heading.", "section": "typography" },
+      { "name": "The Scroll-State Glass Rule", "body": "A surface only becomes glass when it's floating or responding to state - never as a static decorative choice on resting content.", "section": "elevation" },
+      { "name": "The Diagonal Corner Rule", "body": "The signature pricing badge is rounded only on two opposite corners (0 20px 0 20px), a ribbon-like accent shape reserved for callout badges, distinct from every other rounded surface in the system.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do keep brass as the only value/action accent - new emphasis comes from its light/dim steps, not a new hue.",
+      "Do reserve Safelight Amber strictly for small \"this is live\" markers (dots), never text, fills, or buttons.",
+      "Do set IBM Plex Mono only on short, uppercase, letter-spaced labels/tags/buttons - never body copy or headings.",
+      "Do reserve the 20px glass radius and backdrop-filter treatment for floating/scroll-state surfaces; default content stays flat with a hairline border.",
+      "Do treat sprockets and frame tags as structural, load-bearing components - reuse them for new sections rather than inventing a new divider or numbering style."
+    ],
+    "donts": [
+      "Don't introduce a second brand accent color; variety comes from brass's own steps.",
+      "Don't apply glass/blur to a resting, non-floating surface \"for polish\" - it's a state signal, not a texture.",
+      "Don't use stock photography or AI-generated imagery anywhere client-facing; this system's central premise is real, on-site photos.",
+      "Don't give buttons, cards, or form fields anything above the 2px sharp radius - large rounding is reserved exclusively for the glass-surface signal."
+    ]
+  }
+}
