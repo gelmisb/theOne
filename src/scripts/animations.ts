@@ -363,17 +363,27 @@ export function initFilmRollIntro() {
       gsap.set(otherFrames, { opacity: 1 - dim });
       if (sprockets.length) gsap.set(sprockets, { opacity: 1 - dim });
 
-      // Beat 3 - develop: colour negative + soft focus resolving to a sharp positive
-      const td = developEase(clamp01((p - ROLL_LOCK_END) / (DEVELOP_END - ROLL_LOCK_END)));
-      const invertVal = 1 - td;
-      const sepiaVal = 0.65 * (1 - td);
-      const hueVal = -15 * (1 - td);
-      const saturateVal = 1 + 1.2 * (1 - td);
-      const blurVal = 7 * (1 - td);
-      const brightVal = 0.9 + 0.1 * td;
-      gsap.set(heroImg, {
-        filter: `invert(${invertVal}) sepia(${sepiaVal}) hue-rotate(${hueVal}deg) saturate(${saturateVal}) blur(${blurVal}px) brightness(${brightVal})`,
-      });
+      // Beat 3 - develop: colour negative + soft focus resolving to a sharp
+      // positive. Only touches the filter once the frame is actually locked
+      // (p >= ROLL_LOCK_END) - clamp01() alone would floor the (p -
+      // ROLL_LOCK_END) fraction to 0 for the entire roll, meaning the hero
+      // frame would render fully inverted and blurred from the very first
+      // frame, while it's still rolling past among 23 normal-looking
+      // neighbours. Left unfiltered (matching every other frame) until then.
+      if (p < ROLL_LOCK_END) {
+        gsap.set(heroImg, { filter: 'none' });
+      } else {
+        const td = developEase(clamp01((p - ROLL_LOCK_END) / (DEVELOP_END - ROLL_LOCK_END)));
+        const invertVal = 1 - td;
+        const sepiaVal = 0.65 * (1 - td);
+        const hueVal = -15 * (1 - td);
+        const saturateVal = 1 + 1.2 * (1 - td);
+        const blurVal = 7 * (1 - td);
+        const brightVal = 0.9 + 0.1 * td;
+        gsap.set(heroImg, {
+          filter: `invert(${invertVal}) sepia(${sepiaVal}) hue-rotate(${hueVal}deg) saturate(${saturateVal}) blur(${blurVal}px) brightness(${brightVal})`,
+        });
+      }
 
       // Beat 4 - expand into Hero, then the pin releases
       const te = expandEase(clamp01((p - DEVELOP_END) / (1 - DEVELOP_END)));
