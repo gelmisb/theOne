@@ -1,0 +1,398 @@
+---
+// FILM-STRIP-RIBBON-BRIEF.md Phase A: a throwaway spike page, not linked
+// from anywhere in the site nav, noindex, deleted in Phase E's cleanup.
+// Validates the curve + twist + gate shape only - no photos yet (Phase B),
+// no scroll-driven feed (Phase C), no DOM handoff (Phase D).
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Lab: Film Strip Ribbon (Phase A)</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #0A0E13; overflow: hidden; }
+      canvas { display: block; }
+      #panel {
+        position: fixed; top: 12px; left: 12px; z-index: 10;
+        background: rgba(18, 24, 31, 0.85);
+        border: 1px solid rgba(234, 242, 248, 0.16);
+        border-radius: 8px;
+        padding: 14px 16px;
+        font-family: 'IBM Plex Mono', 'Courier New', monospace;
+        font-size: 11px;
+        color: #EAF2F8;
+        width: 260px;
+        backdrop-filter: blur(8px);
+      }
+      #panel h1 {
+        font-size: 12px; margin: 0 0 10px; color: #E6C468;
+        text-transform: uppercase; letter-spacing: 0.06em;
+      }
+      #panel label {
+        display: flex; justify-content: space-between; align-items: center;
+        gap: 8px; margin-bottom: 8px;
+      }
+      #panel label span:first-child { color: #9FB1C2; flex-shrink: 0; }
+      #panel output { color: #E6C468; width: 44px; text-align: right; flex-shrink: 0; }
+      #panel input[type="range"] { flex: 1; accent-color: #E6C468; }
+      #panel .hint { color: #9FB1C2; opacity: 0.7; margin-top: 10px; line-height: 1.5; }
+      #stats {
+        position: fixed; bottom: 12px; left: 12px; z-index: 10;
+        font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #9FB1C2;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="panel">
+      <h1>Ribbon Tuning &mdash; Phase A</h1>
+      <label><span>Twist peak</span><input type="range" id="twistMaxDeg" min="0" max="220" value="165" step="1" /><output>165&deg;</output></label>
+      <label><span>Curl start (t)</span><input type="range" id="curlStart" min="0" max="0.5" value="0.12" step="0.01" /><output>0.12</output></label>
+      <label><span>Curl end (t)</span><input type="range" id="curlEnd" min="0.15" max="0.6" value="0.38" step="0.01" /><output>0.38</output></label>
+      <label><span>Gate start (t)</span><input type="range" id="gateStart" min="0.4" max="0.8" value="0.56" step="0.01" /><output>0.56</output></label>
+      <label><span>Gate end (t)</span><input type="range" id="gateEnd" min="0.5" max="0.95" value="0.74" step="0.01" /><output>0.74</output></label>
+      <label><span>Strip width</span><input type="range" id="stripWidth" min="1.5" max="6" value="3.2" step="0.1" /><output>3.2</output></label>
+      <label><span>Depth (curl Z)</span><input type="range" id="curlDepth" min="0" max="6" value="3" step="0.1" /><output>3.0</output></label>
+      <label><span>Show gate plane</span><input type="checkbox" id="showGate" checked /><output></output></label>
+      <label><span>Show control pts</span><input type="checkbox" id="showControls" checked /><output></output></label>
+      <div class="hint">Drag to orbit, scroll to zoom (OrbitControls). This page is a dev-only spike &mdash; not linked, noindex, deleted before ship.</div>
+    </div>
+    <div id="stats"></div>
+
+    <script>
+      import * as THREE from 'three';
+      import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+
+      // ---- Real 35mm proportions (FILM-STRIP-RIBBON-BRIEF.md section 2) ----
+      const FILM_WIDTH_MM = 35;
+      const FRAME_WIDTH_MM = 36; // along the strip (u)
+      const FRAME_HEIGHT_MM = 24; // image area height
+      const PERF_PITCH_MM = 4.75;
+      const PERFS_PER_FRAME = 8;
+      const FRAME_PITCH_MM = PERF_PITCH_MM * PERFS_PER_FRAME; // 38mm - matches 36mm image + ~2mm gap
+      const MM_TO_UNIT = 1 / 10; // 1 scene unit = 10mm = 1cm, keeps numbers readable
+
+      // ---- Tunable params, wired to the dev panel ----
+      const params = {
+        twistMaxDeg: 165,
+        curlStart: 0.12,
+        curlEnd: 0.38,
+        gateStart: 0.56,
+        gateEnd: 0.74,
+        stripWidth: 3.2, // scene units (overrides the raw mm conversion for Phase A's shape tuning)
+        curlDepth: 3,
+        showGate: true,
+        showControls: true,
+      };
+
+      // ---- Scene ----
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0a0e13);
+
+      const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 200);
+      camera.position.set(-1, 3, 20);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.target.set(-2, 1, 0);
+
+      // Simple directional-ish fill so the gate marker / control-point dots
+      // read in 3D even though the ribbon itself uses fake shader lighting.
+      scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      dirLight.position.set(5, 8, 6);
+      scene.add(dirLight);
+
+      // ---- Curve: enters top-left, curls with depth, flattens through the
+      // gate, exits bottom-right diagonally. Matches the reference's BEATS
+      // (entry direction, one curl, diagonal exit through a flat gate), not
+      // its literal control points - stock clip art, shape-reference only. ----
+      function buildControlPoints(p: typeof params) {
+        const d = p.curlDepth;
+        return [
+          new THREE.Vector3(-15, 7.5, -2), // off-screen top-left, entering
+          new THREE.Vector3(-9, 6.3, 1.5), // heading right, coming toward camera
+          new THREE.Vector3(-6.5, 4.8, -d), // curl: pushed BEHIND for depth crossing
+          new THREE.Vector3(-7.5, 2.2, d * 0.9), // curl: swings back toward camera
+          new THREE.Vector3(-4.5, 0.4, 0.4), // easing out of the curl
+          new THREE.Vector3(-1, -0.8, 0), // approaching the gate, flattening
+          new THREE.Vector3(2.5, -2, 0), // gate: flat, camera-facing
+          new THREE.Vector3(7, -4.2, -0.3), // diagonal exit begins
+          new THREE.Vector3(13, -7, -1.5), // off-screen bottom-right, exiting
+        ];
+      }
+
+      // Twist (roll) as a function of normalized arc-length t - deliberately
+      // NOT derived from the curve's own curvature. Zero at entry, ramps up
+      // through the curl (curlStart -> curlEnd), forced back to exactly zero
+      // across the whole gate span (gateStart -> gateEnd) and stays zero
+      // after, matching the brief's "twist must be zero at the gate".
+      function twistAngle(t: number, p: typeof params): number {
+        const max = (p.twistMaxDeg * Math.PI) / 180;
+        const { curlStart, curlEnd, gateStart } = p;
+        if (t <= curlStart) return 0;
+        if (t <= curlEnd) {
+          const local = (t - curlStart) / (curlEnd - curlStart);
+          // smoothstep up
+          return max * (local * local * (3 - 2 * local));
+        }
+        if (t <= gateStart) {
+          const local = (t - curlEnd) / (gateStart - curlEnd);
+          const eased = local * local * (3 - 2 * local);
+          return max * (1 - eased);
+        }
+        return 0; // flat through and after the gate
+      }
+
+      let curve: THREE.CatmullRomCurve3;
+      let ribbonMesh: THREE.Mesh;
+      let gateHelper: THREE.Group;
+      let controlPointDots: THREE.Group;
+
+      const SEGMENTS = 360;
+
+      const vertexShader = `
+        varying vec2 vUv;
+        varying vec3 vNormalW;
+        varying vec3 vViewDir;
+        void main() {
+          vUv = uv;
+          vec4 worldPos = modelMatrix * vec4(position, 1.0);
+          vNormalW = normalize(mat3(modelMatrix) * normal);
+          vViewDir = normalize(cameraPosition - worldPos.xyz);
+          gl_Position = projectionMatrix * viewMatrix * worldPos;
+        }
+      `;
+
+      const fragmentShader = `
+        precision highp float;
+        varying vec2 vUv;
+        varying vec3 vNormalW;
+        varying vec3 vViewDir;
+
+        uniform vec3 uBaseFront;
+        uniform vec3 uBaseBack;
+        uniform vec3 uGapColor;
+        uniform float uPerfPitchU;   // perforation pitch, in u (frame) units
+        uniform float uPerfHalfW;    // perforation half-width, in u units
+        uniform float uPerfHalfH;    // perforation half-height, in v units
+        uniform float uPerfMarginV;  // v-distance of perf row centres from each edge
+        uniform float uGapHalfU;     // half-width of the inter-frame gap band, in u units
+
+        float sdRoundRect(vec2 p, vec2 halfSize, float r) {
+          vec2 d = abs(p) - halfSize + r;
+          return length(max(d, 0.0)) - r + min(max(d.x, d.y), 0.0);
+        }
+
+        void main() {
+          bool front = gl_FrontFacing;
+          vec3 base = front ? uBaseFront : uBaseBack;
+
+          // Perforations: repeat along u at uPerfPitchU, two rows near v=0 and v=1.
+          float uCell = fract(vUv.x / uPerfPitchU) * uPerfPitchU - uPerfPitchU * 0.5;
+          float dTop = sdRoundRect(vec2(uCell, vUv.y - uPerfMarginV), vec2(uPerfHalfW, uPerfHalfH), uPerfHalfH * 0.4);
+          float dBot = sdRoundRect(vec2(uCell, vUv.y - (1.0 - uPerfMarginV)), vec2(uPerfHalfW, uPerfHalfH), uPerfHalfH * 0.4);
+          if (dTop < 0.0 || dBot < 0.0) discard;
+
+          // Frame gap: a thin darker band at each frame boundary (u is in frame units).
+          float uInFrame = fract(vUv.x);
+          float gap = step(uInFrame, uGapHalfU) + step(1.0 - uGapHalfU, uInFrame);
+          vec3 color = mix(base, uGapColor, clamp(gap, 0.0, 1.0));
+
+          // Fake lighting: darken as the surface turns edge-on to the camera,
+          // so the curl and twist read as real 3D rather than a flat texture.
+          float ndotv = clamp(dot(normalize(vNormalW), normalize(vViewDir)), 0.0, 1.0);
+          float shade = mix(0.55, 1.0, pow(ndotv, 0.85));
+          color *= shade;
+
+          gl_FragColor = vec4(color, 1.0);
+        }
+      `;
+
+      // Orange-brown colour-negative base (section 9 Q3) - ties into the
+      // existing DOM develop effect's warm cast once Phase D hands off.
+      const material = new THREE.ShaderMaterial({
+        side: THREE.DoubleSide,
+        uniforms: {
+          uBaseFront: { value: new THREE.Color(0x8a4d24) },
+          uBaseBack: { value: new THREE.Color(0x4a2c1a) },
+          uGapColor: { value: new THREE.Color(0x120a06) },
+          uPerfPitchU: { value: PERF_PITCH_MM / FRAME_PITCH_MM },
+          // Real KS perforations are ~1.98mm wide within a 4.75mm pitch
+          // (~42% of the pitch, so half-width ~0.21x pitch) and ~2.79mm
+          // tall within the 35mm strip width (~8%, half-height ~0.04).
+          // The original 0.32/0.09 values were oversized enough that
+          // perforations covered a majority of each cell instead of a
+          // minority - confirmed by disabling the discard entirely and
+          // comparing the raw (solid) ribbon against the perforated one.
+          uPerfHalfW: { value: (PERF_PITCH_MM / FRAME_PITCH_MM) * 0.21 },
+          uPerfHalfH: { value: 0.045 },
+          uPerfMarginV: { value: 0.07 },
+          uGapHalfU: { value: 0.012 },
+        },
+        vertexShader,
+        fragmentShader,
+      });
+
+      function buildRibbonGeometry(curveIn: THREE.CatmullRomCurve3, p: typeof params) {
+        const points = curveIn.getSpacedPoints(SEGMENTS);
+        const frenet = curveIn.computeFrenetFrames(SEGMENTS, false);
+        const { tangents, binormals } = frenet;
+
+        let totalLength = 0;
+        const lengths: number[] = [0];
+        for (let i = 1; i <= SEGMENTS; i++) {
+          totalLength += points[i].distanceTo(points[i - 1]);
+          lengths.push(totalLength);
+        }
+
+        const positions: number[] = [];
+        const normalsOut: number[] = [];
+        const uvs: number[] = [];
+        const indices: number[] = [];
+        const halfWidth = (p.stripWidth * MM_TO_UNIT * 10) / 2; // stripWidth already in scene units
+
+        for (let i = 0; i <= SEGMENTS; i++) {
+          const t = i / SEGMENTS;
+          const twist = twistAngle(t, p);
+
+          const tangent = tangents[i].clone().normalize();
+          const binormal = binormals[i].clone().applyAxisAngle(tangent, twist).normalize();
+          const normal = new THREE.Vector3().crossVectors(binormal, tangent).normalize();
+
+          const center = points[i];
+          const p1 = center.clone().addScaledVector(binormal, halfWidth);
+          const p2 = center.clone().addScaledVector(binormal, -halfWidth);
+
+          positions.push(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
+          normalsOut.push(normal.x, normal.y, normal.z, normal.x, normal.y, normal.z);
+
+          const uFrameUnits = lengths[i] / (FRAME_PITCH_MM * MM_TO_UNIT * 10 * (p.stripWidth / 3.2));
+          uvs.push(uFrameUnits, 0, uFrameUnits, 1);
+
+          if (i < SEGMENTS) {
+            const a = i * 2, b = i * 2 + 1, c = (i + 1) * 2, d = (i + 1) * 2 + 1;
+            indices.push(a, c, b, b, c, d);
+          }
+        }
+
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normalsOut, 3));
+        geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+        geometry.setIndex(indices);
+        return geometry;
+      }
+
+      function buildGateHelper(curveIn: THREE.CatmullRomCurve3, p: typeof params): THREE.Group {
+        const group = new THREE.Group();
+        const tGate = (p.gateStart + p.gateEnd) / 2;
+        const point = curveIn.getPointAt(tGate);
+        const geo = new THREE.PlaneGeometry(p.stripWidth * 1.4, p.stripWidth * 1.4 * (FRAME_HEIGHT_MM / FRAME_WIDTH_MM));
+        const mat = new THREE.MeshBasicMaterial({ color: 0xe6c468, wireframe: true, transparent: true, opacity: 0.5 });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.copy(point);
+        group.add(mesh);
+        return group;
+      }
+
+      function buildControlPointDots(points: THREE.Vector3[]): THREE.Group {
+        const group = new THREE.Group();
+        const geo = new THREE.SphereGeometry(0.18, 12, 12);
+        points.forEach((pt, i) => {
+          const mat = new THREE.MeshBasicMaterial({ color: i === 0 ? 0x4fa8de : 0xe8975a });
+          const dot = new THREE.Mesh(geo, mat);
+          dot.position.copy(pt);
+          group.add(dot);
+        });
+        return group;
+      }
+
+      function rebuild() {
+        const controlPoints = buildControlPoints(params);
+        curve = new THREE.CatmullRomCurve3(controlPoints, false, 'catmullrom', 0.5);
+
+        if (ribbonMesh) {
+          scene.remove(ribbonMesh);
+          ribbonMesh.geometry.dispose();
+        }
+        const geometry = buildRibbonGeometry(curve, params);
+        ribbonMesh = new THREE.Mesh(geometry, material);
+        scene.add(ribbonMesh);
+
+        if (gateHelper) scene.remove(gateHelper);
+        gateHelper = buildGateHelper(curve, params);
+        gateHelper.visible = params.showGate;
+        scene.add(gateHelper);
+
+        if (controlPointDots) scene.remove(controlPointDots);
+        controlPointDots = buildControlPointDots(controlPoints);
+        controlPointDots.visible = params.showControls;
+        scene.add(controlPointDots);
+      }
+
+      rebuild();
+
+      // ---- Dev panel wiring ----
+      function bindRange(id: string, key: keyof typeof params, fmt: (v: number) => string = (v) => v.toFixed(2)) {
+        const input = document.getElementById(id) as HTMLInputElement;
+        const output = input.nextElementSibling as HTMLOutputElement;
+        output.textContent = fmt(Number(input.value));
+        input.addEventListener('input', () => {
+          (params as any)[key] = Number(input.value);
+          output.textContent = fmt(Number(input.value));
+          rebuild();
+        });
+      }
+      bindRange('twistMaxDeg', 'twistMaxDeg', (v) => `${v.toFixed(0)}°`);
+      bindRange('curlStart', 'curlStart');
+      bindRange('curlEnd', 'curlEnd');
+      bindRange('gateStart', 'gateStart');
+      bindRange('gateEnd', 'gateEnd');
+      bindRange('stripWidth', 'stripWidth', (v) => v.toFixed(1));
+      bindRange('curlDepth', 'curlDepth', (v) => v.toFixed(1));
+
+      document.getElementById('showGate')!.addEventListener('change', (e) => {
+        params.showGate = (e.target as HTMLInputElement).checked;
+        gateHelper.visible = params.showGate;
+      });
+      document.getElementById('showControls')!.addEventListener('change', (e) => {
+        params.showControls = (e.target as HTMLInputElement).checked;
+        controlPointDots.visible = params.showControls;
+      });
+
+      // ---- Resize + render loop ----
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      const statsEl = document.getElementById('stats')!;
+      let frameCount = 0;
+      let lastFpsTime = performance.now();
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+
+        frameCount++;
+        const now = performance.now();
+        if (now - lastFpsTime > 500) {
+          const fps = Math.round((frameCount * 1000) / (now - lastFpsTime));
+          statsEl.textContent = `${fps} fps · ${SEGMENTS} segments · ${ribbonMesh.geometry.attributes.position.count} verts`;
+          frameCount = 0;
+          lastFpsTime = now;
+        }
+      }
+      animate();
+    </script>
+  </body>
+</html>
