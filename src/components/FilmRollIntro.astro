@@ -1,0 +1,129 @@
+---
+// Phase 1: static layout only — no animation. Doubles as the reduced-
+// motion and no-JS fallback per FILM-ROLL-INTRO-BRIEF.md section 6: this
+// exact markup is what a reduced-motion visitor sees permanently, and
+// what every visitor sees before Phase 2+ adds the scroll-driven roll.
+//
+// Keeps id="intro" — ScrollNav.astro's dot-nav and initScrollHashFix (in
+// animations.ts) both depend on that id existing, regardless of what's
+// inside the section.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Sprockets from './Sprockets.astro';
+
+// Real photos only (brief section 4) — only 3 of the 5 portfolio photos
+// are real, non-AI-generated (Portfolio.astro's GENERATED_FILES set
+// excludes the other 2). Repeated to fill the strip until more real
+// shoots exist; add filenames here first when they do, nothing else
+// needs to change.
+const rollPhotoModules = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/photos/portfolio/{Barbershops,consumables,product advertisement}.jpg',
+  { eager: true }
+);
+const realPhotos = Object.values(rollPhotoModules).map((m) => m.default);
+
+const FRAME_COUNT = 10;
+const HERO_FRAME_INDEX = 4; // Phase 2+ target for the Beat 2 lock — not visually distinguished yet, no animation exists to distinguish it with
+const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
+  photo: realPhotos[i % realPhotos.length],
+  num: String(i + 1).padStart(3, '0'),
+  isHero: i === HERO_FRAME_INDEX,
+}));
+---
+
+<section class="filmroll-intro" id="intro">
+  <div class="fr-strip-wrap">
+    <Sprockets />
+    <div class="fr-strip" aria-hidden="true">
+      {frames.map((f, i) => (
+        <div class="fr-frame" data-hero-frame={f.isHero ? 'true' : undefined}>
+          <span class="fr-fnum mono">{f.num}</span>
+          {f.photo && (
+            <Image
+              src={f.photo}
+              alt=""
+              class="fr-photo"
+              width={360}
+              height={360}
+              widths={[180, 240, 360]}
+              sizes="180px"
+              loading={i < 4 ? 'eager' : 'lazy'}
+              fetchpriority={i === 0 ? 'high' : undefined}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+    <Sprockets dark />
+  </div>
+
+  <div class="wrap fr-content">
+    <h1 class="fr-word"><em>Horizon</em> Vantage</h1>
+    <p class="fr-tagline mono">See Further. Show It Better.</p>
+    <a href="#contact" class="btn btn-primary">Book a Founder Shoot</a>
+  </div>
+</section>
+
+<style>
+  .filmroll-intro{
+    position: relative;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 54px;
+    overflow: hidden;
+    text-align: center;
+    padding: 140px 0 60px;
+    background: var(--bg);
+  }
+
+  .fr-strip-wrap{ width: 100%; }
+  .fr-strip{
+    display: flex; justify-content: center;
+    gap: 3px;
+    overflow: hidden;
+    padding: 3px 0;
+  }
+  .fr-frame{
+    position: relative;
+    flex: 0 0 auto;
+    width: 130px; aspect-ratio: 1/1;
+    border: 1px solid var(--line);
+    overflow: hidden;
+    background: var(--panel);
+  }
+  .fr-frame :global(.fr-photo){
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .fr-fnum{
+    position: absolute; top: 6px; left: 8px; z-index: 1;
+    font-size: 9px; letter-spacing: 0.04em; color: var(--paper-dim);
+    opacity: 0.7;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  }
+
+  .fr-content{ position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
+  .fr-word{
+    font-family: 'Montserrat', serif; font-weight: 400;
+    font-size: clamp(40px, 8vw, 96px);
+    line-height: 1;
+    letter-spacing: -0.01em;
+    margin: 0 0 18px;
+  }
+  .fr-word em{ color: var(--brass); font-style: italic; }
+  .fr-tagline{
+    font-size: 14px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--brass);
+    margin: 0 0 30px;
+  }
+
+  @media (max-width: 900px){
+    .fr-frame{ width: 100px; }
+  }
+  @media (max-width: 640px){
+    .filmroll-intro{ padding: 120px 0 50px; gap: 40px; }
+    .fr-frame{ width: 78px; }
+    .fr-strip{ gap: 2px; }
+  }
+</style>

@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import ScrollNav from '../components/ScrollNav.astro';
-import Intro from '../components/Intro.astro';
+import FilmRollIntro from '../components/FilmRollIntro.astro';
 import Hero from '../components/Hero.astro';
 import Sprockets from '../components/Sprockets.astro';
 import Gap from '../components/Gap.astro';
@@ -18,7 +18,7 @@ import Footer from '../components/Footer.astro';
 <Layout>
   <Header />
   <ScrollNav />
-  <Intro />
+  <FilmRollIntro />
   <Hero />
   <Sprockets />
   <Gap />
@@ -40,8 +40,6 @@ import Footer from '../components/Footer.astro';
   import {
     initScrollHashFix,
     initScrollReveals,
-    initIntroTimeline,
-    initIntroZoomTransition,
     initPersistBgFade,
     initHeroTimeline,
     initHeroParallax,
@@ -58,8 +56,6 @@ import Footer from '../components/Footer.astro';
 
   initSmoothScroll();
   initScrollHashFix();
-  initIntroTimeline();
-  initIntroZoomTransition();
   initPersistBgFade();
   initHeroTimeline();
   initHeroParallax();
