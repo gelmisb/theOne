@@ -144,7 +144,7 @@ export function initFilmRollIntro() {
   const CONTENT_FADE_END = 0.08; // wordmark/tagline/CTA clear out almost immediately, per Beat 1
   const DIM_START = 0.24;
   const ROLL_LOCK_END = 0.4; // Beat 1/2 complete
-  const DEVELOP_END = 0.72; // colour/focus fully resolved by here
+  const DEVELOP_END = 0.1; // colour/focus fully resolved by here
   // Beat 4 starts partway through Beat 3 rather than waiting for it to
   // finish. Holding the frame at native size for the entire develop beat
   // (0.4 -> 0.72, ~a third of the whole pin) left the screen almost empty -
@@ -153,7 +153,7 @@ export function initFilmRollIntro() {
   // developing. Starting the scale-up here means the frame is visibly
   // growing and gaining presence for the second half of the develop beat,
   // instead of sitting inert until colour finishes resolving.
-  const EXPAND_START = 0.5;
+  const EXPAND_START = 0.1;
   const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 
   // A single ease drives the whole roll, rather than splicing a "roll" ease
@@ -288,23 +288,12 @@ export function initFilmRollIntro() {
       // neighbours. Left unfiltered (matching every other frame) until then.
       if (p < ROLL_LOCK_END) {
         gsap.set(heroImg, { filter: 'none' });
-      } else {
-        const td = developEase(clamp01((p - ROLL_LOCK_END) / (DEVELOP_END - ROLL_LOCK_END)));
-        const invertVal = 1 - td;
-        const sepiaVal = 0.65 * (1 - td);
-        const hueVal = -15 * (1 - td);
-        const saturateVal = 1 + 1.2 * (1 - td);
-        const blurVal = 7 * (1 - td);
-        const brightVal = 0.9 + 0.1 * td;
-        gsap.set(heroImg, {
-          filter: `invert(${invertVal}) sepia(${sepiaVal}) hue-rotate(${hueVal}deg) saturate(${saturateVal}) blur(${blurVal}px) brightness(${brightVal})`,
-        });
-      }
+      } 
 
       // Beat 4 - expand into Hero, then the pin releases. Starts at
       // EXPAND_START (mid-develop), not DEVELOP_END - see that constant's
       // comment above.
-      const te = expandEase(clamp01((p - EXPAND_START) / (1 - EXPAND_START)));
+      const te = expandEase(clamp01((p - EXPAND_START) / (1 - DEVELOP_END)));
       gsap.set(heroFrame, {
         scale: 1 + (scaleCover - 1) * te,
         y: expandTranslateY * te,
