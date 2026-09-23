@@ -2,8 +2,13 @@
 // FILM-STRIP-RIBBON-BRIEF.md - throwaway spike page, not linked from
 // anywhere in the site nav, noindex, deleted in Phase E's cleanup.
 // Phase A: curve + twist + gate shape, no photos.
-// Phase B (this pass): real photos via a runtime texture atlas, correct
-// 35mm proportions, back-side rendering, edge print baked into the atlas.
+// Phase B: real photos via a runtime texture atlas, correct 35mm
+// proportions, back-side rendering, edge print baked into the atlas.
+// Phase C (this pass): scroll-driven feed and idle drift, both writing to
+// the SAME uOffset value via relative deltas (not two absolute-state
+// writers) - see the "single source of truth" comment in main() below;
+// that pattern is a direct application of the fix for the DOM intro's
+// idleVisibility/pin race condition (CLAUDE.md, animations.ts).
 import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
@@ -37,10 +42,14 @@ const atlasPhotos = await Promise.all(
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>Lab: Film Strip Ribbon (Phase A)</title>
+    <title>Lab: Film Strip Ribbon (Phase C)</title>
     <style>
-      html, body { margin: 0; height: 100%; background: #0A0E13; overflow: hidden; }
-      canvas { display: block; }
+      html, body { margin: 0; background: #0A0E13; }
+      /* Phase C: real document scroll drives the feed, so the page needs
+         scroll distance - the canvas stays fixed full-viewport over it.
+         (The canvas's fixed positioning is set in JS, not here - Astro's
+         scoped styles can't reach an element the script creates.) */
+      #scroll-spacer { height: 400vh; }
       #panel {
         position: fixed; top: 12px; left: 12px; z-index: 10;
         background: rgba(18, 24, 31, 0.85);
@@ -86,12 +95,16 @@ const atlasPhotos = await Promise.all(
       <div class="hint">Drag to orbit, scroll to zoom (OrbitControls). This page is a dev-only spike &mdash; not linked, noindex, deleted before ship.</div>
     </div>
     <div id="stats"></div>
+    <div id="scroll-spacer" aria-hidden="true"></div>
 
     <script type="application/json" id="atlas-photo-data" set:html={JSON.stringify(atlasPhotos)} />
 
     <script>
       import * as THREE from 'three';
       import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+      import { gsap } from 'gsap';
+      import { ScrollTrigger } from 'gsap/ScrollTrigger';
+      gsap.registerPlugin(ScrollTrigger);
 
       // ---- Real 35mm proportions (FILM-STRIP-RIBBON-BRIEF.md section 2) ----
       const FILM_WIDTH_MM = 35;
@@ -142,6 +155,20 @@ const atlasPhotos = await Promise.all(
         showControls: true,
       };
 
+      // ---- Phase C: scroll-driven feed + idle drift ----
+      // One value, one writer per frame - both the ScrollTrigger callback
+      // and the idle-drift tick in animate() only ever ADD a relative delta
+      // to `feed.offset`, never overwrite it absolutely. That's what makes
+      // the handoff jump-free: whichever source was moving it last, the
+      // other picks up from exactly where it left off. See the animations.ts
+      // idleVisibility fix this mirrors (CLAUDE.md) - that bug was two
+      // controllers each asserting an ABSOLUTE play/pause state for the same
+      // tween; the fix here is the same lesson applied to a continuous value.
+      const DRIFT_SPEED_PER_SEC = 0.045; // frame-units/sec of idle feed
+      const SCROLL_RANGE_FRAMES = 14; // how far the full scroll-spacer feeds
+      const IDLE_RESUME_MS = 350; // pause drift briefly after scroll input, so it doesn't fight scrub's own trailing ease
+      const feed = { offset: 0, lastInputTime: 0 };
+
       // ---- Scene ----
       const scene = new THREE.Scene();
       scene.background = new THREE.Color(0x0a0e13);
@@ -152,6 +179,14 @@ const atlasPhotos = await Promise.all(
       const renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setSize(window.innerWidth, window.innerHeight);
+      // Astro's scoped <style> canvas{} rule can't reach an element created
+      // by JS (it only rewrites selectors for elements literally written in
+      // this file's template), so the fixed full-viewport positioning has
+      // to be set here instead - otherwise the canvas sits in normal
+      // document flow, after the scroll-spacer div in the DOM, and renders
+      // ~400vh below the visible viewport.
+      renderer.domElement.style.position = 'fixed';
+      renderer.domElement.style.inset = '0';
       document.body.appendChild(renderer.domElement);
 
       const controls = new OrbitControls(camera, renderer.domElement);
@@ -243,6 +278,7 @@ const atlasPhotos = await Promise.all(
         uniform float uPerfHalfH;    // perforation half-height, in v units
         uniform float uPerfMarginV;  // v-distance of perf row centres from each edge
         uniform float uGapHalfU;     // half-width of the inter-frame gap band, in u units
+        uniform float uOffset;       // scroll/drift feed position, in frame units
 
         float sdRoundRect(vec2 p, vec2 halfSize, float r) {
           vec2 d = abs(p) - halfSize + r;
@@ -251,14 +287,15 @@ const atlasPhotos = await Promise.all(
 
         void main() {
           bool front = gl_FrontFacing;
-          float uInFrame = fract(vUv.x);
+          float u = vUv.x + uOffset;
+          float uInFrame = fract(u);
 
           // Atlas cell for this frame: each cell already bakes the base
           // film colour, the photo in its image-area rect, and the edge
           // print text (see buildAtlas() in main()) - the shader just picks
           // the right cell and, on the back face, mirrors + darkens it
           // rather than sampling a second baked "back" atlas.
-          float frameIndex = floor(vUv.x);
+          float frameIndex = floor(u);
           float frameInAtlas = mod(frameIndex, uAtlasFrames);
           float col = mod(frameInAtlas, uAtlasCols);
           float row = floor(frameInAtlas / uAtlasCols);
@@ -279,7 +316,7 @@ const atlasPhotos = await Promise.all(
           color = mix(color, uGapColor, clamp(gap, 0.0, 1.0));
 
           // Perforations: repeat along u at uPerfPitchU, two rows near v=0 and v=1.
-          float uCell = fract(vUv.x / uPerfPitchU) * uPerfPitchU - uPerfPitchU * 0.5;
+          float uCell = fract(u / uPerfPitchU) * uPerfPitchU - uPerfPitchU * 0.5;
           float dTop = sdRoundRect(vec2(uCell, vUv.y - uPerfMarginV), vec2(uPerfHalfW, uPerfHalfH), uPerfHalfH * 0.4);
           float dBot = sdRoundRect(vec2(uCell, vUv.y - (1.0 - uPerfMarginV)), vec2(uPerfHalfW, uPerfHalfH), uPerfHalfH * 0.4);
           if (dTop < 0.0 || dBot < 0.0) discard;
@@ -319,6 +356,11 @@ const atlasPhotos = await Promise.all(
           uAtlasCols: { value: 1 },
           uAtlasRows: { value: 1 },
           uAtlasFrames: { value: 1 },
+          // The strip shape stays still; scrolling/drift only change this
+          // (brief section 2) - added to vUv.x once, up front, so frame
+          // lookup, perforations and the gap band all advance together
+          // exactly like a real strip feeding through a projector.
+          uOffset: { value: 0 },
         },
         vertexShader,
         fragmentShader,
@@ -546,16 +588,26 @@ const atlasPhotos = await Promise.all(
       const statsEl = document.getElementById('stats')!;
       let frameCount = 0;
       let lastFpsTime = performance.now();
+      let lastFrameTime = performance.now();
       function animate() {
         requestAnimationFrame(animate);
+
+        const now = performance.now();
+        const dt = Math.min((now - lastFrameTime) / 1000, 0.1); // clamp guards against tab-away catch-up jumps
+        lastFrameTime = now;
+
+        const idle = now - feed.lastInputTime > IDLE_RESUME_MS;
+        if (idle) feed.offset += DRIFT_SPEED_PER_SEC * dt;
+        material.uniforms.uOffset.value = feed.offset;
+
         controls.update();
         renderer.render(scene, camera);
 
         frameCount++;
-        const now = performance.now();
         if (now - lastFpsTime > 500) {
           const fps = Math.round((frameCount * 1000) / (now - lastFpsTime));
-          statsEl.textContent = `${fps} fps · ${SEGMENTS} segments · ${ribbonMesh.geometry.attributes.position.count} verts`;
+          const mode = idle ? 'drift' : 'scroll';
+          statsEl.textContent = `${fps} fps · ${SEGMENTS} segments · ${ribbonMesh.geometry.attributes.position.count} verts · offset ${feed.offset.toFixed(2)} (${mode})`;
           frameCount = 0;
           lastFpsTime = now;
         }
@@ -571,6 +623,24 @@ const atlasPhotos = await Promise.all(
         material.uniforms.uAtlasFrames.value = atlas.frames;
 
         rebuild();
+
+        // Scroll drives feed via a relative delta each update (see the
+        // `feed` comment above) - never `feed.offset = self.progress * N`,
+        // which would snap on every resize/refresh and on the very first
+        // update after idle drift had already moved the offset elsewhere.
+        let lastProgress = 0;
+        ScrollTrigger.create({
+          trigger: '#scroll-spacer',
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: true, // not a numeric lag value - see CLAUDE.md's Lenis/GSAP double-smoothing note
+          onUpdate: (self) => {
+            feed.offset += (self.progress - lastProgress) * SCROLL_RANGE_FRAMES;
+            lastProgress = self.progress;
+            feed.lastInputTime = performance.now();
+          },
+        });
+
         animate();
       }
       main();
