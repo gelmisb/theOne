@@ -4,13 +4,6 @@ import Header from '../components/Header.astro';
 import PageHero from '../components/PageHero.astro';
 import Sprockets from '../components/Sprockets.astro';
 import Footer from '../components/Footer.astro';
-import type { ImageMetadata } from 'astro';
-
-const heroImages = import.meta.glob<{ default: ImageMetadata }>(
-  '/src/assets/photos/portfolio/Barbershops.jpg',
-  { eager: true }
-);
-const heroImage = Object.values(heroImages)[0]?.default;
 
 const included = [
   { k: 'Half-day on-site shoot', v: 'Shot at your business, not a studio — real premises, real staff, real product.' },
@@ -31,7 +24,6 @@ const included = [
     frameLabel="Photography"
     title="Real photos of your actual business, not another stock library."
     subtitle="Half a day on-site is enough to replace every generic stock photo on your website, your Google listing, and your social feeds with something that's actually yours."
-    image={heroImage}
   />
 
   <section id="photography-included">

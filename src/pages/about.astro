@@ -4,13 +4,6 @@ import Header from '../components/Header.astro';
 import PageHero from '../components/PageHero.astro';
 import Sprockets from '../components/Sprockets.astro';
 import Footer from '../components/Footer.astro';
-import type { ImageMetadata } from 'astro';
-
-const aboutImages = import.meta.glob<{ default: ImageMetadata }>(
-  '/src/assets/photos/about.{jpg,jpeg,png,webp}',
-  { eager: true }
-);
-const aboutImage = Object.values(aboutImages)[0]?.default;
 
 const timeline = [
   { k: '10+ yrs', v: 'Senior software engineering — production systems, not side projects' },
@@ -30,7 +23,6 @@ const timeline = [
     frameLabel="About"
     title="Two skill sets that almost never end up in the same business."
     subtitle="Most web studios have never held a camera on a paid job. Most photographers can't ship production-grade software. Horizon Vantage exists because doing both, properly, changes what's actually possible for a small business's online presence."
-    image={aboutImage}
   />
 
   <section id="about-story">
