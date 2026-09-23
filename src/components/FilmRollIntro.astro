@@ -17,7 +17,9 @@ import Sprockets from './Sprockets.astro';
 // watermark crop) don't silently join the roll. 8 real photos as of the
 // critique-driven photo refresh (/impeccable critique intro P2: 3 photos
 // cycling across 24 frames read as an obvious repeating loop) - each now
-// repeats only 3x across the strip instead of 8x.
+// repeats roughly 3x across the strip instead of 8x (the hero photo
+// appears a little more often since HERO_FRAME_INDEX below overrides
+// whatever the i % realPhotos.length cycle would have placed there).
 const rollPhotoEntries = Object.entries(
   import.meta.glob<{ default: ImageMetadata }>(
     '/src/assets/photos/portfolio/{Barbershops,consumables,product advertisement,IMG_0839,IMG_0863,IMG_1643,IMG_3033,IMG_8758}.jpg',

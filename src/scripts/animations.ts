@@ -264,7 +264,15 @@ export function initFilmRollIntro() {
   const sprockets = gsap.utils.toArray<HTMLElement>('.sprockets', section ?? undefined);
   if (!section || !stripViewport || !track || !heroFrame || !heroImg || !heroFnum || !content) return;
 
-  if (prefersReducedMotion) return; // Phase 1's static, flex-centred layout stands as the fallback as-is
+  // Desktop-first pass (brief section 9, Phase 2). This never actually had a
+  // gate - unlike initIntroZoomTransition's own `min-width: 641px` check
+  // just above - so mobile visitors were getting the full ~280vh
+  // scroll-jacked pin with no adaptation, found via /impeccable critique
+  // intro's re-run. Same breakpoint as that existing check, for consistency.
+  // Mobile/reduced-motion get Phase 1's static, flex-centred layout as-is;
+  // a proper mobile variant (shorter pin, fewer frames) is Phase 4.
+  const isDesktop = window.matchMedia('(min-width: 641px)').matches;
+  if (prefersReducedMotion || !isDesktop) return;
 
   const otherFrames = gsap.utils.toArray<HTMLElement>('.fr-frame', track).filter((f) => f !== heroFrame);
   heroFrame.style.willChange = 'transform';
@@ -385,8 +393,14 @@ export function initFilmRollIntro() {
       const x = gsap.utils.interpolate(baseX, lockX, positionEase(pRoll));
       gsap.set(track, { x });
 
+      // pointerEvents rides alongside opacity - without it, the faded-out
+      // wordmark/CTA stayed hit-testable and keyboard-focusable for the
+      // remaining ~92% of the pin (found via /impeccable critique intro's
+      // re-run), an invisible click target sitting at a fixed point on
+      // screen for most of the sequence. Re-enabled on the way back up so
+      // reversing the scroll restores it exactly like everything else here.
       const contentFade = gsap.parseEase('power1.in')(clamp01(p / CONTENT_FADE_END));
-      gsap.set(content, { opacity: 1 - contentFade });
+      gsap.set(content, { opacity: 1 - contentFade, pointerEvents: contentFade >= 1 ? 'none' : 'auto' });
 
       const dim = gsap.parseEase('power1.out')(clamp01((p - DIM_START) / (ROLL_LOCK_END - DIM_START)));
       gsap.set(otherFrames, { opacity: 1 - dim });
