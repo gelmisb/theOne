@@ -11,26 +11,36 @@ import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import Sprockets from './Sprockets.astro';
 
-// Real photos only (brief section 4) — only 3 of the 5 portfolio photos
-// are real, non-AI-generated (Portfolio.astro's GENERATED_FILES set
-// excludes the other 2). Repeated to fill the strip until more real
-// shoots exist; add filenames here first when they do, nothing else
-// needs to change.
+// Real photos only (brief section 4) — explicitly enumerated rather than a
+// bare wildcard so newly-dropped files (e.g. AI-generated portfolio
+// placeholders, or the two gb-Captured-watermarked shoots still pending a
+// watermark crop) don't silently join the roll. 8 real photos as of the
+// critique-driven photo refresh (/impeccable critique intro P2: 3 photos
+// cycling across 24 frames read as an obvious repeating loop) - each now
+// repeats only 3x across the strip instead of 8x.
 const rollPhotoEntries = Object.entries(
   import.meta.glob<{ default: ImageMetadata }>(
-    '/src/assets/photos/portfolio/{Barbershops,consumables,product advertisement}.jpg',
+    '/src/assets/photos/portfolio/{Barbershops,consumables,product advertisement,IMG_0839,IMG_0863,IMG_1643,IMG_3033,IMG_8758}.jpg',
     { eager: true }
   )
 );
 const realPhotos = rollPhotoEntries.map(([, m]) => m.default);
 
 // Phase 3: the hero frame must be the same photo as Layout.astro's
-// persist-bg (also Barbershops.jpg, see index.astro's Phase 1 commit) —
-// Beat 4 expands this frame until it fills the viewport and hands off into
-// Hero, which is sitting on that same fixed background the whole time. If
-// the hero frame showed a different photo, the handoff would visibly swap
-// images instead of reading as one continuous reveal.
-const heroPhotoEntry = rollPhotoEntries.find(([path]) => path.includes('Barbershops'));
+// persist-bg - Beat 4 expands this frame until it fills the viewport and
+// hands off into Hero, which is sitting on that same fixed background the
+// whole time. If the hero frame showed a different photo, the handoff
+// would visibly swap images instead of reading as one continuous reveal.
+//
+// IMG_0839 (on-site gym coaching), not Barbershops - critique P2: Barbershops
+// is the one photo blown up to full-bleed at the climax, and it's the exact
+// shoot PRODUCT.md flags as dated by a visible COVID-era mask. Barbershops
+// stays in the general roll rotation (fine at strip size, per PRODUCT.md),
+// just isn't the hero/full-bleed photo anymore. Gym coaching over a car/bike
+// glamour shot: PRODUCT.md's Users section names cafés, salons, gyms,
+// clinics and trades specifically - this reads as "a real business shot
+// on-site," matching Hero's own "we shoot your business on-site" claim.
+const heroPhotoEntry = rollPhotoEntries.find(([path]) => path.includes('IMG_0839'));
 const heroPhoto = heroPhotoEntry ? heroPhotoEntry[1].default : realPhotos[0];
 
 // Phase 2: more frames than Phase 1 used, and the hero frame sits well off
@@ -55,14 +65,24 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
           <div class="fr-frame" data-hero-frame={f.isHero ? 'true' : undefined}>
             <span class="fr-fnum mono">{f.num}</span>
             {f.photo && (
+              // Every other frame only ever renders at ~130px, so 360px is
+              // already 2x-retina headroom. The hero frame is different: Beat
+              // 4 (initFilmRollIntro, animations.ts) scales it via CSS
+              // transform up to near full viewport width - capping it at the
+              // same 360px source meant upscaling ~4-5x, producing real,
+              // visible blur that had nothing to do with the intentional
+              // develop-filter blur (which resolves to 0 well before the
+              // frame finishes expanding). Only the hero frame gets a larger
+              // srcset/sizes so the "sharp positive" payoff actually is sharp
+              // once it fills the screen.
               <Image
                 src={f.photo}
                 alt=""
                 class="fr-photo"
                 width={360}
                 height={360}
-                widths={[180, 240, 360]}
-                sizes="180px"
+                widths={f.isHero ? [180, 240, 360, 640, 960, 1440] : [180, 240, 360]}
+                sizes={f.isHero ? '(max-width: 900px) 100vw, 1440px' : '180px'}
                 loading={i < 4 ? 'eager' : 'lazy'}
                 fetchpriority={i === 0 ? 'high' : undefined}
               />
