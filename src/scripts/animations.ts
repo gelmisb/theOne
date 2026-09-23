@@ -293,8 +293,28 @@ export function initFilmRollIntro() {
   // transforms this same element is about to receive - safe to recompute on
   // resize. (Resizing mid-scroll, while the frame is already mid-transform,
   // is a known edge case this doesn't specially guard against.)
+  //
+  // offsetLeft is only relative to the element's own offsetParent, not the
+  // section - and a flex item's offsetParent is its flex container, even
+  // when that container itself has no `position` set. .fr-frame's immediate
+  // offsetParent turns out to be .fr-track, not .filmroll-intro, so reading
+  // heroFrame.offsetLeft alone silently dropped .fr-track's own ~882px
+  // flex-centering offset (relative to the section) - the hero frame was
+  // never actually locking to centre, just to a fixed amount short of it.
+  // Walking the real offsetParent chain instead of assuming one hop fixes
+  // this generally, rather than hardcoding today's specific DOM depth.
+  function cumulativeOffsetLeft(el: HTMLElement, stopAt: HTMLElement): number {
+    let x = 0;
+    let node: HTMLElement | null = el;
+    while (node && node !== stopAt) {
+      x += node.offsetLeft;
+      node = node.offsetParent as HTMLElement | null;
+    }
+    return x;
+  }
+
   function measure() {
-    const center = heroFrame!.offsetLeft + heroFrame!.offsetWidth / 2;
+    const center = cumulativeOffsetLeft(heroFrame!, section!) + heroFrame!.offsetWidth / 2;
     lockX = window.innerWidth / 2 - center;
 
     const rect = heroFrame!.getBoundingClientRect();
