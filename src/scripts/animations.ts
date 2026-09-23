@@ -603,12 +603,25 @@ export function initContactSheetReveal() {
   );
 }
 
-/** Nav background solidifies once the user scrolls past the hero. */
+/**
+ * Nav background solidifies once the user scrolls past the hero. Triggers
+ * off Hero's own top reaching the viewport top, not a fixed scroll offset -
+ * with FilmRollIntro's ~280vh pin now occupying the very top of the page,
+ * a bare `start: 'top -80'` (no `trigger`, so it measures from the
+ * document body) fired within the first 80px of scroll - a glass header
+ * appearing while the intro was still mid-roll, before Hero was anywhere
+ * near the viewport. Confirmed via critique (/impeccable critique intro):
+ * this broke DESIGN.md's Scroll-State Glass Rule (glass = floating/active
+ * signal, not a timing accident) and made the intro's pinned scene feel
+ * interrupted by chrome that belonged to the next section.
+ */
 export function initNavOnScroll() {
   const header = document.querySelector('header');
-  if (!header) return;
+  const hero = document.getElementById('hero');
+  if (!header || !hero) return;
   ScrollTrigger.create({
-    start: 'top -80',
+    trigger: hero,
+    start: 'top top',
     end: 99999,
     toggleClass: { targets: header, className: 'scrolled' },
   });
