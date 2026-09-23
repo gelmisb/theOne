@@ -9,11 +9,11 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 /**
  * Fixes a real bug: loading the page directly at a URL hash (e.g. /#offer)
  * makes the browser jump there natively, often before ScrollTrigger has
- * measured the pinned Intro section - if that jump lands past Intro's
+ * measured the pinned FilmRollIntro section - if that jump lands past its
  * trigger range before GSAP has anything to measure against, the pin can
- * get stuck in its pinned (position: fixed) state indefinitely, leaving
- * Intro's portal artwork rendered fixed at the top of the viewport no
- * matter how far down the page you actually are.
+ * get stuck in its pinned (position: fixed) state indefinitely, leaving the
+ * intro rendered fixed at the top of the viewport no matter how far down
+ * the page you actually are.
  *
  * Must run before any other init function sets up a pinned ScrollTrigger.
  * Forces the page to start at the top (so every pin measures correctly),
@@ -82,141 +82,6 @@ export function initScrollReveals() {
 }
 
 /**
- * Intro reveal - plays once on load. The grid materializes, then the iris
- * opens onto the wordmark.
- *
- * The hidden starting state (clip-path, opacity, y) is set in Intro.astro's
- * CSS, not here - CSS paints hidden before this script even runs, so there's
- * no flash of the fully-visible heading followed by a JS-driven snap to
- * hidden. This function only needs to animate back *out* of that state.
- */
-export function initIntroTimeline() {
-  const intro = document.querySelector('.intro');
-  if (!intro) return;
-
-  if (prefersReducedMotion) {
-    gsap.set('.intro-reveal', { clipPath: 'circle(150% at 50% 50%)' });
-    return;
-  }
-
-  const tl = gsap.timeline({ defaults: { ease: 'power2.inOut' } });
-
-  tl.to('.intro-reveal', { clipPath: 'circle(140% at 50% 50%)', duration: 1.1, ease: 'power3.inOut' }, 0.6)
-    .fromTo('[data-intro-el]', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.12 }, 1.05)
-    .fromTo('.intro-word', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7 }, 1.05)
-    .fromTo('.intro-scroll', { opacity: 0 }, { opacity: 0.7, duration: 0.6 }, 1.65);
-}
-
-/**
- * Pinned "fly through the window" scroll transition, ported from GreenSock's
- * official pinned-zoom demo (codepen.io/GreenSock/pen/YzbPYMx): a foreground
- * "porthole" photo (a dark window opening) scales up and pushes toward the
- * viewer via CSS 3D perspective while the section stays pinned for a fixed
- * scroll distance, its opening growing to reveal the persistent site
- * background (Layout.astro's .persist-bg, fixed behind every section)
- * underneath, before releasing into Hero. Replaces the old mosaic-lens
- * effect, which didn't read well here.
- *
- * `end` is a function (not a fixed string) so the pin covers a consistent
- * 0.15 viewport-heights of scroll regardless of the visitor's screen height -
- * a fixed "+=15%" would otherwise scale off the section's own height
- * instead, behaving inconsistently on very short or very tall viewports.
- *
- * Video is desktop-only (see the matching `min-width: 641px` breakpoint on
- * both the CSS in Intro.astro and the <source media> query that stops
- * mobile from ever fetching the file) - below that, this always takes the
- * image-transform path below, even when a video element exists in the DOM,
- * since on mobile it has no loaded source to play.
- */
-export function initIntroZoomTransition() {
-  const intro = document.querySelector<HTMLElement>('.intro');
-  if (!intro) return;
-
-  const isDesktop = window.matchMedia('(min-width: 641px)').matches;
-  const video = isDesktop ? document.querySelector<HTMLVideoElement>('[data-intro-video]') : null;
-  if (video) {
-    initIntroVideoZoomTransition(intro, video);
-    return;
-  }
-
-  const feature = document.querySelector<HTMLElement>('[data-intro-feature]');
-  if (!feature) return;
-
-  if (prefersReducedMotion) return; // no pin, no zoom - plain scroll past
-
-  gsap
-    .timeline({
-      scrollTrigger: {
-        trigger: intro,
-        start: 'top top',
-        end: () => '+=' + window.innerHeight * 0.9,
-        pin: true,
-        scrub: true,
-        invalidateOnRefresh: true,
-      },
-    })
-    .to('.intro-reveal, .intro-frame, .intro-scroll', { opacity: 0, ease: 'power1.inOut' }, 0)
-    // scale + z (via the 500px perspective) compound multiplicatively -
-    // at scale:6 / z:350 that was ~6 × (500/(500-350)) ≈ 20x total
-    // magnification, far beyond what the 1456px-wide source image
-    // (src/assets/photos/intro-window.png) can hold up to, hence the
-    // blocky/blurred look. Dialed back to a combined ~3.4x (2 × 500/300)
-    // - still a real "push toward camera" zoom, just within what this
-    // source resolution can render cleanly. Raise this again if a
-    // higher-resolution source image is swapped in.
-    .to(feature, { scale: 2, z: 200, transformOrigin: 'center center', ease: 'power1.inOut' }, 0)
-    .to(feature, { opacity: 0, ease: 'power1.in' }, 0.5);
-}
-
-/**
- * Single-clip video porthole: plays once, unlooped, the moment the page
- * loads - no `loop` attribute, so it naturally holds its last frame once
- * done. If the visitor scrolls into the pinned range (whether or not that
- * initial play has finished), scroll takes over: `currentTime` is driven
- * directly by scroll progress, same mechanism the pin/scrub setup already
- * uses. Scrolling back up past the start just pauses on the first frame -
- * this is a one-shot intro, not a loop, so it doesn't replay itself.
- * Reuses the same pin/start/end/scrub ScrollTrigger shape as the
- * image-transform version above - only what happens inside differs.
- */
-function initIntroVideoZoomTransition(intro: HTMLElement, video: HTMLVideoElement) {
-  if (prefersReducedMotion) return; // sits on its poster (first) frame, unplayed
-
-  video.play().catch(() => {});
-
-  let scrubbing = false;
-
-  gsap
-    .timeline({
-      scrollTrigger: {
-        trigger: intro,
-        start: 'top top',
-        end: () => '+=' + window.innerHeight * 0.9,
-        pin: true,
-        scrub: true,
-        invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          if (self.progress <= 0) {
-            if (!scrubbing) return;
-            scrubbing = false;
-            video.pause();
-            video.currentTime = 0;
-            return;
-          }
-          if (!scrubbing) {
-            scrubbing = true;
-            video.pause();
-          }
-          if (video.readyState >= 1 && video.duration) {
-            video.currentTime = self.progress * video.duration;
-          }
-        },
-      },
-    })
-    .to('.intro-reveal, .intro-frame, .intro-scroll', { opacity: 0, ease: 'power1.inOut' }, 0);
-}
-
-/**
  * Film roll intro (Phase 3): idle drift, then one scroll-scrubbed sequence
  * covering all four storyboard beats from FILM-ROLL-INTRO-BRIEF.md section 3:
  *
@@ -265,10 +130,8 @@ export function initFilmRollIntro() {
   if (!section || !stripViewport || !track || !heroFrame || !heroImg || !heroFnum || !content) return;
 
   // Desktop-first pass (brief section 9, Phase 2). This never actually had a
-  // gate - unlike initIntroZoomTransition's own `min-width: 641px` check
-  // just above - so mobile visitors were getting the full ~280vh
-  // scroll-jacked pin with no adaptation, found via /impeccable critique
-  // intro's re-run. Same breakpoint as that existing check, for consistency.
+  // gate, so mobile visitors were getting the full ~280vh scroll-jacked pin
+  // with no adaptation - found via /impeccable critique intro's re-run.
   // Mobile/reduced-motion get Phase 1's static, flex-centred layout as-is;
   // a proper mobile variant (shorter pin, fewer frames) is Phase 4.
   const isDesktop = window.matchMedia('(min-width: 641px)').matches;
@@ -448,8 +311,8 @@ export function initFilmRollIntro() {
 }
 
 /**
- * Fades Layout.astro's persistent journey background (revealed through
- * Intro's portal, visible through Hero) out as Gap scrolls through the
+ * Fades Layout.astro's persistent journey background (visible through Hero,
+ * which has no background image of its own) out as Gap scrolls through the
  * viewport, scrubbed to scroll position - fully faded by the time Gap has
  * passed, handing off cleanly to Gap's own background photo.
  */
