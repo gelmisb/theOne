@@ -10,6 +10,7 @@
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import Sprockets from './Sprockets.astro';
+import logoWatermark from '../assets/photos/logo/logo_transparent.png';
 
 // Real photos only (brief section 4) — explicitly enumerated rather than a
 // bare wildcard so newly-dropped files (e.g. AI-generated portfolio
@@ -59,6 +60,15 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
 ---
 
 <section class="filmroll-intro" id="intro">
+  <Image
+    src={logoWatermark}
+    alt=""
+    aria-hidden="true"
+    class="fr-watermark"
+    width={794}
+    height={702}
+    loading="eager"
+  />
   <div class="fr-strip-wrap">
     <Sprockets />
     <div class="fr-strip">
@@ -115,7 +125,25 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
     background: var(--bg);
   }
 
-  .fr-strip-wrap{ width: 100%; }
+  /* Faint logo watermark behind everything - large, centred, barely there.
+     0.05 opacity matches global.css's .grain layer, the established
+     "atmospheric, not a focal element" convention in this system. An
+     earlier idea was the full leather-mockup logo render as the section's
+     actual background image, rejected because it has its own baked-in
+     "Horizon Vantage" wordmark and tagline that would sit right behind
+     .fr-content's live ones - two copies of the same text competing in
+     the first five seconds. This is the icon mark only, faint enough to
+     read as texture rather than a second logo. */
+  .fr-watermark{
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(60vw, 820px); height: auto;
+    opacity: 0.05;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .fr-strip-wrap{ width: 100%; position: relative; z-index: 1; }
   /* .fr-strip is the fixed viewport - it never moves or transforms. It
      centres .fr-track (wider than the viewport by design) via flex, which
      is also what the no-JS/reduced-motion fallback relies on for its
