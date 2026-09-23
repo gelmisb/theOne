@@ -14,6 +14,12 @@
         "value": "montserrat",
         "createdAt": "2026-09-23T09:16:28.433Z",
         "reason": "Established site-wide display typeface from prior work, predates this session; this session only fixed it never actually loading, did not choose it"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(0,0,0,0.8)",
+        "createdAt": "2026-09-23T11:22:35.172Z",
+        "reason": "Standard text-shadow legibility utility on .fr-fnum over photos, not a brand/palette color - confirmed false positive during /impeccable polish sweep of critique findings"
       }
     ]
   }

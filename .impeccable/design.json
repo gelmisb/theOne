@@ -105,6 +105,14 @@
       "description": "Signature film-sprocket-hole texture used as a divider between major sections.",
       "html": "<div class=\"ds-sprockets\"></div>",
       "css": ".ds-sprockets { height: 14px; width: 100%; background-image: radial-gradient(circle, rgba(230,196,104,0.45) 1.6px, transparent 1.7px); background-size: 22px 14px; background-position: 10px center; opacity: 0.55; }"
+    },
+    {
+      "name": "Grain & Vignette",
+      "kind": "custom",
+      "refersTo": "grain-vignette",
+      "description": "Signature atmosphere - fixed film-grain texture and radial vignette sitting above every section on every page, disabled under prefers-reduced-motion.",
+      "html": "<div class=\"ds-grain\"></div><div class=\"ds-vignette\"></div>",
+      "css": ".ds-grain { position: fixed; inset: -10%; z-index: 999; pointer-events: none; opacity: 0.05; mix-blend-mode: overlay; animation: ds-grain-shift 1s steps(6) infinite; } .ds-vignette { position: fixed; inset: 0; z-index: 998; pointer-events: none; background: radial-gradient(ellipse 120% 80% at 50% 40%, transparent 55%, rgba(0,0,0,0.4) 100%); } @keyframes ds-grain-shift { 0% { transform: translate(0,0); } 50% { transform: translate(-2%,2%); } 100% { transform: translate(0,0); } } @media (prefers-reduced-motion: reduce) { .ds-grain { animation: none; } }"
     }
   ],
   "narrative": {

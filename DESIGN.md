@@ -163,6 +163,9 @@ A thin horizontal strip of small brass dots on a repeating radial-gradient patte
 ### Frame Tag (signature component)
 A small glowing safelight dot + a mono, uppercase "FRAME 00N" label, used to number section headers the way a contact sheet numbers its frames. Its own CSS comment calls it out as this system's "signature element" — every section head that uses it should keep the numbering sequential and the dot glow (`box-shadow: 0 0 8px 1px rgba(224,141,75,0.6)`) intact.
 
+### Grain & Vignette (signature component)
+A fixed, full-viewport film-grain texture (`opacity: 0.05`, `mix-blend-mode: overlay`, a subtly shifting SVG turbulence pattern) plus a soft radial vignette (transparent center fading to `rgba(0,0,0,0.4)` at the edges), both sitting above every section on every page. Its own CSS comment calls it "signature atmosphere" — it's what keeps the whole site feeling like it's being viewed through a lens rather than flat screen glass. Disabled (`animation: none`) under `prefers-reduced-motion`; the static grain and vignette otherwise remain.
+
 ## Do's and Don'ts
 
 ### Do:
