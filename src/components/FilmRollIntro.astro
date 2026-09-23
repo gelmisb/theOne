@@ -22,8 +22,12 @@ const rollPhotoModules = import.meta.glob<{ default: ImageMetadata }>(
 );
 const realPhotos = Object.values(rollPhotoModules).map((m) => m.default);
 
-const FRAME_COUNT = 10;
-const HERO_FRAME_INDEX = 4; // Phase 2+ target for the Beat 2 lock — not visually distinguished yet, no animation exists to distinguish it with
+// Phase 2: more frames than Phase 1 used, and the hero frame sits well off
+// the strip's natural (flex-centred) resting position so the scroll-driven
+// roll has real distance to cover before it locks — see initFilmRollIntro
+// in animations.ts.
+const FRAME_COUNT = 24;
+const HERO_FRAME_INDEX = 19; // leaves runway before it to roll through, and a few tail frames after it for the overshoot-then-settle
 const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
   photo: realPhotos[i % realPhotos.length],
   num: String(i + 1).padStart(3, '0'),
@@ -34,25 +38,27 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
 <section class="filmroll-intro" id="intro">
   <div class="fr-strip-wrap">
     <Sprockets />
-    <div class="fr-strip" aria-hidden="true">
-      {frames.map((f, i) => (
-        <div class="fr-frame" data-hero-frame={f.isHero ? 'true' : undefined}>
-          <span class="fr-fnum mono">{f.num}</span>
-          {f.photo && (
-            <Image
-              src={f.photo}
-              alt=""
-              class="fr-photo"
-              width={360}
-              height={360}
-              widths={[180, 240, 360]}
-              sizes="180px"
-              loading={i < 4 ? 'eager' : 'lazy'}
-              fetchpriority={i === 0 ? 'high' : undefined}
-            />
-          )}
-        </div>
-      ))}
+    <div class="fr-strip">
+      <div class="fr-track" aria-hidden="true">
+        {frames.map((f, i) => (
+          <div class="fr-frame" data-hero-frame={f.isHero ? 'true' : undefined}>
+            <span class="fr-fnum mono">{f.num}</span>
+            {f.photo && (
+              <Image
+                src={f.photo}
+                alt=""
+                class="fr-photo"
+                width={360}
+                height={360}
+                widths={[180, 240, 360]}
+                sizes="180px"
+                loading={i < 4 ? 'eager' : 'lazy'}
+                fetchpriority={i === 0 ? 'high' : undefined}
+              />
+            )}
+          </div>
+        ))}
+      </div>
     </div>
     <Sprockets dark />
   </div>
@@ -77,11 +83,24 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
   }
 
   .fr-strip-wrap{ width: 100%; }
+  /* .fr-strip is the fixed viewport - it never moves or transforms. It
+     centres .fr-track (wider than the viewport by design) via flex, which
+     is also what the no-JS/reduced-motion fallback relies on for its
+     static centred look. .fr-track is what initFilmRollIntro (Phase 2,
+     animations.ts) actually translates - keeping the transform off the
+     overflow:hidden element itself means the clip boundary stays put while
+     the frames slide past it, instead of the whole clipped box sliding as
+     one rigid unit. */
   .fr-strip{
     display: flex; justify-content: center;
-    gap: 3px;
     overflow: hidden;
     padding: 3px 0;
+  }
+  .fr-track{
+    display: flex;
+    gap: 3px;
+    width: max-content;
+    will-change: transform;
   }
   .fr-frame{
     position: relative;
@@ -124,6 +143,6 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
   @media (max-width: 640px){
     .filmroll-intro{ padding: 120px 0 50px; gap: 40px; }
     .fr-frame{ width: 78px; }
-    .fr-strip{ gap: 2px; }
+    .fr-track{ gap: 2px; }
   }
 </style>

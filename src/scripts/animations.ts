@@ -217,6 +217,109 @@ function initIntroVideoZoomTransition(intro: HTMLElement, video: HTMLVideoElemen
 }
 
 /**
+ * Film roll intro (Phase 2): idle drift before scroll, then a scroll-scrubbed
+ * roll that decelerates and locks the designated hero frame to centre while
+ * its neighbours dim - the "picking a frame off a contact sheet" moment from
+ * FILM-ROLL-INTRO-BRIEF.md's Beat 1/2. Desktop-first pass; mobile and
+ * reduced-motion variants (gsap.matchMedia()) land in Phase 4. Beat 3/4
+ * (develop + expand into Hero) aren't built yet, so the pin only spans
+ * Beats 0-2 for now - it'll grow once Phase 3 adds the rest.
+ *
+ * The idle-to-scroll handoff is the one piece that has to be seamless (brief
+ * Beat 1: "no jump in position or speed"). Rather than a second GSAP tween
+ * with its own "from" value - which GSAP would capture at creation time, not
+ * at the actual moment scrolling starts - the roll is computed by hand in a
+ * single onUpdate callback, using `baseX`: .fr-track's live x position, read
+ * the instant the pin engages (onEnter). That guarantees no position jump
+ * regardless of where idle drift happened to be mid-oscillation.
+ */
+export function initFilmRollIntro() {
+  const section = document.querySelector<HTMLElement>('.filmroll-intro');
+  const track = document.querySelector<HTMLElement>('.fr-track');
+  const heroFrame = track?.querySelector<HTMLElement>('[data-hero-frame="true"]');
+  const content = document.querySelector<HTMLElement>('.fr-content');
+  if (!section || !track || !heroFrame || !content) return;
+
+  if (prefersReducedMotion) return; // Phase 1's static, flex-centred layout stands as the fallback as-is
+
+  const otherFrames = gsap.utils.toArray<HTMLElement>('.fr-frame', track).filter((f) => f !== heroFrame);
+
+  const ROLL_END = 0.65; // fraction of this section's pin where the roll gives way to the stop/lock
+  const CONTENT_FADE_END = 0.18; // wordmark/tagline/CTA clear out early, per Beat 1
+  const OVERSHOOT_PX = 220; // roll past the lock point, then ease back - reads as a reel settling, not a hard stop
+
+  let lockX = 0;
+  let rollX = 0;
+  let baseX = 0;
+
+  // offsetLeft is layout position, unaffected by the transform this same
+  // element is about to receive - safe to recompute on resize.
+  function measure() {
+    const center = heroFrame!.offsetLeft + heroFrame!.offsetWidth / 2;
+    lockX = window.innerWidth / 2 - center;
+    rollX = lockX - OVERSHOOT_PX;
+  }
+  measure();
+
+  // Beat 0: a slow, small back-and-forth so the strip reads as alive before
+  // anyone scrolls. Paused off-screen and when the tab is hidden.
+  const idleTween = gsap.to(track, {
+    x: '+=22',
+    duration: 5,
+    ease: 'sine.inOut',
+    yoyo: true,
+    repeat: -1,
+  });
+
+  const idleVisibility = ScrollTrigger.create({
+    trigger: section,
+    start: 'top bottom',
+    end: 'bottom top',
+    onToggle: (self) => {
+      if (self.isActive) idleTween.play();
+      else idleTween.pause();
+    },
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) idleTween.pause();
+    else if (idleVisibility.isActive) idleTween.play();
+  });
+
+  ScrollTrigger.create({
+    trigger: section,
+    start: 'top top',
+    end: () => '+=' + window.innerHeight * 1.6,
+    pin: true,
+    scrub: 0.4,
+    invalidateOnRefresh: true,
+    onRefresh: measure,
+    onEnter: () => {
+      idleTween.pause();
+      baseX = Number(gsap.getProperty(track, 'x')) || 0;
+    },
+    onLeaveBack: () => idleTween.play(),
+    onUpdate: (self) => {
+      const p = self.progress;
+      let x: number;
+
+      if (p <= ROLL_END) {
+        const t = gsap.parseEase('power2.in')(p / ROLL_END);
+        x = gsap.utils.interpolate(baseX, rollX, t);
+        gsap.set(content, { opacity: 1 - gsap.parseEase('power1.in')(Math.min(p / CONTENT_FADE_END, 1)) });
+        gsap.set(otherFrames, { opacity: 1 });
+      } else {
+        const t = gsap.parseEase('power3.out')((p - ROLL_END) / (1 - ROLL_END));
+        x = gsap.utils.interpolate(rollX, lockX, t);
+        gsap.set(otherFrames, { opacity: 1 - t * 0.75 });
+      }
+
+      gsap.set(track, { x });
+    },
+  });
+}
+
+/**
  * Fades Layout.astro's persistent journey background (revealed through
  * Intro's portal, visible through Hero) out as Gap scrolls through the
  * viewport, scrubbed to scroll position - fully faded by the time Gap has
