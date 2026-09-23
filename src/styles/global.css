@@ -119,6 +119,26 @@ h2.section-h{
 h2.section-h i{ font-style: italic; color: var(--brass); }
 .section-sub{ color: var(--paper-dim); font-size: 17px; line-height: 1.65; }
 
+/* Skip link - lets a keyboard-only visitor jump straight past FilmRollIntro's
+   ~280vh scroll-pinned sequence to real content, instead of tabbing through
+   the whole thing or being stuck behind it. Off-screen until focused, same
+   visual recipe as .btn-primary (brass fill, ink-navy text, mono label) so
+   it reads as a real, intentional action rather than a stray browser
+   default. Added per /impeccable critique's P3 finding on FilmRollIntro. */
+.skip-link{
+  position: absolute;
+  top: -100px; left: 12px;
+  z-index: 1000;
+  background: var(--brass); color: var(--bg);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
+  text-decoration: none;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  transition: top .2s ease;
+}
+.skip-link:focus{ top: 12px; }
+
 .btn{
   display: inline-flex; align-items: center; gap: 10px;
   padding: 15px 28px;
