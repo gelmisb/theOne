@@ -273,7 +273,16 @@ export function initFilmRollIntro() {
   const CONTENT_FADE_END = 0.08; // wordmark/tagline/CTA clear out almost immediately, per Beat 1
   const DIM_START = 0.24;
   const ROLL_LOCK_END = 0.4; // Beat 1/2 complete
-  const DEVELOP_END = 0.72; // Beat 3 complete; Beat 4 runs DEVELOP_END -> 1
+  const DEVELOP_END = 0.72; // colour/focus fully resolved by here
+  // Beat 4 starts partway through Beat 3 rather than waiting for it to
+  // finish. Holding the frame at native size for the entire develop beat
+  // (0.4 -> 0.72, ~a third of the whole pin) left the screen almost empty -
+  // a small, blurred square in a sea of black for a long stretch, which
+  // critique found reads as a stalled/broken page rather than film
+  // developing. Starting the scale-up here means the frame is visibly
+  // growing and gaining presence for the second half of the develop beat,
+  // instead of sitting inert until colour finishes resolving.
+  const EXPAND_START = 0.5;
   const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 
   // A single ease drives the whole roll, rather than splicing a "roll" ease
@@ -405,8 +414,10 @@ export function initFilmRollIntro() {
         });
       }
 
-      // Beat 4 - expand into Hero, then the pin releases
-      const te = expandEase(clamp01((p - DEVELOP_END) / (1 - DEVELOP_END)));
+      // Beat 4 - expand into Hero, then the pin releases. Starts at
+      // EXPAND_START (mid-develop), not DEVELOP_END - see that constant's
+      // comment above.
+      const te = expandEase(clamp01((p - EXPAND_START) / (1 - EXPAND_START)));
       gsap.set(heroFrame, {
         scale: 1 + (scaleCover - 1) * te,
         y: expandTranslateY * te,
