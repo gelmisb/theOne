@@ -244,12 +244,17 @@ export function initFilmRollIntro() {
 
   const otherFrames = gsap.utils.toArray<HTMLElement>('.fr-frame', track).filter((f) => f !== heroFrame);
 
-  const ROLL_END = 0.65; // fraction of this section's pin where the roll gives way to the stop/lock
   const CONTENT_FADE_END = 0.18; // wordmark/tagline/CTA clear out early, per Beat 1
-  const OVERSHOOT_PX = 220; // roll past the lock point, then ease back - reads as a reel settling, not a hard stop
+  const DIM_START = 0.55; // neighbouring frames start dimming as the lock approaches
+  // A single ease drives the whole roll, rather than splicing a "roll" ease
+  // and a "lock" ease together at a fixed progress fraction: two eases
+  // meeting at a hard boundary have different slopes on either side (their
+  // rate of change doesn't match), which reads as a sudden speed change -
+  // "back.out" overshoots past 1 and settles on its own, in one continuous
+  // curve, so there's no seam for that glitch to happen at.
+  const positionEase = gsap.parseEase('back.out(1.2)');
 
   let lockX = 0;
-  let rollX = 0;
   let baseX = 0;
 
   // offsetLeft is layout position, unaffected by the transform this same
@@ -257,7 +262,6 @@ export function initFilmRollIntro() {
   function measure() {
     const center = heroFrame!.offsetLeft + heroFrame!.offsetWidth / 2;
     lockX = window.innerWidth / 2 - center;
-    rollX = lockX - OVERSHOOT_PX;
   }
   measure();
 
@@ -291,7 +295,15 @@ export function initFilmRollIntro() {
     start: 'top top',
     end: () => '+=' + window.innerHeight * 1.6,
     pin: true,
-    scrub: 0.4,
+    // Lenis already smooths raw scroll input (lenis.ts). A numeric scrub
+    // value here would add GSAP's own extra lag on top of that - two
+    // independent smoothing systems fighting each other, which shows up as
+    // jittery, glitchy back-and-forth motion right as scroll velocity
+    // approaches zero (i.e. exactly at the roll-to-lock transition). `true`
+    // ties x directly to Lenis's already-eased position instead; the
+    // back.out ease driving `x` below provides the actual deceleration feel,
+    // so no second layer of lag is needed.
+    scrub: true,
     invalidateOnRefresh: true,
     onRefresh: measure,
     onEnter: () => {
@@ -301,20 +313,15 @@ export function initFilmRollIntro() {
     onLeaveBack: () => idleTween.play(),
     onUpdate: (self) => {
       const p = self.progress;
-      let x: number;
 
-      if (p <= ROLL_END) {
-        const t = gsap.parseEase('power2.in')(p / ROLL_END);
-        x = gsap.utils.interpolate(baseX, rollX, t);
-        gsap.set(content, { opacity: 1 - gsap.parseEase('power1.in')(Math.min(p / CONTENT_FADE_END, 1)) });
-        gsap.set(otherFrames, { opacity: 1 });
-      } else {
-        const t = gsap.parseEase('power3.out')((p - ROLL_END) / (1 - ROLL_END));
-        x = gsap.utils.interpolate(rollX, lockX, t);
-        gsap.set(otherFrames, { opacity: 1 - t * 0.75 });
-      }
-
+      const x = gsap.utils.interpolate(baseX, lockX, positionEase(p));
       gsap.set(track, { x });
+
+      const contentFade = gsap.parseEase('power1.in')(Math.min(p / CONTENT_FADE_END, 1));
+      gsap.set(content, { opacity: 1 - contentFade });
+
+      const dim = gsap.parseEase('power1.out')(Math.max(0, Math.min(1, (p - DIM_START) / (1 - DIM_START))));
+      gsap.set(otherFrames, { opacity: 1 - dim * 0.75 });
     },
   });
 }
