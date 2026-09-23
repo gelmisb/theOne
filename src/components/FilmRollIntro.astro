@@ -16,11 +16,22 @@ import Sprockets from './Sprockets.astro';
 // excludes the other 2). Repeated to fill the strip until more real
 // shoots exist; add filenames here first when they do, nothing else
 // needs to change.
-const rollPhotoModules = import.meta.glob<{ default: ImageMetadata }>(
-  '/src/assets/photos/portfolio/{Barbershops,consumables,product advertisement}.jpg',
-  { eager: true }
+const rollPhotoEntries = Object.entries(
+  import.meta.glob<{ default: ImageMetadata }>(
+    '/src/assets/photos/portfolio/{Barbershops,consumables,product advertisement}.jpg',
+    { eager: true }
+  )
 );
-const realPhotos = Object.values(rollPhotoModules).map((m) => m.default);
+const realPhotos = rollPhotoEntries.map(([, m]) => m.default);
+
+// Phase 3: the hero frame must be the same photo as Layout.astro's
+// persist-bg (also Barbershops.jpg, see index.astro's Phase 1 commit) —
+// Beat 4 expands this frame until it fills the viewport and hands off into
+// Hero, which is sitting on that same fixed background the whole time. If
+// the hero frame showed a different photo, the handoff would visibly swap
+// images instead of reading as one continuous reveal.
+const heroPhotoEntry = rollPhotoEntries.find(([path]) => path.includes('Barbershops'));
+const heroPhoto = heroPhotoEntry ? heroPhotoEntry[1].default : realPhotos[0];
 
 // Phase 2: more frames than Phase 1 used, and the hero frame sits well off
 // the strip's natural (flex-centred) resting position so the scroll-driven
@@ -29,7 +40,7 @@ const realPhotos = Object.values(rollPhotoModules).map((m) => m.default);
 const FRAME_COUNT = 24;
 const HERO_FRAME_INDEX = 19; // leaves runway before it to roll through, and a few tail frames after it for the overshoot-then-settle
 const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
-  photo: realPhotos[i % realPhotos.length],
+  photo: i === HERO_FRAME_INDEX ? heroPhoto : realPhotos[i % realPhotos.length],
   num: String(i + 1).padStart(3, '0'),
   isHero: i === HERO_FRAME_INDEX,
 }));

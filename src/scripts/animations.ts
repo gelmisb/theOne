@@ -217,51 +217,89 @@ function initIntroVideoZoomTransition(intro: HTMLElement, video: HTMLVideoElemen
 }
 
 /**
- * Film roll intro (Phase 2): idle drift before scroll, then a scroll-scrubbed
- * roll that decelerates and locks the designated hero frame to centre while
- * its neighbours dim - the "picking a frame off a contact sheet" moment from
- * FILM-ROLL-INTRO-BRIEF.md's Beat 1/2. Desktop-first pass; mobile and
- * reduced-motion variants (gsap.matchMedia()) land in Phase 4. Beat 3/4
- * (develop + expand into Hero) aren't built yet, so the pin only spans
- * Beats 0-2 for now - it'll grow once Phase 3 adds the rest.
+ * Film roll intro (Phase 3): idle drift, then one scroll-scrubbed sequence
+ * covering all four storyboard beats from FILM-ROLL-INTRO-BRIEF.md section 3:
  *
- * The idle-to-scroll handoff is the one piece that has to be seamless (brief
- * Beat 1: "no jump in position or speed"). Rather than a second GSAP tween
- * with its own "from" value - which GSAP would capture at creation time, not
- * at the actual moment scrolling starts - the roll is computed by hand in a
- * single onUpdate callback, using `baseX`: .fr-track's live x position, read
- * the instant the pin engages (onEnter). That guarantees no position jump
- * regardless of where idle drift happened to be mid-oscillation.
+ *   Beat 1/2 (0 -> ROLL_LOCK_END)  roll, decelerate, lock the hero frame to
+ *                                  centre, dim its neighbours.
+ *   Beat 3   (-> DEVELOP_END)      the locked hero frame develops: colour
+ *                                  negative + soft focus resolving to a sharp
+ *                                  positive, via CSS filter only.
+ *   Beat 4   (-> end)              the developed frame expands (transform
+ *                                  only - scale + translate, never width/
+ *                                  height) until it fills the viewport, then
+ *                                  the pin releases into the real Hero
+ *                                  section underneath.
+ *
+ * Desktop-first pass; mobile and reduced-motion variants (gsap.matchMedia())
+ * are Phase 4.
+ *
+ * Every beat is computed as a pure function of scroll progress `p` inside one
+ * onUpdate, rather than as chained GSAP tweens, for two reasons proven out
+ * fixing Phase 2's roll-to-lock glitch: (1) a tween's "from" value is
+ * captured at creation time, not at the moment it's actually needed - wrong
+ * for the idle-to-scroll handoff, which needs .fr-track's *live* x the
+ * instant the pin engages (`baseX`, read in onEnter). (2) splicing separate
+ * eases at a fixed progress boundary leaves a seam where their slopes don't
+ * match, which reads as a glitch right at that boundary - single continuous
+ * eases per beat avoid that.
+ *
+ * Beat 4's expansion target is computed once in measure(): lockX already
+ * guarantees the hero frame's horizontal centre lands on the viewport centre
+ * once locked, and since no vertical transform is ever applied to the strip,
+ * the frame's vertical position is constant and safe to read once via
+ * getBoundingClientRect. From there, scaling to cover the viewport and
+ * translating to viewport-centre is a standard FLIP-style delta - applied to
+ * the hero frame itself, on top of the track's own x, since transforms on a
+ * parent and child compose independently.
  */
 export function initFilmRollIntro() {
   const section = document.querySelector<HTMLElement>('.filmroll-intro');
+  const stripViewport = document.querySelector<HTMLElement>('.fr-strip');
   const track = document.querySelector<HTMLElement>('.fr-track');
   const heroFrame = track?.querySelector<HTMLElement>('[data-hero-frame="true"]');
+  const heroImg = heroFrame?.querySelector<HTMLElement>('.fr-photo');
+  const heroFnum = heroFrame?.querySelector<HTMLElement>('.fr-fnum');
   const content = document.querySelector<HTMLElement>('.fr-content');
-  if (!section || !track || !heroFrame || !content) return;
+  const sprockets = gsap.utils.toArray<HTMLElement>('.sprockets', section ?? undefined);
+  if (!section || !stripViewport || !track || !heroFrame || !heroImg || !heroFnum || !content) return;
 
   if (prefersReducedMotion) return; // Phase 1's static, flex-centred layout stands as the fallback as-is
 
   const otherFrames = gsap.utils.toArray<HTMLElement>('.fr-frame', track).filter((f) => f !== heroFrame);
+  heroFrame.style.willChange = 'transform';
+  heroImg.style.willChange = 'filter';
 
-  const CONTENT_FADE_END = 0.18; // wordmark/tagline/CTA clear out early, per Beat 1
-  const DIM_START = 0.55; // neighbouring frames start dimming as the lock approaches
+  const CONTENT_FADE_END = 0.08; // wordmark/tagline/CTA clear out almost immediately, per Beat 1
+  const DIM_START = 0.24;
+  const ROLL_LOCK_END = 0.4; // Beat 1/2 complete
+  const DEVELOP_END = 0.72; // Beat 3 complete; Beat 4 runs DEVELOP_END -> 1
+  const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
+
   // A single ease drives the whole roll, rather than splicing a "roll" ease
-  // and a "lock" ease together at a fixed progress fraction: two eases
-  // meeting at a hard boundary have different slopes on either side (their
-  // rate of change doesn't match), which reads as a sudden speed change -
-  // "back.out" overshoots past 1 and settles on its own, in one continuous
-  // curve, so there's no seam for that glitch to happen at.
+  // and a "lock" ease together at a fixed progress fraction (see this
+  // function's doc comment) - "back.out" overshoots past 1 and settles on
+  // its own, in one continuous curve.
   const positionEase = gsap.parseEase('back.out(1.2)');
+  const developEase = gsap.parseEase('power1.inOut');
+  const expandEase = gsap.parseEase('power2.inOut');
 
   let lockX = 0;
   let baseX = 0;
+  let scaleCover = 1;
+  let expandTranslateY = 0;
 
-  // offsetLeft is layout position, unaffected by the transform this same
-  // element is about to receive - safe to recompute on resize.
+  // offsetLeft/getBoundingClientRect read layout position, unaffected by the
+  // transforms this same element is about to receive - safe to recompute on
+  // resize. (Resizing mid-scroll, while the frame is already mid-transform,
+  // is a known edge case this doesn't specially guard against.)
   function measure() {
     const center = heroFrame!.offsetLeft + heroFrame!.offsetWidth / 2;
     lockX = window.innerWidth / 2 - center;
+
+    const rect = heroFrame!.getBoundingClientRect();
+    scaleCover = Math.max(window.innerWidth / rect.width, window.innerHeight / rect.height);
+    expandTranslateY = window.innerHeight / 2 - (rect.top + rect.height / 2);
   }
   measure();
 
@@ -293,16 +331,15 @@ export function initFilmRollIntro() {
   ScrollTrigger.create({
     trigger: section,
     start: 'top top',
-    end: () => '+=' + window.innerHeight * 1.6,
+    end: () => '+=' + window.innerHeight * 2.8, // ~280vh - covers all four beats (brief section 7: "250-300vh on desktop")
     pin: true,
     // Lenis already smooths raw scroll input (lenis.ts). A numeric scrub
     // value here would add GSAP's own extra lag on top of that - two
     // independent smoothing systems fighting each other, which shows up as
     // jittery, glitchy back-and-forth motion right as scroll velocity
-    // approaches zero (i.e. exactly at the roll-to-lock transition). `true`
-    // ties x directly to Lenis's already-eased position instead; the
-    // back.out ease driving `x` below provides the actual deceleration feel,
-    // so no second layer of lag is needed.
+    // approaches zero. `true` ties everything directly to Lenis's
+    // already-eased position instead; the per-beat eases below provide the
+    // actual deceleration feel, so no second layer of lag is needed.
     scrub: true,
     invalidateOnRefresh: true,
     onRefresh: measure,
@@ -314,14 +351,43 @@ export function initFilmRollIntro() {
     onUpdate: (self) => {
       const p = self.progress;
 
-      const x = gsap.utils.interpolate(baseX, lockX, positionEase(p));
+      // Beat 1/2 - roll and lock
+      const pRoll = clamp01(p / ROLL_LOCK_END);
+      const x = gsap.utils.interpolate(baseX, lockX, positionEase(pRoll));
       gsap.set(track, { x });
 
-      const contentFade = gsap.parseEase('power1.in')(Math.min(p / CONTENT_FADE_END, 1));
+      const contentFade = gsap.parseEase('power1.in')(clamp01(p / CONTENT_FADE_END));
       gsap.set(content, { opacity: 1 - contentFade });
 
-      const dim = gsap.parseEase('power1.out')(Math.max(0, Math.min(1, (p - DIM_START) / (1 - DIM_START))));
-      gsap.set(otherFrames, { opacity: 1 - dim * 0.75 });
+      const dim = gsap.parseEase('power1.out')(clamp01((p - DIM_START) / (ROLL_LOCK_END - DIM_START)));
+      gsap.set(otherFrames, { opacity: 1 - dim });
+      if (sprockets.length) gsap.set(sprockets, { opacity: 1 - dim });
+
+      // Beat 3 - develop: colour negative + soft focus resolving to a sharp positive
+      const td = developEase(clamp01((p - ROLL_LOCK_END) / (DEVELOP_END - ROLL_LOCK_END)));
+      const invertVal = 1 - td;
+      const sepiaVal = 0.65 * (1 - td);
+      const hueVal = -15 * (1 - td);
+      const saturateVal = 1 + 1.2 * (1 - td);
+      const blurVal = 7 * (1 - td);
+      const brightVal = 0.9 + 0.1 * td;
+      gsap.set(heroImg, {
+        filter: `invert(${invertVal}) sepia(${sepiaVal}) hue-rotate(${hueVal}deg) saturate(${saturateVal}) blur(${blurVal}px) brightness(${brightVal})`,
+      });
+
+      // Beat 4 - expand into Hero, then the pin releases
+      const te = expandEase(clamp01((p - DEVELOP_END) / (1 - DEVELOP_END)));
+      gsap.set(heroFrame, {
+        scale: 1 + (scaleCover - 1) * te,
+        y: expandTranslateY * te,
+        transformOrigin: '50% 50%',
+        borderColor: te > 0.02 ? 'transparent' : 'var(--line)',
+      });
+      gsap.set(heroFnum, { opacity: 1 - te });
+      // The strip's clipping boundaries are only frame-row-tall - without
+      // this, the expanding hero frame would get clipped the moment it grows
+      // past that height instead of filling the viewport.
+      gsap.set([section, stripViewport], { overflow: te > 0 ? 'visible' : 'hidden' });
     },
   });
 }
