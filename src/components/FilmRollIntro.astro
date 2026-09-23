@@ -23,7 +23,7 @@ import logoWatermark from '../assets/photos/logo/logo_transparent.png';
 // whatever the i % realPhotos.length cycle would have placed there).
 const rollPhotoEntries = Object.entries(
   import.meta.glob<{ default: ImageMetadata }>(
-    '/src/assets/photos/portfolio/{Barbershops,consumables,product advertisement,IMG_0839,IMG_0863,IMG_1643,IMG_3033,IMG_8758}.jpg',
+    '/src/assets/photos/portfolio/{Barbershops,consumables,product advertisement,IMG_0839,IMG_0863,IMG_1643,IMG_3033,IMG_8758,motorcycle-rider}.jpg',
     { eager: true }
   )
 );
@@ -35,15 +35,14 @@ const realPhotos = rollPhotoEntries.map(([, m]) => m.default);
 // whole time. If the hero frame showed a different photo, the handoff
 // would visibly swap images instead of reading as one continuous reveal.
 //
-// IMG_0839 (on-site gym coaching), not Barbershops - critique P2: Barbershops
-// is the one photo blown up to full-bleed at the climax, and it's the exact
-// shoot PRODUCT.md flags as dated by a visible COVID-era mask. Barbershops
-// stays in the general roll rotation (fine at strip size, per PRODUCT.md),
-// just isn't the hero/full-bleed photo anymore. Gym coaching over a car/bike
-// glamour shot: PRODUCT.md's Users section names cafés, salons, gyms,
-// clinics and trades specifically - this reads as "a real business shot
-// on-site," matching Hero's own "we shoot your business on-site" claim.
-const heroPhotoEntry = rollPhotoEntries.find(([path]) => path.includes('IMG_0839'));
+// motorcycle-rider.jpg, not IMG_0839 - second critique pass flagged the
+// gym-coaching candid (dim, off-angle, the coach the visible subject) as
+// compositionally weak for the one full-bleed "look what I can shoot"
+// moment. motorcycle-rider is direct-to-camera, sharp, and a selective-
+// color edit that reads as confident, considered photography - a founder
+// pick, not a code-driven one. IMG_0839 stays in the general roll rotation
+// (fine at strip size), just isn't the hero/full-bleed photo anymore.
+const heroPhotoEntry = rollPhotoEntries.find(([path]) => path.includes('motorcycle-rider'));
 const heroPhoto = heroPhotoEntry ? heroPhotoEntry[1].default : realPhotos[0];
 
 // Phase 2: more frames than Phase 1 used, and the hero frame sits well off
