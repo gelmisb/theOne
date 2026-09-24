@@ -32,15 +32,18 @@
         class="updates-form glass"
         id="newsletter-form"
         name="newsletter-signup"
-        method="POST"
-        data-netlify="true"
-        netlify-honeypot="bot-field"
         data-reveal
         data-reveal-group="updates-head"
       >
-        <input type="hidden" name="form-name" value="newsletter-signup" />
+        <!-- Posts to /api/subscribe (a Netlify Function, see
+             netlify/functions/subscribe.ts) instead of Netlify Forms - this
+             signup goes straight into Brevo (contact list + welcome email),
+             not a form-submissions log, so there's nothing for Netlify's
+             own form detection to do here. bot-field is still a honeypot,
+             just checked server-side in the function instead of by
+             Netlify's netlify-honeypot attribute. -->
         <p style="display:none;">
-          <label>Leave this field blank: <input name="bot-field" /></label>
+          <label>Leave this field blank: <input name="bot-field" id="news-bot-field" /></label>
         </p>
         <div class="updates-row">
           <label for="news-email" class="sr-only">Email address</label>

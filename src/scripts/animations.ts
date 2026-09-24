@@ -846,16 +846,19 @@ export function initNewsletterSignup() {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const params = new URLSearchParams();
-    new FormData(form).forEach((value, key) => params.append(key, value.toString()));
+    const email = (document.getElementById('news-email') as HTMLInputElement | null)?.value ?? '';
+    const botField = (document.getElementById('news-bot-field') as HTMLInputElement | null)?.value ?? '';
 
     try {
-      const res = await fetch('/', {
+      // /api/subscribe redirects to the Netlify Function that actually
+      // talks to Brevo (netlify/functions/subscribe.ts) - adds the
+      // contact to the mailing list and sends the welcome email.
+      const res = await fetch('/api/subscribe', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params.toString(),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, botField }),
       });
-      if (!res.ok) throw new Error(`Form submission failed: ${res.status}`);
+      if (!res.ok) throw new Error(`Subscribe request failed: ${res.status}`);
 
       localStorage.setItem(NEWSLETTER_SUBSCRIBED_KEY, 'true');
       errorEl?.setAttribute('hidden', '');

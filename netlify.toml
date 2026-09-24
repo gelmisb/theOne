@@ -1,0 +1,8 @@
+# Deliberately minimal - only declares where Netlify Functions live
+# (netlify/functions/subscribe.ts, the Brevo newsletter integration).
+# Build command and publish directory are left untouched here on purpose:
+# this site is already live and deploying successfully with those
+# configured in the Netlify dashboard, and duplicating them into this file
+# risks silently overriding working settings if they don't match exactly.
+[build]
+  functions = "netlify/functions"
