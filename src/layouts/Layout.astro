@@ -125,6 +125,19 @@ const persistImage = Object.values(persistImages)[0]?.default;
     {persistImage && (
       <div class="persist-bg" data-persist-bg aria-hidden="true" transition:persist>
         <Image src={persistImage} alt="" class="persist-bg-img" widths={[640, 960, 1280, 1920]} sizes="100vw" loading="eager" fetchpriority="high" />
+        <!-- dev3 experiment (see src/scripts/ambient-bg.ts for the full
+             reasoning) - a mouse-reactive WebGL shader layered over the
+             photo via mix-blend-mode:screen, not replacing it. Lives
+             inside .persist-bg specifically so it inherits the exact same
+             scroll-driven fade-out initPersistBgFade already drives
+             (opacity to 0 as Gap scrolls into view) - ambient-bg.ts's own
+             ScrollTrigger mirrors those same boundaries to pause
+             rendering once it's invisible, rather than adding a second,
+             independent fade. If initAmbientBackground bails out early
+             (prefers-reduced-motion, no WebGL support) this canvas simply
+             never gets a rendering context - a transparent, empty element
+             sitting over the photo, same as not being there at all. -->
+        <canvas class="ambient-bg" data-ambient-bg aria-hidden="true"></canvas>
         <div class="persist-bg-scrim"></div>
       </div>
     )}
@@ -184,6 +197,7 @@ const persistImage = Object.values(persistImages)[0]?.default;
     initSectionTransitions,
   } from '../scripts/animations';
   import { initSmoothScroll } from '../scripts/lenis';
+  import { initAmbientBackground } from '../scripts/ambient-bg';
 
   document.addEventListener('astro:before-swap', teardownForTransition);
   document.addEventListener('astro:page-load', () => {
@@ -191,6 +205,7 @@ const persistImage = Object.values(persistImages)[0]?.default;
     initScrollHashFix();
     initFilmRollIntro();
     initMobileIntroVideo();
+    initAmbientBackground();
     initPersistBgFade();
     initHeroTimeline();
     initHeroParallax();
@@ -223,5 +238,19 @@ const persistImage = Object.values(persistImages)[0]?.default;
   .persist-bg-scrim{
     position: absolute; inset: 0;
     background: linear-gradient(180deg, rgba(10,14,19,0.5), rgba(10,14,19,0.7) 60%, rgba(10,14,19,0.85) 100%);
+  }
+  /* dev3 experiment - see the markup comment above and ambient-bg.ts for
+     the full reasoning. screen blending only ever brightens, so the
+     shader's mostly-black base lets the photo underneath show through
+     untouched and only its glow actually adds anything; opacity pulls it
+     back further so it reads as atmosphere over the photo, not a second
+     competing visual. pointer-events:none so it never intercepts clicks
+     meant for real content sitting on top. */
+  .ambient-bg{
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    mix-blend-mode: screen;
+    opacity: 0.75;
+    pointer-events: none;
   }
 </style>
