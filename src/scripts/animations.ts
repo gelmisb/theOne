@@ -794,6 +794,78 @@ export function initPortfolioLightbox() {
   portfolioLightbox.init();
 }
 
+// "Remember this browser already subscribed" - a plain localStorage flag,
+// not tracking/marketing data, purely so a returning visitor sees the
+// thank-you state instead of being asked to sign up again. CookieBanner.astro
+// covers this in its own disclosure text since it's a new piece of storage,
+// even though it's the same "strictly necessary, functional" category as
+// the consent flag that banner already sets.
+const NEWSLETTER_SUBSCRIBED_KEY = 'hv-newsletter-subscribed';
+
+/**
+ * Homepage's "Keep Me Updated" email signup (NewsletterSignup.astro).
+ * Swaps the form for a thank-you panel on success - a GSAP cross-fade
+ * (skipped, snapping straight to the end state, under reduced-motion, same
+ * convention as every other animation in this codebase) rather than just
+ * hiding the submit button in place, per founder request. A browser that's
+ * already subscribed skips the form entirely on future visits and sees the
+ * thank-you panel immediately, no animation.
+ */
+export function initNewsletterSignup() {
+  const form = document.querySelector<HTMLFormElement>('#newsletter-form');
+  const thanks = document.querySelector<HTMLElement>('#newsletter-thanks');
+  if (!form || !thanks) return;
+
+  const errorEl = document.getElementById('news-error');
+
+  const showThanks = (instant: boolean) => {
+    if (instant || prefersReducedMotion) {
+      form.style.display = 'none';
+      thanks.removeAttribute('hidden');
+      gsap.set(thanks, { opacity: 1, y: 0 });
+      return;
+    }
+    gsap.to(form, {
+      opacity: 0,
+      y: -8,
+      duration: 0.35,
+      ease: 'power2.in',
+      onComplete: () => {
+        form.style.display = 'none';
+        thanks.removeAttribute('hidden');
+        gsap.fromTo(thanks, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' });
+      },
+    });
+  };
+
+  if (localStorage.getItem(NEWSLETTER_SUBSCRIBED_KEY) === 'true') {
+    showThanks(true);
+    return;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const params = new URLSearchParams();
+    new FormData(form).forEach((value, key) => params.append(key, value.toString()));
+
+    try {
+      const res = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString(),
+      });
+      if (!res.ok) throw new Error(`Form submission failed: ${res.status}`);
+
+      localStorage.setItem(NEWSLETTER_SUBSCRIBED_KEY, 'true');
+      errorEl?.setAttribute('hidden', '');
+      showThanks(false);
+    } catch {
+      errorEl?.removeAttribute('hidden');
+    }
+  });
+}
+
 /**
  * Numbered scroll-nav dots - one ScrollTrigger per tracked section, toggling
  * the matching dot's .active class as that section becomes the current one

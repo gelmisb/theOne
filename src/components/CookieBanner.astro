@@ -5,12 +5,21 @@
 // analytics or ad pixels are added later, gate their init calls behind
 // `localStorage.getItem('hv-cookie-consent') === 'accepted'` and swap this
 // for a real two-choice banner at that point.
+//
+// hv-newsletter-subscribed (initNewsletterSignup, animations.ts) joins
+// hv-cookie-consent (this banner's own flag) in the same "strictly
+// necessary, functional only" category - it just remembers that this
+// browser already signed up, so the form isn't shown again, and isn't used
+// for tracking or profiling. Mentioned explicitly below rather than left
+// implicit under "essential cookies", since it's real, user-visible storage
+// and the whole point of this banner is not saying less than what's true.
 ---
 
 <div class="cookie-banner glass" id="cookie-banner" hidden>
   <div class="cookie-banner-inner wrap">
     <p class="cookie-banner-text">
-      This site runs on essential cookies only - no trackers, no ads, no analytics.
+      This site runs on essential cookies only - to remember this choice, and whether you've
+      signed up for updates. No trackers, no ads, no analytics.
     </p>
     <button type="button" class="btn btn-primary cookie-banner-accept" id="cookie-banner-accept">Got it</button>
   </div>

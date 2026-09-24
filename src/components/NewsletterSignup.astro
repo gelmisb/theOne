@@ -6,6 +6,15 @@
 // equivalent: a low-commitment email signup rather than the full form,
 // since a visitor already scrolling the homepage hasn't necessarily
 // decided to book yet.
+//
+// Submit handling (initNewsletterSignup, animations.ts) lives in the
+// shared script module rather than an inline <script> here, on purpose -
+// this component only ever appears on the homepage, which gets revisited
+// many times per session via Astro's client-side page transitions, and an
+// inline script tag only reliably re-executes on genuinely new content
+// (see Layout.astro's own script comment for the full explanation of that
+// trap). The shared module's astro:page-load handler doesn't have that
+// problem.
 ---
 
 <section class="updates-section" id="updates">
@@ -18,70 +27,42 @@
       Occasional news, new work, and offers - no spam, unsubscribe any time.
     </p>
 
-    <form
-      class="updates-form glass"
-      id="newsletter-form"
-      name="newsletter-signup"
-      method="POST"
-      data-netlify="true"
-      netlify-honeypot="bot-field"
-      data-reveal
-      data-reveal-group="updates-head"
-    >
-      <input type="hidden" name="form-name" value="newsletter-signup" />
-      <p style="display:none;">
-        <label>Leave this field blank: <input name="bot-field" /></label>
-      </p>
-      <div class="updates-row">
-        <label for="news-email" class="sr-only">Email address</label>
-        <input id="news-email" name="email" type="email" required placeholder="you@business.ie" />
-        <button type="submit" class="btn btn-primary">Keep Me Updated</button>
+    <div class="updates-panel-wrap">
+      <form
+        class="updates-form glass"
+        id="newsletter-form"
+        name="newsletter-signup"
+        method="POST"
+        data-netlify="true"
+        netlify-honeypot="bot-field"
+        data-reveal
+        data-reveal-group="updates-head"
+      >
+        <input type="hidden" name="form-name" value="newsletter-signup" />
+        <p style="display:none;">
+          <label>Leave this field blank: <input name="bot-field" /></label>
+        </p>
+        <div class="updates-row">
+          <label for="news-email" class="sr-only">Email address</label>
+          <input id="news-email" name="email" type="email" required placeholder="you@business.ie" />
+          <button type="submit" class="btn btn-primary">Keep Me Updated</button>
+        </div>
+        <label class="updates-consent">
+          <input type="checkbox" name="consent" required />
+          <span>
+            I'd like to receive occasional news and offers from Horizon Vantage, and I agree to the <a href="/terms">Terms of Service</a>.
+          </span>
+        </label>
+        <p class="form-note form-error" id="news-error" hidden>Something went wrong - please try again or email us directly.</p>
+      </form>
+
+      <div class="updates-thanks glass" id="newsletter-thanks" hidden aria-live="polite">
+        <h3>Thanks for choosing to hear more from us.</h3>
+        <p>You're on the list - we'll only reach out with real updates, never spam.</p>
       </div>
-      <label class="updates-consent">
-        <input type="checkbox" name="consent" required />
-        <span>
-          I'd like to receive occasional news and offers from Horizon Vantage, and I agree to the <a href="/terms">Terms of Service</a>.
-        </span>
-      </label>
-      <p class="form-note form-success" id="news-success" hidden>Thanks - you're on the list.</p>
-      <p class="form-note form-error" id="news-error" hidden>Something went wrong - please try again or email us directly.</p>
-    </form>
+    </div>
   </div>
 </section>
-
-<script>
-  // Same Netlify Forms recipe as Contact.astro's enquiry form - a distinct
-  // form `name` (newsletter-signup) so Netlify tracks submissions to this
-  // one separately from enquiries in its dashboard.
-  const form = document.getElementById('newsletter-form') as HTMLFormElement | null;
-  const success = document.getElementById('news-success');
-  const error = document.getElementById('news-error');
-  const submitBtn = form?.querySelector('button[type="submit"]') as HTMLElement | null;
-
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!form) return;
-
-    const params = new URLSearchParams();
-    new FormData(form).forEach((value, key) => params.append(key, value.toString()));
-
-    try {
-      const res = await fetch('/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params.toString(),
-      });
-      if (!res.ok) throw new Error(`Form submission failed: ${res.status}`);
-
-      success?.removeAttribute('hidden');
-      error?.setAttribute('hidden', '');
-      form.reset();
-      if (submitBtn) submitBtn.style.display = 'none';
-    } catch {
-      error?.removeAttribute('hidden');
-    }
-  });
-</script>
 
 <style>
   .updates-section{
@@ -94,8 +75,8 @@
   }
   .updates-section h2{ max-width: 700px; margin: 0 auto 20px; }
   .updates-section .section-sub{ max-width: 480px; margin: 0 auto 44px; }
+  .updates-panel-wrap{ max-width: 520px; margin: 0 auto; }
   .updates-form{
-    max-width: 520px; margin: 0 auto;
     display: flex; flex-direction: column; gap: 16px;
     text-align: left;
     padding: 32px;
@@ -133,5 +114,20 @@
   .updates-consent a:hover{ text-decoration: underline; }
 
   .form-note{ font-size: 12px; color: var(--paper-dim); margin: 0; opacity: 0.7; }
-  .form-success{ color: var(--brass); opacity: 1; }
+
+  /* Thank-you panel - swapped in for the form (initNewsletterSignup,
+     animations.ts) on successful submit, or immediately on any later visit
+     from a browser that's already subscribed (see the localStorage note
+     there, and CookieBanner.astro for the matching consent-notice copy). */
+  .updates-thanks{
+    padding: 32px;
+    border-radius: var(--radius-glass);
+    text-align: center;
+  }
+  @media (max-width: 640px){ .updates-thanks{ padding: 24px 20px; } }
+  .updates-thanks h3{
+    font-family: var(--font-display), serif; font-weight: 400;
+    font-size: 22px; margin: 0 0 10px; color: var(--brass);
+  }
+  .updates-thanks p{ margin: 0; font-size: 14px; color: var(--paper-dim); line-height: 1.5; }
 </style>

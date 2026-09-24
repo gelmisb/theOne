@@ -7,14 +7,12 @@ const year = new Date().getFullYear();
 // links from any of the new standalone pages without this prefix.
 const homePrefix = Astro.url.pathname === '/' ? '' : '/';
 
-// Placeholder destinations - swap these for the real profile URLs.
-// Deliberately not guessed at a specific handle (e.g. "/company/horizon-
-// vantage"), since publishing a wrong link is worse than an honest
-// placeholder someone has to fill in once.
+// LinkedIn and Facebook profiles don't exist yet (founder hasn't created
+// them) - shown only once they're real, rather than as dead placeholder
+// links to each platform's generic homepage. Add back to SOCIALS the same
+// way as Instagram below when they're up; SOCIAL_ICONS already has both.
 const SOCIALS = [
-  { name: 'LinkedIn', href: 'https://linkedin.com', icon: 'linkedin' },
-  { name: 'Instagram', href: 'https://instagram.com', icon: 'instagram' },
-  { name: 'Facebook', href: 'https://facebook.com', icon: 'facebook' },
+  { name: 'Instagram', href: 'https://instagram.com/horizonvantage', icon: 'instagram' },
 ];
 const SOCIAL_ICONS: Record<string, string> = {
   linkedin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8.5" r="0.9" fill="currentColor" stroke="none"/><path d="M8 11v6"/><path d="M12.5 17v-3.5a2 2 0 0 1 4 0V17"/><path d="M12.5 11v6"/></svg>',
