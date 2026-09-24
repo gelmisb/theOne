@@ -17,6 +17,15 @@
         ],
         "createdAt": "2026-09-23T13:26:28.793Z",
         "reason": "Lightbox template img, deliberately empty until initPortfolioLightbox (animations.ts) sets src on open - pre-existing pattern, not a forgotten image"
+      },
+      {
+        "rule": "layout-transition",
+        "value": "*",
+        "files": [
+          "src/components/Header.astro"
+        ],
+        "createdAt": "2026-09-24T16:02:06.782Z",
+        "reason": "pre-existing scroll-state transition (header pill-margin effect on .scrolled), predates this session - only the hamburger/mobile-nav additions nearby are new. Single small fixed-position element toggling once per scroll-state crossing, not a per-frame animation; reworking the whole scrolled-state visual to transform-only is a separate, unrequested redesign"
       }
     ]
   }
