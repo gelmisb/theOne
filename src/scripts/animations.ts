@@ -1,10 +1,33 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { getLenis } from './lenis';
+import { getLenis, destroySmoothScroll } from './lenis';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/**
+ * Runs once per session (wired from Layout.astro's own inline script, which
+ * Astro's client router treats as identical across every page and so only
+ * ever executes the one time - see that file for why this lives there and
+ * not per-page). Fires immediately before the outgoing page's DOM is
+ * replaced on a client-side transition.
+ *
+ * Every init function in this module creates ScrollTriggers, GSAP tweens,
+ * and (via initSmoothScroll) a Lenis instance scoped to the outgoing page's
+ * elements. Without an explicit teardown, transitioning to the next page
+ * would leave all of that still running against now-detached nodes -
+ * pinned ScrollTriggers holding stale spacer elements, an old Lenis
+ * instance still driving its own raf loop alongside the new page's - which
+ * is exactly what reads as "laggy and jittery" scrolling after a few
+ * client-side navigations, the same class of bug as the pre-existing "two
+ * controllers fighting over one tween" note on the film-roll idle drift.
+ */
+export function teardownForTransition() {
+  ScrollTrigger.getAll().forEach((st) => st.kill());
+  gsap.globalTimeline.clear();
+  destroySmoothScroll();
+}
 
 /**
  * Fixes a real bug: loading the page directly at a URL hash (e.g. /#offer)
@@ -28,7 +51,7 @@ export function initScrollHashFix() {
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   window.scrollTo(0, 0);
 
-  window.addEventListener('load', () => {
+  const settle = () => {
     requestAnimationFrame(() => {
       ScrollTrigger.refresh();
       const target = document.querySelector<HTMLElement>(hash);
@@ -40,7 +63,21 @@ export function initScrollHashFix() {
         target.scrollIntoView();
       }
     });
-  });
+  };
+
+  // The real window 'load' event only ever fires once per hard navigation -
+  // never again on a client-side transition (ClientRouter, Layout.astro),
+  // so a page arrived at via a transition (e.g. a Footer link to /#offer
+  // clicked from another page) would have registered a 'load' listener
+  // that then simply never fires. By the time this runs on a transition,
+  // 'load' has long since happened and document.readyState is already
+  // 'complete' - settle immediately in that case instead of waiting on an
+  // event that's not coming again.
+  if (document.readyState === 'complete') {
+    settle();
+  } else {
+    window.addEventListener('load', settle, { once: true });
+  }
 }
 
 /**
@@ -120,6 +157,7 @@ export function initScrollReveals() {
  */
 export function initFilmRollIntro() {
   const section = document.querySelector<HTMLElement>('.filmroll-intro');
+  const stripWrap = document.querySelector<HTMLElement>('.fr-strip-wrap');
   const stripViewport = document.querySelector<HTMLElement>('.fr-strip');
   const track = document.querySelector<HTMLElement>('.fr-track');
   const heroFrame = track?.querySelector<HTMLElement>('[data-hero-frame="true"]');
@@ -127,7 +165,25 @@ export function initFilmRollIntro() {
   const heroFnum = heroFrame?.querySelector<HTMLElement>('.fr-fnum');
   const content = document.querySelector<HTMLElement>('.fr-content');
   const sprockets = gsap.utils.toArray<HTMLElement>('.sprockets', section ?? undefined);
-  if (!section || !stripViewport || !track || !heroFrame || !heroImg || !heroFnum || !content) return;
+  if (!section || !stripWrap || !stripViewport || !track || !heroFrame || !heroImg || !heroFnum || !content) return;
+
+  // .fr-strip-wrap carries the "little bit diagonal" tilt (its own CSS
+  // `transform: rotate(4deg)`). Read the actual applied angle off computed
+  // style rather than hardcoding 4 here too - two copies of the same number
+  // drifting apart is exactly how the hero frame ends up crooked again the
+  // next time someone tweaks the tilt in the .astro file without knowing
+  // this reads it back. Beat 4 below spins the hero frame by the negative
+  // of this angle as it expands, so it visually straightens out instead of
+  // ballooning into the viewport still tilted.
+  function getRotationDeg(el: HTMLElement): number {
+    const t = getComputedStyle(el).transform;
+    if (!t || t === 'none') return 0;
+    const m = t.match(/^matrix\(([^)]+)\)$/);
+    if (!m) return 0;
+    const [a, b] = m[1].split(',').map(Number);
+    return Math.atan2(b, a) * (180 / Math.PI);
+  }
+  const stripRotationDeg = getRotationDeg(stripWrap);
 
   // Desktop-first pass (brief section 9, Phase 2). This never actually had a
   // gate, so mobile visitors were getting the full ~280vh scroll-jacked pin
@@ -198,7 +254,19 @@ export function initFilmRollIntro() {
     lockX = window.innerWidth / 2 - center;
 
     const rect = heroFrame!.getBoundingClientRect();
-    scaleCover = Math.max(window.innerWidth / rect.width, window.innerHeight / rect.height);
+    // scaleCover has to be relative to the frame's own untransformed size
+    // (offsetWidth/offsetHeight), not getBoundingClientRect's axis-aligned
+    // box. With the strip tilted, rect.width/height are the *bounding box*
+    // of a rotated square - wider and taller than the square itself - so
+    // dividing by them understated the scale needed to cover the viewport,
+    // which is why the frame sometimes stalled at ~90% of full width/height
+    // instead of reaching true full-bleed. The frame's own size doesn't
+    // change with rotation, so offsetWidth/offsetHeight are the right divisor
+    // regardless of the strip's tilt.
+    scaleCover = Math.max(window.innerWidth / heroFrame!.offsetWidth, window.innerHeight / heroFrame!.offsetHeight);
+    // Rotation is around the frame's own center, so the bounding box's
+    // center still lands on the frame's true visual center - safe to keep
+    // reading this from rect.
     expandTranslateY = window.innerHeight / 2 - (rect.top + rect.height / 2);
   }
   measure();
@@ -297,6 +365,10 @@ export function initFilmRollIntro() {
       gsap.set(heroFrame, {
         scale: 1 + (scaleCover - 1) * te,
         y: expandTranslateY * te,
+        // Counter-rotate the hero frame against the strip's own tilt as it
+        // expands, so by te=1 (full-bleed) it's dead straight instead of
+        // ballooning into the viewport still carrying the strip's diagonal.
+        rotation: -stripRotationDeg * te,
         transformOrigin: '50% 50%',
         borderColor: te > 0.02 ? 'transparent' : 'var(--line)',
       });
@@ -372,7 +444,13 @@ export function splitIntoWordSpans(el: HTMLElement): HTMLElement[] {
 /** Hero entrance timeline - plays once on load, not on scroll. */
 export function initHeroTimeline() {
   const heading = document.querySelector<HTMLElement>('.hero-h');
-  const words = heading ? splitIntoWordSpans(heading) : [];
+  // Homepage-only section - since this now runs unconditionally on every
+  // page (see the shared astro:page-load handler in Layout.astro), guard
+  // against the standalone pages the same way every other init function
+  // here already does, rather than spamming "GSAP target not found"
+  // warnings for a whole timeline of selectors that only exist on Hero.astro.
+  if (!heading) return;
+  const words = splitIntoWordSpans(heading);
 
   if (prefersReducedMotion) {
     gsap.set(
@@ -494,7 +572,15 @@ export function initContactSheetReveal() {
 export function initNavOnScroll() {
   const header = document.querySelector('header');
   const hero = document.getElementById('hero');
-  if (!header || !hero) return;
+  if (!header) return;
+  // Header persists across client-side page transitions (transition:persist,
+  // see Layout.astro) so its DOM node - and whatever class was on it - is
+  // whatever the *previous* page left behind. Reset to the default
+  // (non-scrolled) state on every page entry; the ScrollTrigger below (when
+  // this page actually has a #hero to measure against) immediately
+  // re-evaluates the real position from there, same as a fresh full load.
+  header.classList.remove('scrolled');
+  if (!hero) return;
   ScrollTrigger.create({
     trigger: hero,
     start: 'top top',

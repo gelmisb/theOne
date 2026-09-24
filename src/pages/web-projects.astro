@@ -24,13 +24,14 @@ const hasProjects = projects.length > 0;
   title="Web Design Work — Horizon Vantage"
   description="Website builds for local businesses in Wicklow, designed around real on-site photography instead of a template."
 >
-  <Header />
+  <Header transition:persist />
 
   <PageHero
     frameNum="017"
     frameLabel="Web Projects"
     title="Websites built around real photography, not a template."
     subtitle="Every build starts from the same on-site shoot as the photography and video work — the site is designed around the images, not the other way around."
+    variant="grid"
   />
 
   <section id="web-projects-grid">
@@ -80,23 +81,10 @@ const hasProjects = projects.length > 0;
   <Footer />
 </Layout>
 
-<script>
-  import {
-    initScrollReveals,
-    initNavOnScroll,
-    initMagneticButtons,
-    initHeadingSplitReveal,
-    initSectionTransitions,
-  } from '../scripts/animations';
-  import { initSmoothScroll } from '../scripts/lenis';
-
-  initSmoothScroll();
-  initScrollReveals();
-  initNavOnScroll();
-  initMagneticButtons();
-  initHeadingSplitReveal();
-  initSectionTransitions();
-</script>
+<!-- Animation bootstrap lives in Layout.astro's single shared script, not
+     here - see that file's script comment for why a per-page script can't
+     reliably do this once Astro's client-side page transitions are in
+     play. -->
 
 <style>
   .wp-grid{
@@ -108,7 +96,7 @@ const hasProjects = projects.length > 0;
   .wp-card{ border-radius: var(--radius-glass); overflow: hidden; }
   .wp-shot{ width: 100%; aspect-ratio: 16/10; object-fit: cover; display: block; }
   .wp-body{ padding: 20px; }
-  .wp-body h3{ font-family: 'Montserrat', serif; font-weight: 400; font-size: 19px; margin: 0 0 8px; }
+  .wp-body h3{ font-family: var(--font-display), serif; font-weight: 400; font-size: 19px; margin: 0 0 8px; }
   .wp-body p{ font-size: 14px; line-height: 1.55; color: var(--paper-dim); margin: 0 0 12px; }
   .wp-body a{ font-size: 13px; color: var(--brass); text-decoration: none; }
   .wp-body a:hover{ color: var(--brass-light); }

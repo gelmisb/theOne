@@ -5,12 +5,34 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 let lenisInstance: Lenis | null = null;
+let rafCallback: ((time: number) => void) | null = null;
 
 /** Exposed so other modules (e.g. the hash-fix in animations.ts) can route
  *  programmatic jumps through Lenis instead of the native scrollIntoView,
  *  avoiding the two scroll systems fighting each other on load. */
 export function getLenis(): Lenis | null {
   return lenisInstance;
+}
+
+/**
+ * Tears down the current Lenis instance and its gsap.ticker raf callback.
+ * With Astro's client-side page transitions (ClientRouter, wired in
+ * Layout.astro), initSmoothScroll() runs again on every navigation - without
+ * this, each transition would leave the previous page's Lenis instance
+ * still driving its own raf loop forever (an accumulating, ever-faster-
+ * compounding scroll feel is exactly the kind of "jitter" a leaked Lenis
+ * instance produces) instead of being replaced by a fresh one bound to the
+ * new page's DOM.
+ */
+export function destroySmoothScroll() {
+  if (rafCallback) {
+    gsap.ticker.remove(rafCallback);
+    rafCallback = null;
+  }
+  if (lenisInstance) {
+    lenisInstance.destroy();
+    lenisInstance = null;
+  }
 }
 
 /**
@@ -29,6 +51,11 @@ export function initSmoothScroll() {
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (prefersReducedMotion) return;
 
+  // Defensive: a stray double-call (e.g. a transition firing before the
+  // previous page's instance was torn down) must not stack two Lenis
+  // instances/raf loops on top of each other.
+  destroySmoothScroll();
+
   const lenis = new Lenis({
     duration: 1.1,
     smoothWheel: true,
@@ -36,9 +63,10 @@ export function initSmoothScroll() {
 
   lenis.on('scroll', ScrollTrigger.update);
 
-  gsap.ticker.add((time) => {
+  rafCallback = (time) => {
     lenis.raf(time * 1000);
-  });
+  };
+  gsap.ticker.add(rafCallback);
   // Lenis now drives the raf loop; let it own frame timing rather than GSAP's
   // own lag-smoothing compensation, per GSAP's documented Lenis integration.
   gsap.ticker.lagSmoothing(0);

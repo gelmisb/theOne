@@ -68,7 +68,7 @@ const homePrefix = Astro.url.pathname === '/' ? '' : '/';
   }
   .brand{
     display: flex; align-items: center; gap: 10px;
-    font-family: 'Montserrat', serif;
+    font-family: var(--font-display), serif;
     font-size: 22px;
     letter-spacing: 0.01em;
     color: var(--paper);
@@ -80,7 +80,7 @@ const homePrefix = Astro.url.pathname === '/' ? '' : '/';
   .navlinks a{
     text-decoration: none; color: var(--paper-dim);
     font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono), monospace;
     transition: color .2s ease;
   }
   .navlinks a:hover, .navlinks a:focus-visible{ color: var(--brass); }

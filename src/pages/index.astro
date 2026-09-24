@@ -17,7 +17,7 @@ import Footer from '../components/Footer.astro';
 
 <Layout>
   <a href="#hero" class="skip-link">Skip intro</a>
-  <Header />
+  <Header transition:persist />
   <FilmRollIntro />
   <ScrollNav />
   <Hero />
@@ -37,38 +37,7 @@ import Footer from '../components/Footer.astro';
   <Footer />
 </Layout>
 
-<script>
-  import {
-    initScrollHashFix,
-    initFilmRollIntro,
-    initScrollReveals,
-    initPersistBgFade,
-    initHeroTimeline,
-    initHeroParallax,
-    initContactSheetReveal,
-    initNavOnScroll,
-    initMagneticButtons,
-    initPortfolioLightbox,
-    initVideoLightbox,
-    initScrollNav,
-    initHeadingSplitReveal,
-    initSectionTransitions,
-  } from '../scripts/animations';
-  import { initSmoothScroll } from '../scripts/lenis';
-
-  initSmoothScroll();
-  initScrollHashFix();
-  initFilmRollIntro();
-  initPersistBgFade();
-  initHeroTimeline();
-  initHeroParallax();
-  initScrollReveals();
-  initContactSheetReveal();
-  initNavOnScroll();
-  initMagneticButtons();
-  initPortfolioLightbox();
-  initVideoLightbox();
-  initScrollNav();
-  initHeadingSplitReveal();
-  initSectionTransitions();
-</script>
+<!-- Animation bootstrap (initFilmRollIntro, initHeroTimeline, etc.) now
+     lives in Layout.astro's single shared script, not here - see that
+     file's script comment for why a per-page script can't reliably do
+     this once Astro's client-side page transitions are in play. -->

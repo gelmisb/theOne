@@ -24,7 +24,7 @@ const included = [
   title="Business Photography in Wicklow — Horizon Vantage"
   description="On-site business photography for cafés, salons, gyms, clinics and tradespeople in Wicklow — shot by a working photographer, edited and delivered in 5 days."
 >
-  <Header />
+  <Header transition:persist />
 
   <PageHero
     frameNum="008"
@@ -79,23 +79,10 @@ const included = [
   <Footer />
 </Layout>
 
-<script>
-  import {
-    initScrollReveals,
-    initNavOnScroll,
-    initMagneticButtons,
-    initHeadingSplitReveal,
-    initSectionTransitions,
-  } from '../scripts/animations';
-  import { initSmoothScroll } from '../scripts/lenis';
-
-  initSmoothScroll();
-  initScrollReveals();
-  initNavOnScroll();
-  initMagneticButtons();
-  initHeadingSplitReveal();
-  initSectionTransitions();
-</script>
+<!-- Animation bootstrap lives in Layout.astro's single shared script, not
+     here - see that file's script comment for why a per-page script can't
+     reliably do this once Astro's client-side page transitions are in
+     play. -->
 
 <style>
   .photo-strip{
@@ -106,7 +93,7 @@ const included = [
   }
   .photo-strip > div{ flex: 1; min-width: 220px; padding-right: 24px; }
   .photo-strip .k{
-    font-family: 'Montserrat', serif; font-style: italic;
+    font-family: var(--font-display), serif; font-style: italic;
     font-size: 20px; color: var(--brass); display: block; margin-bottom: 8px;
   }
   .photo-strip .v{ font-size: 14px; color: var(--paper-dim); line-height: 1.5; }

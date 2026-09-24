@@ -4,25 +4,29 @@
    cross-origin round-trip), flagged as the single largest opportunity
    (~2.4s) in a mobile PageSpeed audit. Bundled at build time instead, so
    the fonts ship from the same origin as everything else with no extra
-   round-trips. Latin-only subsets and just the weights actually used in
-   this file (no italic Inter or IBM Plex Mono - nothing here sets
-   font-style: italic on either).
+   round-trips.
 
-   Montserrat is the display font for the wordmark and every H2 (.serif,
-   h2.section-h, and per-component headings that repeat that font-family
-   declaration) - it was referenced throughout the CSS but never actually
-   imported anywhere, so every browser was silently falling back to its
-   generic serif instead of Montserrat. 400 + 400-italic only: every
-   Montserrat usage in this codebase is font-weight: 400, and the italic
-   is used for the brass-accented word/phrase inside headings (e.g.
-   FilmRollIntro's `<em>Horizon</em>`, Header's `.brand em`). */
-@import '@fontsource-variable/inter/wght.css';
-@import '@fontsource/instrument-serif/latin.css';
-@import '@fontsource/instrument-serif/latin-italic.css';
-@import '@fontsource/ibm-plex-mono/latin-400.css';
-@import '@fontsource/ibm-plex-mono/latin-500.css';
-@import '@fontsource/montserrat/latin-400.css';
-@import '@fontsource/montserrat/latin-400-italic.css';
+   Typography system (2026-09-24 refresh, ported from dev2): Fraunces
+   (display) + Hanken Grotesk (body) + JetBrains Mono (EXIF/frame labels) -
+   the free, self-hostable alternative to the founder's paid first choice
+   (PP Editorial New + PP Neue Montreal + a Pangram Pangram mono, ~$40/style
+   each). Replaces the previous Montserrat/Instrument Serif split (two
+   different serifs doing the same "display" job in different spots) with
+   one variable serif throughout, and Inter/IBM Plex Mono with their
+   Fraunces-family-appropriate counterparts. --font-display/--font-body/
+   --font-mono below are the single point of control - every component
+   references the variable, not a literal font name, so swapping to the
+   paid pairing later (if the founder buys the Pangram Pangram licences)
+   is a three-line change here instead of a find-and-replace across the
+   codebase. Fraunces' `standard` axis set (opsz + wght) is used rather
+   than the plainer `wght`-only file, so large display headings pick up
+   the more expressive high-optical-size ink traps automatically while
+   small text stays closer to a text serif - true swash/soft/wonk variants
+   aren't imported, since nothing here uses them. */
+@import '@fontsource-variable/hanken-grotesk/wght.css';
+@import '@fontsource-variable/fraunces/standard.css';
+@import '@fontsource-variable/fraunces/standard-italic.css';
+@import '@fontsource-variable/jetbrains-mono/wght.css';
 
 :root{
   --bg: #0A0E13;
@@ -38,6 +42,9 @@
   --line-strong: rgba(234,242,248,0.26);
   --radius: 2px;
   --radius-glass: 20px;
+  --font-body: 'Hanken Grotesk Variable', sans-serif;
+  --font-display: 'Fraunces Variable', serif;
+  --font-mono: 'JetBrains Mono Variable', monospace;
 }
 
 *{ box-sizing: border-box; }
@@ -53,14 +60,14 @@ body{
   margin: 0;
   background: var(--bg);
   color: var(--paper);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body), sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
 a{ color: inherit; }
-.mono{ font-family: 'IBM Plex Mono', monospace; }
-.serif{ font-family: 'Montserrat', serif; }
+.mono{ font-family: var(--font-mono), monospace; }
+.serif{ font-family: var(--font-display), serif; }
 
 .wrap{ max-width: 1180px; margin: 0 auto; padding: 0 32px; }
 @media (max-width: 640px){ .wrap{ padding: 0 20px; } }
@@ -79,7 +86,7 @@ a{ color: inherit; }
 /* Frame tag - signature element */
 .frame-tag{
   display: flex; align-items: baseline; gap: 14px;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 12px;
   letter-spacing: 0.08em;
   color: var(--brass);
@@ -96,7 +103,7 @@ a{ color: inherit; }
   flex-shrink: 0;
 }
 .exif{
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 11px;
   letter-spacing: 0.04em;
   color: var(--paper-dim);
@@ -111,7 +118,7 @@ section{ padding: 110px 0; position: relative; }
 
 .section-head{ max-width: 680px; margin-bottom: 60px; }
 h2.section-h{
-  font-family: 'Montserrat', serif; font-weight: 400;
+  font-family: var(--font-display), serif; font-weight: 400;
   font-size: clamp(32px, 4vw, 50px);
   line-height: 1.08;
   margin: 0 0 18px;
@@ -130,7 +137,7 @@ h2.section-h i{ font-style: italic; color: var(--brass); }
   top: -100px; left: 12px;
   z-index: 1000;
   background: var(--brass); color: var(--bg);
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
   text-decoration: none;
   padding: 12px 20px;
@@ -142,7 +149,7 @@ h2.section-h i{ font-style: italic; color: var(--brass); }
 .btn{
   display: inline-flex; align-items: center; gap: 10px;
   padding: 15px 28px;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
   text-decoration: none;
   border-radius: var(--radius);

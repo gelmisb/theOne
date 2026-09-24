@@ -4,6 +4,13 @@ import Header from '../components/Header.astro';
 import PageHero from '../components/PageHero.astro';
 import Sprockets from '../components/Sprockets.astro';
 import Footer from '../components/Footer.astro';
+import type { ImageMetadata } from 'astro';
+
+const heroImages = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/photos/portfolio/training-floor.jpg',
+  { eager: true }
+);
+const heroImage = Object.values(heroImages)[0]?.default;
 
 // No example reels yet - this page ships copy-only until real client
 // video work exists to show. Revisit once footage is available and add
@@ -20,13 +27,14 @@ const deliverables = [
   title="Business Video in Wicklow — Horizon Vantage"
   description="On-site video for cafés, salons, gyms, clinics and tradespeople in Wicklow — short-form clips and promo video, shot alongside your photography."
 >
-  <Header />
+  <Header transition:persist />
 
   <PageHero
     frameNum="011"
     frameLabel="Videography"
     title="Motion adds what a photo can't — and it's shot the same visit."
     subtitle="A short promo clip and a handful of vertical cuts, filmed during the same on-site shoot as your photography — no separate booking, no separate crew."
+    image={heroImage}
   />
 
   <section id="video-included">
@@ -70,23 +78,10 @@ const deliverables = [
   <Footer />
 </Layout>
 
-<script>
-  import {
-    initScrollReveals,
-    initNavOnScroll,
-    initMagneticButtons,
-    initHeadingSplitReveal,
-    initSectionTransitions,
-  } from '../scripts/animations';
-  import { initSmoothScroll } from '../scripts/lenis';
-
-  initSmoothScroll();
-  initScrollReveals();
-  initNavOnScroll();
-  initMagneticButtons();
-  initHeadingSplitReveal();
-  initSectionTransitions();
-</script>
+<!-- Animation bootstrap lives in Layout.astro's single shared script, not
+     here - see that file's script comment for why a per-page script can't
+     reliably do this once Astro's client-side page transitions are in
+     play. -->
 
 <style>
   .video-strip{
@@ -97,7 +92,7 @@ const deliverables = [
   }
   .video-strip > div{ flex: 1; min-width: 220px; padding-right: 24px; }
   .video-strip .k{
-    font-family: 'Montserrat', serif; font-style: italic;
+    font-family: var(--font-display), serif; font-style: italic;
     font-size: 20px; color: var(--brass); display: block; margin-bottom: 8px;
   }
   .video-strip .v{ font-size: 14px; color: var(--paper-dim); line-height: 1.5; }

@@ -77,7 +77,7 @@ const stats = [
 
   .hero-inner{ position: relative; z-index: 2; }
   .hero-eyebrow{
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono), monospace;
     font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
     color: var(--brass);
     margin-bottom: 26px;
@@ -93,7 +93,7 @@ const stats = [
     box-shadow: 0 0 10px 2px rgba(224,141,75,0.6);
   }
   h1.hero-h{
-    font-family: 'Montserrat', serif;
+    font-family: var(--font-display), serif;
     font-weight: 400;
     font-size: clamp(40px, 6.2vw, 84px);
     line-height: 1.02;
@@ -130,7 +130,7 @@ const stats = [
   }
   .hero-strip > div{ flex: 1; min-width: 150px; padding-right: 24px; opacity: 0; }
   .hero-strip .k{
-    font-family: 'Montserrat', serif; font-style: italic;
+    font-family: var(--font-display), serif; font-style: italic;
     font-size: 28px; color: var(--brass); display: block; margin-bottom: 4px;
   }
   .hero-strip .v{ font-size: 13px; color: var(--paper-dim); line-height: 1.4; }

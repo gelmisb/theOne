@@ -13,25 +13,18 @@ interface Props {
   title: string;
   subtitle: string;
   image?: ImageMetadata;
+  // No page in the photo pool actually depicts "a website" - rather than
+  // force an unrelated business photo onto a page about web builds, this
+  // gives that one page (and any other future photo-less page) its own
+  // identity: a faint blueprint/wireframe grid instead of a scrim-over-photo.
+  variant?: 'grid';
 }
 
-const { frameNum, frameLabel, title, subtitle, image } = Astro.props;
+const { frameNum, frameLabel, title, subtitle, image, variant } = Astro.props;
 ---
 
-<section class="page-hero">
-  {image && (
-    <div class="page-hero-bg" aria-hidden="true">
-      <Image
-        src={image}
-        alt=""
-        class="page-hero-img"
-        widths={[640, 960, 1280, 1600]}
-        sizes="100vw"
-        loading="eager"
-      />
-      <div class="page-hero-scrim"></div>
-    </div>
-  )}
+<section class={`page-hero ${variant ? `page-hero--${variant}` : ''}`}>
+  {variant === 'grid' && <div class="page-hero-grid" aria-hidden="true"></div>}
   <div class="wrap page-hero-inner">
     <div class="frame-tag"><span class="num">FRAME {frameNum}</span> {frameLabel}</div>
     <h1 class="page-hero-h">{title}</h1>
@@ -45,21 +38,28 @@ const { frameNum, frameLabel, title, subtitle, image } = Astro.props;
     padding: 170px 0 90px;
     overflow: hidden;
   }
-  .page-hero-bg{ position: absolute; inset: 0; z-index: 0; }
-  .page-hero-bg :global(.page-hero-img){
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-  }
   .page-hero-scrim{
     position: absolute; inset: 0;
     background:
       radial-gradient(ellipse 900px 500px at 15% -10%, rgba(230,196,104,0.14), transparent 60%),
       linear-gradient(180deg, rgba(10,14,19,0.72), rgba(10,14,19,0.88) 65%, var(--bg) 100%);
   }
+  /* Web Projects' page-hero--grid variant: a faint blueprint grid standing
+     in for the photo every other service page gets, since "a website" has
+     no real on-site shot to show. Fades toward the page background rather
+     than a hard edge, matching how the photo variant's scrim resolves. */
+  .page-hero--grid .page-hero-grid{
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(230,196,104,0.09) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(230,196,104,0.09) 1px, transparent 1px);
+    background-size: 56px 56px;
+    -webkit-mask-image: radial-gradient(ellipse 900px 560px at 20% 0%, #000 0%, transparent 72%);
+    mask-image: radial-gradient(ellipse 900px 560px at 20% 0%, #000 0%, transparent 72%);
+  }
   .page-hero-inner{ position: relative; z-index: 1; }
   .page-hero-h{
-    font-family: 'Montserrat', serif; font-weight: 400;
+    font-family: var(--font-display), serif; font-weight: 400;
     font-size: clamp(38px, 5.5vw, 66px);
     line-height: 1.05;
     letter-spacing: -0.01em;

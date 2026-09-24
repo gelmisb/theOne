@@ -199,18 +199,18 @@ const sections: Section[] = [
     display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
   }
   .legal-header .brand{
-    font-family: 'Montserrat', serif; font-size: 20px; text-decoration: none; color: var(--paper);
+    font-family: var(--font-display), serif; font-size: 20px; text-decoration: none; color: var(--paper);
   }
   .legal-header .brand em{ color: var(--brass); font-style: italic; }
   .back-link{
-    font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.04em;
+    font-family: var(--font-mono), monospace; font-size: 13px; letter-spacing: 0.04em;
     color: var(--paper-dim); text-decoration: none; transition: color 0.2s ease;
   }
   .back-link:hover{ color: var(--brass); }
 
   .legal-doc{ padding: 70px 0 110px; }
   .legal-doc h1{
-    font-family: 'Montserrat', serif; font-weight: 400;
+    font-family: var(--font-display), serif; font-weight: 400;
     font-size: clamp(32px, 5vw, 56px);
     line-height: 1.08;
     margin: 0 0 10px;
@@ -221,7 +221,7 @@ const sections: Section[] = [
   }
   .legal-section{ max-width: 720px; margin-bottom: 34px; }
   .legal-section h2{
-    font-family: 'Montserrat', serif; font-weight: 400;
+    font-family: var(--font-display), serif; font-weight: 400;
     font-size: 22px; color: var(--brass);
     margin: 0 0 12px;
   }

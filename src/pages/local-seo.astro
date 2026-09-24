@@ -4,6 +4,13 @@ import Header from '../components/Header.astro';
 import PageHero from '../components/PageHero.astro';
 import Sprockets from '../components/Sprockets.astro';
 import Footer from '../components/Footer.astro';
+import type { ImageMetadata } from 'astro';
+
+const heroImages = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/photos/portfolio/counter-service.jpg',
+  { eager: true }
+);
+const heroImage = Object.values(heroImages)[0]?.default;
 
 const rows = [
   { lbl: 'Category', val: 'Set & verified' },
@@ -25,13 +32,14 @@ const steps = [
   title="Local SEO & Google Business Profile Setup — Wicklow — Horizon Vantage"
   description="Google Business Profile setup and local SEO for small businesses in Wicklow — category, service area, photos, and review systems done properly, not left to default settings."
 >
-  <Header />
+  <Header transition:persist />
 
   <PageHero
     frameNum="014"
     frameLabel="Local SEO"
     title="Your Google listing is doing more selling than your homepage."
     subtitle="Most local searches never make it past the map pack. A finished, verified, correctly categorised Google Business Profile is worth more than another homepage redesign."
+    image={heroImage}
   />
 
   <section id="local-seo-checklist">
@@ -75,23 +83,10 @@ const steps = [
   <Footer />
 </Layout>
 
-<script>
-  import {
-    initScrollReveals,
-    initNavOnScroll,
-    initMagneticButtons,
-    initHeadingSplitReveal,
-    initSectionTransitions,
-  } from '../scripts/animations';
-  import { initSmoothScroll } from '../scripts/lenis';
-
-  initSmoothScroll();
-  initScrollReveals();
-  initNavOnScroll();
-  initMagneticButtons();
-  initHeadingSplitReveal();
-  initSectionTransitions();
-</script>
+<!-- Animation bootstrap lives in Layout.astro's single shared script, not
+     here - see that file's script comment for why a per-page script can't
+     reliably do this once Astro's client-side page transitions are in
+     play. -->
 
 <style>
   .gbp-card{
@@ -102,7 +97,7 @@ const steps = [
   .gbp-row{ display: flex; justify-content: space-between; padding: 14px 0; border-top: 1px solid var(--line); font-size: 14px; }
   .gbp-row:first-child{ border-top: none; }
   .gbp-row .lbl{ color: var(--paper-dim); }
-  .gbp-row .val{ color: var(--brass); font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
+  .gbp-row .val{ color: var(--brass); font-family: var(--font-mono), monospace; font-size: 13px; }
 
   .seo-steps{
     display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px;
@@ -115,6 +110,6 @@ const steps = [
   .seo-step-n{
     display: block; font-size: 12px; color: var(--brass); letter-spacing: 0.08em; margin-bottom: 10px;
   }
-  .seo-step h3{ font-family: 'Montserrat', serif; font-weight: 400; font-size: 20px; margin: 0 0 10px; }
+  .seo-step h3{ font-family: var(--font-display), serif; font-weight: 400; font-size: 20px; margin: 0 0 10px; }
   .seo-step p{ font-size: 14px; line-height: 1.6; color: var(--paper-dim); margin: 0; }
 </style>

@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { Image, getImage } from 'astro:assets';
+import { ClientRouter } from 'astro:transitions';
 import type { ImageMetadata } from 'astro';
 import CookieBanner from '../components/CookieBanner.astro';
 import logoDark from '../assets/photos/logo/logo_dark.png';
@@ -105,20 +106,96 @@ const persistImage = Object.values(persistImages)[0]?.default;
     <meta name="twitter:image" content={ogImageURL} />
 
     <script type="application/ld+json" set:html={JSON.stringify(structuredData)} is:inline />
+
+    <!-- SPA-style client-side navigation (astro:transitions) instead of a
+         full page reload per link click - a hard reload was the actual
+         source of the "jittery" feel switching between the new standalone
+         pages: a white flash, GSAP/Lenis re-initializing from a cold DOM,
+         and every fixed-position layer (header, persist-bg, grain,
+         vignette) visibly re-painting from scratch. ClientRouter fetches
+         the next page in the background and cross-fades the swap via the
+         browser's View Transitions API instead. -->
+    <ClientRouter />
   </head>
   <body>
     {persistImage && (
-      <div class="persist-bg" data-persist-bg aria-hidden="true">
+      <div class="persist-bg" data-persist-bg aria-hidden="true" transition:persist>
         <Image src={persistImage} alt="" class="persist-bg-img" widths={[640, 960, 1280, 1920]} sizes="100vw" loading="eager" fetchpriority="high" />
         <div class="persist-bg-scrim"></div>
       </div>
     )}
     <slot />
-    <div class="grain" aria-hidden="true"></div>
-    <div class="vignette" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true" transition:persist></div>
+    <div class="vignette" aria-hidden="true" transition:persist></div>
     <CookieBanner />
   </body>
 </html>
+
+<script>
+  // Every page-animation bootstrap call lives here, in the ONE script that's
+  // byte-identical across every page (Layout.astro is shared) - not split
+  // per page as it used to be. Two things forced that:
+  //
+  // 1. astro:before-swap/astro:page-load have to be wired up exactly once
+  //    for the whole session, not per page - Astro's client router
+  //    deduplicates inline <script> tags by content across the *entire*
+  //    session (not just against the immediately-previous page), so a
+  //    script tag that already ran once (e.g. on the very first load of
+  //    "/") is recognized as "already executed" and silently skipped on
+  //    every later visit back to that same page, however many other pages
+  //    you'd visited in between. A per-page script that assigned its own
+  //    init logic on each visit (an earlier version of this) broke exactly
+  //    on revisits for that reason - home worked once, then went dead on
+  //    the second visit back. Only this file's script is guaranteed
+  //    identical (and therefore reliably deduped to one registration) on
+  //    every single page, so it's the only safe place to register
+  //    session-lifetime listeners.
+  // 2. Since only ONE inline script can be relied on to actually run,
+  //    every init function used anywhere on the site is called from here,
+  //    unconditionally, on every page. That's safe because every one of
+  //    them already guards on its own target elements existing (a
+  //    homepage-only effect like the film-roll intro or the hero timeline
+  //    just no-ops on a page with no #hero) - the guard clauses, not which
+  //    page's script happened to import what, are what decide which
+  //    effects actually apply to the current page.
+  import {
+    teardownForTransition,
+    initScrollHashFix,
+    initFilmRollIntro,
+    initScrollReveals,
+    initPersistBgFade,
+    initHeroTimeline,
+    initHeroParallax,
+    initContactSheetReveal,
+    initNavOnScroll,
+    initMagneticButtons,
+    initPortfolioLightbox,
+    initVideoLightbox,
+    initScrollNav,
+    initHeadingSplitReveal,
+    initSectionTransitions,
+  } from '../scripts/animations';
+  import { initSmoothScroll } from '../scripts/lenis';
+
+  document.addEventListener('astro:before-swap', teardownForTransition);
+  document.addEventListener('astro:page-load', () => {
+    initSmoothScroll();
+    initScrollHashFix();
+    initFilmRollIntro();
+    initPersistBgFade();
+    initHeroTimeline();
+    initHeroParallax();
+    initScrollReveals();
+    initContactSheetReveal();
+    initNavOnScroll();
+    initMagneticButtons();
+    initPortfolioLightbox();
+    initVideoLightbox();
+    initScrollNav();
+    initHeadingSplitReveal();
+    initSectionTransitions();
+  });
+</script>
 
 <style>
   .persist-bg{

@@ -97,14 +97,14 @@ const tiers = [
   .tier .badge{
     position: absolute; top: 0; right: 0;
     background: var(--brass); color: var(--bg);
-    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    font-family: var(--font-mono), monospace; font-size: 10px;
     letter-spacing: 0.08em; text-transform: uppercase;
     padding: 6px 12px;
     border-radius: 0 var(--radius-glass) 0 var(--radius-glass);
   }
-  .tier .tier-num{ font-family: 'IBM Plex Mono', monospace; color: var(--brass); font-size: 12px; margin-bottom: 16px; letter-spacing: 0.08em; }
-  .tier h3{ font-family: 'Montserrat', serif; font-weight: 400; font-size: 28px; margin: 0 0 10px; }
-  .tier .price{ font-family: 'IBM Plex Mono', monospace; font-size: 22px; color: var(--brass); margin-bottom: 6px; }
+  .tier .tier-num{ font-family: var(--font-mono), monospace; color: var(--brass); font-size: 12px; margin-bottom: 16px; letter-spacing: 0.08em; }
+  .tier h3{ font-family: var(--font-display), serif; font-weight: 400; font-size: 28px; margin: 0 0 10px; }
+  .tier .price{ font-family: var(--font-mono), monospace; font-size: 22px; color: var(--brass); margin-bottom: 6px; }
   .tier .price .suffix{ font-size: 14px; opacity: .7; }
   .tier .purpose{ font-size: 13px; color: var(--paper-dim); font-style: italic; margin-bottom: 26px; }
   .tier .desc{ font-size: 15px; line-height: 1.6; color: var(--paper-dim); margin: 0; flex-grow: 1; }
@@ -118,6 +118,6 @@ const tiers = [
   }
   .addon .t{ font-size: 14px; color: var(--paper-dim); }
   .addon .t strong{ color: var(--paper); font-weight: 600; }
-  .addon .price{ font-family: 'IBM Plex Mono', monospace; color: var(--brass); font-size: 16px; white-space: nowrap; }
+  .addon .price{ font-family: var(--font-mono), monospace; color: var(--brass); font-size: 16px; white-space: nowrap; }
   .addon .unit{ opacity: .6; font-size: 12px; }
 </style>

@@ -49,13 +49,13 @@ const homePrefix = Astro.url.pathname === '/' ? '' : '/';
     padding-bottom: 36px; border-bottom: 1px solid var(--line);
     margin-bottom: 26px;
   }
-  .foot-brand .brand{ display: flex; align-items: center; gap: 10px; font-family: 'Instrument Serif', serif; font-size: 22px; margin-bottom: 12px; }
+  .foot-brand .brand{ display: flex; align-items: center; gap: 10px; font-family: var(--font-display), serif; font-size: 22px; margin-bottom: 12px; }
   .foot-brand .brand em{ color: var(--brass); font-style: italic; }
   .foot-brand .brand :global(.brand-mark){ width: 28px; height: 28px; object-fit: contain; flex-shrink: 0; }
   .foot-brand p{ color: var(--paper-dim); font-size: 14px; max-width: 280px; line-height: 1.6; }
   .foot-cols{ display: flex; gap: 60px; flex-wrap: wrap; }
   .foot-col h3{
-    font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em;
+    font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: 0.08em;
     text-transform: uppercase; color: var(--brass); margin: 0 0 16px;
   }
   .foot-col a{
@@ -65,7 +65,7 @@ const homePrefix = Astro.url.pathname === '/' ? '' : '/';
   .foot-col a:hover{ color: var(--paper); }
   .foot-bottom{
     display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
-    font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--paper-dim); opacity: 0.6;
+    font-family: var(--font-mono), monospace; font-size: 11px; color: var(--paper-dim); opacity: 0.6;
   }
   .foot-bottom a{ text-decoration: none; transition: color 0.2s ease; }
   .foot-bottom a:hover{ color: var(--paper); }

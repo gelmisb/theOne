@@ -23,7 +23,7 @@ const timeline = [
   title="About Horizon Vantage — Why This Business Exists"
   description="Why Horizon Vantage exists: 10+ years of software engineering and 5+ years of professional photography, combined into one offer for local Irish businesses."
 >
-  <Header />
+  <Header transition:persist />
 
   <PageHero
     frameNum="019"
@@ -92,23 +92,10 @@ const timeline = [
   <Footer />
 </Layout>
 
-<script>
-  import {
-    initScrollReveals,
-    initNavOnScroll,
-    initMagneticButtons,
-    initHeadingSplitReveal,
-    initSectionTransitions,
-  } from '../scripts/animations';
-  import { initSmoothScroll } from '../scripts/lenis';
-
-  initSmoothScroll();
-  initScrollReveals();
-  initNavOnScroll();
-  initMagneticButtons();
-  initHeadingSplitReveal();
-  initSectionTransitions();
-</script>
+<!-- Animation bootstrap lives in Layout.astro's single shared script, not
+     here - see that file's script comment for why a per-page script can't
+     reliably do this once Astro's client-side page transitions are in
+     play. -->
 
 <style>
   .about-layout{ display: grid; grid-template-columns: 0.8fr 1.6fr; gap: 60px; align-items: start; }
@@ -122,7 +109,7 @@ const timeline = [
   .about-timeline > div{ padding: 22px; border-top: 1px solid var(--line); }
   .about-timeline > div:first-child{ border-top: none; }
   .at-k{
-    display: block; font-family: 'Montserrat', serif; font-style: italic;
+    display: block; font-family: var(--font-display), serif; font-style: italic;
     font-size: 24px; color: var(--brass); margin-bottom: 6px;
   }
   .at-v{ font-size: 13px; color: var(--paper-dim); line-height: 1.45; }
