@@ -90,10 +90,10 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
                 src={f.photo}
                 alt=""
                 class="fr-photo"
-                width={360}
-                height={360}
+                width={500}
+                height={500}
                 widths={f.isHero ? [180, 240, 360, 640, 960, 1440] : [180, 240, 360]}
-                sizes={f.isHero ? '(max-width: 900px) 100vw, 1440px' : '180px'}
+                sizes={f.isHero ? '(max-width: 900px) 100vw, 1440px' : '500px'}
                 loading={i < 4 ? 'eager' : 'lazy'}
                 fetchpriority={i === 0 ? 'high' : undefined}
               />
@@ -172,6 +172,7 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
     gap: 3px;
     width: max-content;
     will-change: transform;
+    height: 500px;
   }
   .fr-frame{
     position: relative;
@@ -180,6 +181,7 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
     border: 1px solid var(--line);
     overflow: hidden;
     background: var(--panel);
+    width: 500px;
   }
   .fr-frame :global(.fr-photo){
     position: absolute; inset: 0;
