@@ -197,7 +197,7 @@ const persistImage = Object.values(persistImages)[0]?.default;
     initSectionTransitions,
   } from '../scripts/animations';
   import { initSmoothScroll } from '../scripts/lenis';
-  import { initAmbientBackground } from '../scripts/ambient-bg';
+  import { initAmbientBackground, initIntroAmbientGlow } from '../scripts/ambient-bg';
 
   document.addEventListener('astro:before-swap', teardownForTransition);
   document.addEventListener('astro:page-load', () => {
@@ -206,6 +206,7 @@ const persistImage = Object.values(persistImages)[0]?.default;
     initFilmRollIntro();
     initMobileIntroVideo();
     initAmbientBackground();
+    initIntroAmbientGlow();
     initPersistBgFade();
     initHeroTimeline();
     initHeroParallax();

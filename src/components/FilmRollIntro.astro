@@ -60,6 +60,14 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
 ---
 
 <section class="filmroll-intro" id="intro">
+  <!-- dev3 experiment (founder request, 2026-09-24) - the same ambient
+       shader as Layout.astro's persist-bg, layered behind the film strip
+       too. Own canvas/WebGL context (initIntroAmbientGlow, ambient-bg.ts):
+       this section paints a solid background in front of persist-bg, so
+       persist-bg's own canvas can't show through it - see ambient-bg.ts
+       for the full stacking-context reasoning. Desktop-only, matches
+       initFilmRollIntro's own gate. -->
+  <canvas class="fr-ambient-glow" data-ambient-bg-intro aria-hidden="true"></canvas>
   <Image
     src={logoWatermark}
     alt=""
@@ -138,6 +146,12 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
 <style>
   .filmroll-intro{
     position: relative;
+    /* Scopes z-index among this section's own children (glow canvas,
+       watermark, content) to a local stacking context, so a z-index:-1
+       child paints above this section's own `background` fill (always
+       painted first within an isolated context, per spec) without leaking
+       out to compete with unrelated z-index values elsewhere on the page. */
+    isolation: isolate;
     min-height: 100vh;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 54px;
@@ -146,6 +160,25 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
     padding: 140px 0 60px;
     background: var(--bg);
   }
+
+  /* dev3 experiment - see the <canvas> comment above and ambient-bg.ts.
+     z-index:-1 (scoped locally by .filmroll-intro's isolation above) sits
+     above this section's own solid background fill but below the
+     watermark (z:0) and content (z:1), and mix-blend-mode:screen keeps it
+     additive-only so it reads as glow rather than washing out the dark
+     backdrop. Hidden outright once .fr-video-mode is active (mobile) -
+     it'd render at zero visible cost behind the opaque video anyway
+     (z:0 > -1), but not even creating the WebGL context in the first
+     place is better for mobile battery/GPU headroom. */
+  .fr-ambient-glow{
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    z-index: -1;
+    mix-blend-mode: screen;
+    opacity: 0.7;
+    pointer-events: none;
+  }
+  .fr-video-mode .fr-ambient-glow{ display: none; }
 
   /* Faint logo watermark behind everything - large, centred, barely there.
      0.05 opacity matches global.css's .grain layer, the established

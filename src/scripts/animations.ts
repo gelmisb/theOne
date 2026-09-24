@@ -2,6 +2,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
 import { getLenis, destroySmoothScroll } from './lenis';
+import { teardownIntroAmbientGlow } from './ambient-bg';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -38,6 +39,7 @@ export function teardownForTransition() {
   document.body.style.overflow = '';
   portfolioLightbox?.destroy();
   portfolioLightbox = null;
+  teardownIntroAmbientGlow();
 }
 
 /**

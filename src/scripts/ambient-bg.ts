@@ -7,36 +7,59 @@ gsap.registerPlugin(ScrollTrigger);
  * Mouse-reactive WebGL shader (founder-supplied sample_bg.html, adapted
  * in place - same shader, same Three.js APIs, just wired into this
  * codebase's module/init-function conventions instead of a standalone
- * <script type="module"> page) as an ambient layer over Layout.astro's
- * persist-bg photo.
+ * <script type="module"> page).
  *
- * Layered, not swapped in for the photo: the whole site's identity is
+ * Two independent instances share this one shader:
+ *  - initAmbientBackground(): layered over Layout.astro's persist-bg photo,
+ *    session-lifetime (persist-bg is `transition:persist`, so its canvas is
+ *    only ever set up once).
+ *  - initIntroAmbientGlow(): layered behind FilmRollIntro's film strip
+ *    (founder request, 2026-09-24) - a *separate* canvas/WebGL context,
+ *    because the intro is a solid-background pinned section painted in
+ *    front of persist-bg, not a transparent one; there's no way for a
+ *    single canvas living in persist-bg to show through it (see the git
+ *    history on this file for the stacking-context reasoning). Unlike
+ *    persist-bg, FilmRollIntro is NOT transition:persist - it gets torn
+ *    down and rebuilt every time the visitor navigates back to the
+ *    homepage, so this instance is properly disposed (renderer +
+ *    listeners) on every teardown rather than assumed session-lifetime,
+ *    or repeat home visits would leak WebGL contexts until the browser's
+ *    per-page context limit started killing contexts outright - including
+ *    persist-bg's.
+ *
+ * Layered, not swapped in for the photo/strip: the whole site's identity is
  * "real on-site photography, not generic visuals" (Gap.astro pitches
  * directly against exactly the kind of templated/generic look a bare
- * animated backdrop risks reading as) - replacing the photo outright would
- * cut against that. `mix-blend-mode: screen` on the canvas (see
- * Layout.astro) lets the shader's mostly-black base + glowing highlights
- * sit over the photo without hiding it: screen blending only ever
- * brightens, so dark shader regions let the photo show through untouched
- * and only the glow itself adds atmosphere on top. Try dev3 first before
- * deciding whether this belongs on the actual site - it's a real, fairly
- * heavy per-pixel shader running continuously, which is a legitimate
- * trade-off against the site's own established "cinematic but disciplined"
- * motion budget.
+ * animated backdrop risks reading as) - replacing either with the shader
+ * would cut against that. `mix-blend-mode: screen` lets the shader's
+ * mostly-black base + glowing highlights sit over dark backgrounds without
+ * hiding what's under them: screen blending only ever brightens, so dark
+ * shader regions leave the photo/strip untouched and only the glow itself
+ * adds atmosphere on top.
  *
- * Three.js is dynamically imported inside this module's setup rather than
- * statically at top level - it's a ~600KB dependency used by nothing else
- * on the site, no reason to add it to every page's JS bundle for visitors
- * whose browser can't even run this (reduced-motion, no WebGL) or who
- * never reach the code path.
+ * Three.js is dynamically imported inside setupLayer rather than statically
+ * at top level - it's a ~600KB dependency used by nothing else on the site,
+ * no reason to add it to every page's JS bundle for visitors whose browser
+ * can't even run this (reduced-motion, no WebGL) or who never reach either
+ * code path.
  */
 
-let start: () => void = () => {};
-let stop: () => void = () => {};
-let pausedByScroll = false;
-let setupPromise: Promise<void> | null = null;
+interface Controls {
+  start: () => void;
+  stop: () => void;
+  dispose: () => void;
+}
 
-async function setupOnce(canvas: HTMLCanvasElement) {
+function prefersReducedMotion() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function hasWebGLSupport() {
+  const probe = document.createElement('canvas');
+  return !!(probe.getContext('webgl') || probe.getContext('experimental-webgl'));
+}
+
+async function setupLayer(canvas: HTMLCanvasElement): Promise<Controls> {
   const THREE = await import('three');
 
   const scene = new THREE.Scene();
@@ -174,25 +197,25 @@ async function setupOnce(canvas: HTMLCanvasElement) {
       }
     `,
   });
-  scene.add(new THREE.Mesh(geometry, material));
+  const mesh = new THREE.Mesh(geometry, material);
+  scene.add(mesh);
 
   function onPointerMove(clientX: number, clientY: number) {
     targetMouse.x = clientX / window.innerWidth;
     targetMouse.y = 1 - clientY / window.innerHeight;
   }
-  window.addEventListener('mousemove', (e) => onPointerMove(e.clientX, e.clientY));
-  window.addEventListener(
-    'touchmove',
-    (e) => {
-      if (e.touches.length > 0) onPointerMove(e.touches[0].clientX, e.touches[0].clientY);
-    },
-    { passive: true }
-  );
-  window.addEventListener('resize', () => {
+  const onMouseMove = (e: MouseEvent) => onPointerMove(e.clientX, e.clientY);
+  const onTouchMove = (e: TouchEvent) => {
+    if (e.touches.length > 0) onPointerMove(e.touches[0].clientX, e.touches[0].clientY);
+  };
+  const onResize = () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     uniforms.r.value.set(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  });
+  };
+  window.addEventListener('mousemove', onMouseMove);
+  window.addEventListener('touchmove', onTouchMove, { passive: true });
+  window.addEventListener('resize', onResize);
 
   let rafId = 0;
   let running = false;
@@ -204,34 +227,56 @@ async function setupOnce(canvas: HTMLCanvasElement) {
     uniforms.mouse.value.copy(mouse);
     renderer.render(scene, camera);
   }
-  start = () => {
+  const start = () => {
     if (running) return;
     running = true;
     rafId = requestAnimationFrame(renderTick);
   };
-  stop = () => {
+  const stop = () => {
     running = false;
     cancelAnimationFrame(rafId);
   };
 
-  canvas.addEventListener(
-    'webglcontextlost',
-    (e) => {
-      e.preventDefault();
-      stop();
-    },
-    { once: true }
-  );
+  const onContextLost = (e: Event) => {
+    e.preventDefault();
+    stop();
+  };
+  canvas.addEventListener('webglcontextlost', onContextLost, { once: true });
+
+  const dispose = () => {
+    stop();
+    window.removeEventListener('mousemove', onMouseMove);
+    window.removeEventListener('touchmove', onTouchMove);
+    window.removeEventListener('resize', onResize);
+    canvas.removeEventListener('webglcontextlost', onContextLost);
+    geometry.dispose();
+    material.dispose();
+    renderer.dispose();
+    // forceContextLoss(), not just dispose() - dispose() frees GPU
+    // resources but doesn't guarantee the context itself is released
+    // immediately, which matters here specifically because
+    // initIntroAmbientGlow creates a brand new context on every homepage
+    // visit. Without this, enough repeat visits in one session exhausts
+    // the browser's per-page WebGL context limit and starts silently
+    // killing contexts outright - including persist-bg's session-lifetime
+    // one, which has no recovery path.
+    renderer.forceContextLoss();
+  };
 
   start();
+  return { start, stop, dispose };
 }
+
+let bgControls: Controls | null = null;
+let bgReady: Promise<void> | null = null;
+let bgPausedByScroll = false;
 
 /**
  * Called from Layout.astro's shared astro:page-load handler, same as every
  * other init function in this codebase - but unlike most of them, its
- * one-time WebGL setup (setupOnce above) genuinely only runs once per
- * session (guarded via the canvas' own dataset flag, since the canvas
- * itself is transition:persist and survives every client-side navigation).
+ * one-time WebGL setup genuinely only runs once per session (guarded via
+ * the canvas' own dataset flag, since the canvas itself is transition:persist
+ * and survives every client-side navigation) and is never disposed.
  *
  * The scroll-based pause/resume boundary below is different: it has to be
  * re-created on *every* call, not just the first, because
@@ -246,29 +291,28 @@ async function setupOnce(canvas: HTMLCanvasElement) {
 export async function initAmbientBackground() {
   const canvas = document.querySelector<HTMLCanvasElement>('[data-ambient-bg]');
   if (!canvas) return;
-
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (prefersReducedMotion) return;
+  if (prefersReducedMotion()) return;
 
   if (!canvas.dataset.wired) {
-    const probe = document.createElement('canvas');
-    const hasWebGL = !!(probe.getContext('webgl') || probe.getContext('experimental-webgl'));
-    if (!hasWebGL) return;
-
+    if (!hasWebGLSupport()) return;
     canvas.dataset.wired = 'true';
-    setupPromise = setupOnce(canvas);
+    bgReady = setupLayer(canvas).then((controls) => {
+      bgControls = controls;
+    });
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) stop();
-      else if (!pausedByScroll) start();
+      if (!bgControls) return;
+      if (document.hidden) bgControls.stop();
+      else if (!bgPausedByScroll) bgControls.start();
     });
   }
 
-  await setupPromise;
+  await bgReady;
+  if (!bgControls) return;
 
   // Default to running on every page - only overridden below if this page
   // actually has a #offer-intro to measure against.
-  pausedByScroll = false;
-  if (!document.hidden) start();
+  bgPausedByScroll = false;
+  if (!document.hidden) bgControls.start();
 
   const gap = document.getElementById('offer-intro');
   if (!gap) return;
@@ -279,8 +323,8 @@ export async function initAmbientBackground() {
   // onLeaveBack (all still at least partially visible) and only actually
   // stop on onLeave, where the fade has just finished.
   const resume = () => {
-    pausedByScroll = false;
-    if (!document.hidden) start();
+    bgPausedByScroll = false;
+    if (!document.hidden) bgControls?.start();
   };
   ScrollTrigger.create({
     trigger: gap,
@@ -290,8 +334,8 @@ export async function initAmbientBackground() {
     onEnterBack: resume,
     onLeaveBack: resume,
     onLeave: () => {
-      pausedByScroll = true;
-      stop();
+      bgPausedByScroll = true;
+      bgControls?.stop();
     },
     onRefresh: (self) => {
       // Sync to whatever the actual current scroll position is at creation
@@ -300,11 +344,110 @@ export async function initAmbientBackground() {
       // state the moment it's created (e.g. landing back on the homepage
       // already scrolled past Gap, via browser back/forward).
       if (self.progress >= 1) {
-        pausedByScroll = true;
-        stop();
+        bgPausedByScroll = true;
+        bgControls?.stop();
       } else {
         resume();
       }
     },
   });
+}
+
+let introControls: Controls | null = null;
+let introObserver: IntersectionObserver | null = null;
+let introVisible = true;
+let introVisibilityHandler: (() => void) | null = null;
+// Bumped on every init call and every teardown - setupLayer's dynamic
+// import('three') + WebGLRenderer construction take a moment, so a fast
+// home -> elsewhere -> home round trip can have two initIntroAmbientGlow()
+// calls in flight at once. Whichever one's setup resolves after a newer
+// generation has already started (or a teardown has already run) is stale
+// and must dispose itself immediately instead of overwriting the current
+// instance - otherwise the orphaned instance leaks its context, and worse,
+// a slow first setup resolving *after* a second one has already claimed
+// introControls would stomp the working instance with a dead one.
+let introGeneration = 0;
+
+function syncIntroPlayback() {
+  if (!introControls) return;
+  if (introVisible && !document.hidden) introControls.start();
+  else introControls.stop();
+}
+
+/**
+ * Founder request (2026-09-24): the same glow, layered behind the film
+ * strip too, not just the rest of the page. Desktop-only, mirroring
+ * initFilmRollIntro's own gate - mobile gets the video background instead
+ * (initMobileIntroVideo), and stacking a third motion layer underneath an
+ * opaque video that already hides it would just burn battery for nothing
+ * visible.
+ *
+ * A brand new canvas + WebGL context every call, deliberately - see the
+ * module-level comment for why a second instance is necessary at all
+ * (FilmRollIntro's own solid background blocks persist-bg's canvas from
+ * showing through it) and why disposal (teardownIntroAmbientGlow) matters
+ * here specifically, unlike initAmbientBackground above.
+ */
+export async function initIntroAmbientGlow() {
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-ambient-bg-intro]');
+  const section = document.querySelector<HTMLElement>('.filmroll-intro');
+  if (!canvas || !section) return;
+  if (prefersReducedMotion()) return;
+  if (!window.matchMedia('(min-width: 641px)').matches) return;
+  if (!hasWebGLSupport()) return;
+
+  const generation = ++introGeneration;
+  const controls = await setupLayer(canvas);
+
+  if (generation !== introGeneration) {
+    // Superseded by a later init call or a teardown while setup was still
+    // in flight - this instance is already orphaned, dispose it right away
+    // rather than assigning it as the current one.
+    controls.dispose();
+    return;
+  }
+
+  introControls = controls;
+  introVisible = true;
+
+  // IntersectionObserver rather than a ScrollTrigger boundary - the intro
+  // is pinned (position: fixed) for its entire ~280vh scroll range, so a
+  // ScrollTrigger measuring its own unpinned box height ('bottom top') would
+  // fire "scrolled past" at ~100vh, cutting the glow off partway through
+  // the pin instead of when the section actually leaves the viewport.
+  // IntersectionObserver just reads real layout geometry, which correctly
+  // reflects the pin holding it on-screen the whole time.
+  introObserver = new IntersectionObserver(
+    ([entry]) => {
+      introVisible = entry.isIntersecting;
+      syncIntroPlayback();
+    },
+    { threshold: 0 }
+  );
+  introObserver.observe(section);
+
+  introVisibilityHandler = () => syncIntroPlayback();
+  document.addEventListener('visibilitychange', introVisibilityHandler);
+
+  syncIntroPlayback();
+}
+
+/**
+ * Called from teardownForTransition (animations.ts) on every
+ * astro:before-swap - unlike initAmbientBackground's persist-bg canvas,
+ * FilmRollIntro isn't transition:persist, so its canvas and WebGL context
+ * are genuinely destroyed and recreated on every homepage visit. Without an
+ * explicit dispose here, each round trip back to "/" would leak another
+ * live WebGL context.
+ */
+export function teardownIntroAmbientGlow() {
+  introGeneration++;
+  introObserver?.disconnect();
+  introObserver = null;
+  if (introVisibilityHandler) {
+    document.removeEventListener('visibilitychange', introVisibilityHandler);
+    introVisibilityHandler = null;
+  }
+  introControls?.dispose();
+  introControls = null;
 }
