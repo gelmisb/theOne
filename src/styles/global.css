@@ -28,6 +28,12 @@
 @import '@fontsource-variable/fraunces/standard-italic.css';
 @import '@fontsource-variable/jetbrains-mono/wght.css';
 
+/* Portfolio's photo lightbox (initPortfolioLightbox, animations.ts) -
+   PhotoSwipe builds its own DOM straight onto <body> on open, outside any
+   component's scoped styles, so its theming has to live in a global
+   stylesheet rather than Portfolio.astro's own <style> block. */
+@import 'photoswipe/style.css';
+
 :root{
   --bg: #0A0E13;
   --panel: #12181F;
@@ -45,6 +51,13 @@
   --font-body: 'Hanken Grotesk Variable', sans-serif;
   --font-display: 'Fraunces Variable', serif;
   --font-mono: 'JetBrains Mono Variable', monospace;
+
+  /* PhotoSwipe theming (see the @import above) - brand's own bg instead of
+     PhotoSwipe's default pure black, and the brass accent on its secondary
+     icon color (the counter/zoom-level text) so it doesn't read as an
+     unthemed default. */
+  --pswp-bg: var(--bg);
+  --pswp-icon-color-secondary: var(--brass);
 }
 
 *{ box-sizing: border-box; }

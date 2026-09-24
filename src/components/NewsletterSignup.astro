@@ -1,0 +1,137 @@
+---
+// Replaces Contact.astro in this FRAME 007 slot on the homepage - the full
+// enquiry form now lives on its own page (src/pages/contact.astro), linked
+// from every "Book a Founder Shoot" style CTA across the site instead of a
+// #contact anchor-scroll back here. This is the lighter, homepage-native
+// equivalent: a low-commitment email signup rather than the full form,
+// since a visitor already scrolling the homepage hasn't necessarily
+// decided to book yet.
+---
+
+<section class="updates-section" id="updates">
+  <div class="wrap">
+    <div class="frame-tag" style="justify-content:center;" data-reveal data-reveal-group="updates-head">
+      <span class="num">FRAME 007</span> Stay In The Loop
+    </div>
+    <h2 class="section-h" data-reveal data-reveal-group="updates-head">Keep me updated.</h2>
+    <p class="section-sub" data-reveal data-reveal-group="updates-head">
+      Occasional news, new work, and offers - no spam, unsubscribe any time.
+    </p>
+
+    <form
+      class="updates-form glass"
+      id="newsletter-form"
+      name="newsletter-signup"
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      data-reveal
+      data-reveal-group="updates-head"
+    >
+      <input type="hidden" name="form-name" value="newsletter-signup" />
+      <p style="display:none;">
+        <label>Leave this field blank: <input name="bot-field" /></label>
+      </p>
+      <div class="updates-row">
+        <label for="news-email" class="sr-only">Email address</label>
+        <input id="news-email" name="email" type="email" required placeholder="you@business.ie" />
+        <button type="submit" class="btn btn-primary">Keep Me Updated</button>
+      </div>
+      <label class="updates-consent">
+        <input type="checkbox" name="consent" required />
+        <span>
+          I'd like to receive occasional news and offers from Horizon Vantage, and I agree to the <a href="/terms">Terms of Service</a>.
+        </span>
+      </label>
+      <p class="form-note form-success" id="news-success" hidden>Thanks - you're on the list.</p>
+      <p class="form-note form-error" id="news-error" hidden>Something went wrong - please try again or email us directly.</p>
+    </form>
+  </div>
+</section>
+
+<script>
+  // Same Netlify Forms recipe as Contact.astro's enquiry form - a distinct
+  // form `name` (newsletter-signup) so Netlify tracks submissions to this
+  // one separately from enquiries in its dashboard.
+  const form = document.getElementById('newsletter-form') as HTMLFormElement | null;
+  const success = document.getElementById('news-success');
+  const error = document.getElementById('news-error');
+  const submitBtn = form?.querySelector('button[type="submit"]') as HTMLElement | null;
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!form) return;
+
+    const params = new URLSearchParams();
+    new FormData(form).forEach((value, key) => params.append(key, value.toString()));
+
+    try {
+      const res = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString(),
+      });
+      if (!res.ok) throw new Error(`Form submission failed: ${res.status}`);
+
+      success?.removeAttribute('hidden');
+      error?.setAttribute('hidden', '');
+      form.reset();
+      if (submitBtn) submitBtn.style.display = 'none';
+    } catch {
+      error?.removeAttribute('hidden');
+    }
+  });
+</script>
+
+<style>
+  .updates-section{
+    background:
+      radial-gradient(ellipse 700px 400px at 50% 0%, rgba(230,196,104,0.16), transparent 60%),
+      var(--panel);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    text-align: center;
+  }
+  .updates-section h2{ max-width: 700px; margin: 0 auto 20px; }
+  .updates-section .section-sub{ max-width: 480px; margin: 0 auto 44px; }
+  .updates-form{
+    max-width: 520px; margin: 0 auto;
+    display: flex; flex-direction: column; gap: 16px;
+    text-align: left;
+    padding: 32px;
+    border-radius: var(--radius-glass);
+  }
+  @media (max-width: 640px){ .updates-form{ padding: 24px 20px; } }
+
+  .sr-only{
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  .updates-row{ display: flex; gap: 10px; }
+  @media (max-width: 480px){ .updates-row{ flex-direction: column; } }
+  .updates-row input{
+    flex: 1; min-width: 0;
+    background: var(--bg);
+    border: 1px solid var(--line-strong);
+    color: var(--paper);
+    padding: 13px 14px;
+    font-family: var(--font-body), sans-serif;
+    font-size: 14px;
+    border-radius: var(--radius);
+  }
+  .updates-row input:focus{ outline: none; border-color: var(--brass); }
+  .updates-row button{ flex-shrink: 0; }
+
+  .updates-consent{
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 13px; line-height: 1.5; color: var(--paper-dim);
+    cursor: pointer;
+  }
+  .updates-consent input{ margin-top: 3px; flex-shrink: 0; accent-color: var(--brass); }
+  .updates-consent a{ color: var(--brass); text-decoration: none; }
+  .updates-consent a:hover{ text-decoration: underline; }
+
+  .form-note{ font-size: 12px; color: var(--paper-dim); margin: 0; opacity: 0.7; }
+  .form-success{ color: var(--brass); opacity: 1; }
+</style>

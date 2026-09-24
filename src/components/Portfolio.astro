@@ -1,14 +1,11 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
 const photoModules = import.meta.glob<{ default: ImageMetadata }>(
   '/src/assets/photos/portfolio/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}',
   { eager: true }
 );
-// Filenames of AI-generated fill-in shots - not real client work, so they're
-// visibly tagged and excluded from the "shown with their permission" claim below.
-const GENERATED_FILES = new Set(['counter-service.jpg', 'training-floor.jpg']);
 
 // This wildcard glob means anything dropped into the portfolio folder goes
 // live here automatically - unlike FilmRollIntro.astro, which explicitly
@@ -43,22 +40,36 @@ const CAPTION_OVERRIDES: Record<string, string> = {
   'gelmis-bartulis-UaFUhxyGNFY-unsplash.jpg': 'Touring Motorcycle',
 };
 
-const photos = Object.entries(photoModules)
-  .filter(([path]) => !EXCLUDED_FILES.has(path.split('/').pop()!))
-  .sort(([a], [b]) => a.localeCompare(b))
-  .map(([path, mod]) => {
-    const rawName = path.split('/').pop()!;
-    const filename = rawName.replace(/\.[^.]+$/, '');
-    const caption =
-      CAPTION_OVERRIDES[rawName] ?? filename.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-    const generated = GENERATED_FILES.has(rawName);
-    return { src: mod.default, caption, generated };
-  });
-const hasGenerated = photos.some((p) => p.generated);
+// Full-resolution version of each photo for the lightbox (PhotoSwipe needs
+// real pixel dimensions up front to size its viewer without a jump once the
+// image loads) - capped at 1600px wide rather than serving the original
+// multi-megapixel camera file into a modal nobody's zooming past that.
+const photos = await Promise.all(
+  Object.entries(photoModules)
+    .filter(([path]) => !EXCLUDED_FILES.has(path.split('/').pop()!))
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(async ([path, mod]) => {
+      const rawName = path.split('/').pop()!;
+      const filename = rawName.replace(/\.[^.]+$/, '');
+      const caption =
+        CAPTION_OVERRIDES[rawName] ?? filename.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+      const full = await getImage({ src: mod.default, width: 1600 });
+      return { src: mod.default, caption, fullSrc: full.src, fullWidth: full.attributes.width, fullHeight: full.attributes.height };
+    })
+);
 
+const hasPhotos = photos.length > 0;
 const frameCount = 10;
 const frames = Array.from({ length: frameCount }, (_, i) => String(i + 1).padStart(3, '0'));
-const hasPhotos = photos.length > 0;
+
+// Pads the grid out to a full row at the widest (5-column) breakpoint
+// instead of ending mid-row - "More Soon" tiles rather than an abrupt gap,
+// same idea as Web Projects' empty-state skeleton cards. Narrower
+// breakpoints (3-col, 2-col) won't line up as evenly against this same
+// count, but that's the existing, already-accepted trade-off the swatch-
+// frame empty state below has always had - not something this introduces.
+const PLACEHOLDER_COLS = 5;
+const placeholderCount = hasPhotos ? (PLACEHOLDER_COLS - (photos.length % PLACEHOLDER_COLS)) % PLACEHOLDER_COLS : 0;
 
 // On-site video clips. Add entries here the same way photos live in
 // src/assets/photos/portfolio - poster is optional (falls back to a plain
@@ -80,26 +91,24 @@ const hasVideos = videos.length > 0;
       )}
       <p class="section-sub">
         {hasPhotos
-          ? hasGenerated
-            ? 'A selection of founder shoots for real local businesses, shown here with their permission - alongside a couple of AI-generated concept frames, marked below, filling gaps while more real shoots are booked in.'
-            : 'A selection of founder shoots for real local businesses, shown here with their permission.'
+          ? 'A selection of founder shoots for real local businesses, shown here with their permission.'
           : "This studio is relaunching, not starting cold - the founder shoots below are being booked now, with real local businesses, shown here with their permission as soon as galleries are delivered."}
       </p>
     </div>
 
     <div class="contact-sheet" data-reveal data-reveal-group="portfolio-head">
-      <div class="cs-grid">
+      <div class="cs-grid" id="portfolio-gallery">
         {hasPhotos
           ? photos.map((p, i) => (
-              <button
-                type="button"
-                class="frame has-photo"
-                data-lightbox-trigger
-                data-lightbox-index={i}
-                aria-label={`Open photo: ${p.caption}${p.generated ? ' (AI-generated concept)' : ''}`}
+              <a
+                href={p.fullSrc}
+                data-pswp-width={p.fullWidth}
+                data-pswp-height={p.fullHeight}
+                class="frame has-photo pswp-item"
+                target="_blank"
+                rel="noopener"
               >
                 <span class="fnum">{String(i + 1).padStart(3, '0')}</span>
-                {p.generated && <span class="ai-tag mono">AI Concept</span>}
                 <Image
                   src={p.src}
                   alt={p.caption}
@@ -108,8 +117,8 @@ const hasVideos = videos.length > 0;
                   sizes="(max-width: 560px) 50vw, (max-width: 900px) 33vw, 20vw"
                   loading="lazy"
                 />
-                <span class="caption mono">{p.caption}{p.generated && ' - AI concept'}</span>
-              </button>
+                <span class="caption mono">{p.caption}</span>
+              </a>
             ))
           : frames.map((n, i) => (
               <div class="frame" style={`--hue-shift:${(i * 11) % 40}deg`}>
@@ -118,6 +127,13 @@ const hasVideos = videos.length > 0;
                 <span class="x">-</span>
               </div>
             ))}
+        {hasPhotos && Array.from({ length: placeholderCount }).map((_, i) => (
+          <div class="frame frame-placeholder" style={`--hue-shift:${(i * 13) % 40}deg`}>
+            <span class="fnum">{String(photos.length + i + 1).padStart(3, '0')}</span>
+            <div class="swatch"></div>
+            <span class="placeholder-label mono">More Soon</span>
+          </div>
+        ))}
       </div>
       <div class="cs-note">
         {hasPhotos ? (
@@ -131,7 +147,7 @@ const hasVideos = videos.length > 0;
             the commuter belt. First galleries land here as soon as they're delivered.
           </p>
         )}
-        <a href="#contact" class="btn btn-ghost">Get an early slot</a>
+        <a href="/contact" class="btn btn-ghost">Get an early slot</a>
       </div>
     </div>
 
@@ -166,12 +182,15 @@ const hasVideos = videos.length > 0;
 </section>
 
 {/*
-  Both lightboxes render as siblings of <section>, not nested inside it:
-  position:fixed only means "relative to the viewport" as long as no
+  The video lightbox renders as a sibling of <section>, not nested inside
+  it: position:fixed only means "relative to the viewport" as long as no
   ancestor has a CSS transform. initSectionTransitions() applies a scroll-
   scrubbed transform to every top-level section (including this one), which
   would otherwise make the section the fixed-positioning containing block
-  and break these modals' full-viewport overlay.
+  and break this modal's full-viewport overlay. PhotoSwipe (the photo
+  lightbox, initPortfolioLightbox in animations.ts) builds its own DOM
+  appended straight to <body> for the same reason, so it needs no markup
+  here at all.
 */}
 
 {hasVideos && (
@@ -179,24 +198,6 @@ const hasVideos = videos.length > 0;
     <button type="button" class="lb-close" data-video-lightbox-close aria-label="Close video">✕</button>
     <div class="lb-video-wrap" data-video-lightbox-wrap></div>
   </div>
-)}
-
-{hasPhotos && (
-  <div class="lightbox" data-lightbox>
-    <button type="button" class="lb-close" data-lightbox-close aria-label="Close">✕</button>
-    <button type="button" class="lb-nav lb-prev" data-lightbox-prev aria-label="Previous photo">‹</button>
-    <button type="button" class="lb-nav lb-next" data-lightbox-next aria-label="Next photo">›</button>
-    <figure class="lb-figure">
-      <img data-lightbox-img alt="" />
-      <figcaption class="mono" data-lightbox-caption></figcaption>
-    </figure>
-  </div>
-)}
-
-{hasPhotos && (
-  <script is:inline define:vars={{ photoUrls: photos.map((p) => p.src.src), captions: photos.map((p) => p.caption) }}>
-    window.__portfolioPhotos = { photoUrls, captions };
-  </script>
 )}
 
 <style>
@@ -215,17 +216,6 @@ const hasVideos = videos.length > 0;
     position: absolute; top: 8px; left: 10px; z-index: 2;
     font-family: var(--font-mono), monospace; font-size: 10px; color: var(--paper-dim); opacity: .6;
   }
-  .frame .ai-tag{
-    position: absolute; top: 8px; right: 8px; z-index: 2;
-    font-size: 9px; letter-spacing: 0.05em; text-transform: uppercase;
-    color: var(--paper);
-    background: rgba(10,14,19,0.65);
-    border: 1px solid rgba(234,242,248,0.28);
-    padding: 3px 7px;
-    border-radius: 999px;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-  }
   .frame .swatch{
     position: absolute; inset: 0;
     background: linear-gradient(calc(135deg + var(--hue-shift)), rgba(79,168,222,0.2), rgba(10,14,19,0.9) 60%);
@@ -233,6 +223,11 @@ const hasVideos = videos.length > 0;
   .frame .x{
     font-family: var(--font-display), serif; font-style: italic; font-size: 15px;
     color: var(--paper-dim); opacity: 0.55; z-index: 2;
+  }
+  .frame-placeholder .placeholder-label{
+    position: relative; z-index: 2;
+    font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--paper-dim); opacity: 0.7;
   }
   .cs-note{
     padding: 34px 36px;
@@ -245,7 +240,7 @@ const hasVideos = videos.length > 0;
   /* Real photo frames */
   .frame.has-photo{
     margin: 0; padding: 0; background: none; cursor: zoom-in;
-    font: inherit; color: inherit;
+    font: inherit; color: inherit; text-decoration: none;
   }
   .frame.has-photo :global(.photo){
     position: absolute; inset: 0;
@@ -317,7 +312,37 @@ const hasVideos = videos.length > 0;
   }
   .frame.has-video:focus-visible{ outline: 2px solid var(--brass); outline-offset: -2px; }
 
-  /* Video lightbox */
+  /* Video lightbox - deliberately stays a dark viewer regardless of site
+     theme, for video contrast. The photo lightbox is PhotoSwipe now (see
+     initPortfolioLightbox, animations.ts) and is themed globally in
+     global.css instead of here, since its DOM isn't scoped to this component. */
+  .lightbox{
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(10,17,24,0.95);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden;
+    transition: opacity .3s ease;
+  }
+  .lightbox.open{ opacity: 1; visibility: visible; }
+  .lb-close{
+    position: absolute;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(16px) saturate(1.6);
+    -webkit-backdrop-filter: blur(16px) saturate(1.6);
+    border: 1px solid rgba(255,255,255,0.25); color: #FFFFFF;
+    cursor: pointer; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color .2s ease, color .2s ease, background .2s ease;
+    top: 24px; right: 24px; width: 42px; height: 42px; font-size: 16px;
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+    .lb-close{ background: rgba(20,24,30,0.75); }
+  }
+  .lb-close:hover{ border-color: var(--brass); color: var(--brass); background: rgba(255,255,255,0.14); }
+  @media (max-width: 640px){
+    .lb-close{ top: 12px; right: 12px; }
+  }
+
   .video-lightbox .lb-video-wrap{
     position: relative;
     width: min(92vw, 1100px);
@@ -329,48 +354,5 @@ const hasVideos = videos.length > 0;
     width: 100%; height: 100%;
     border: 1px solid rgba(255,255,255,0.18);
     background: #000;
-  }
-
-  /* Lightbox - deliberately stays a dark viewer regardless of site theme, for photo contrast */
-  .lightbox{
-    position: fixed; inset: 0; z-index: 1000;
-    background: rgba(10,17,24,0.95);
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; visibility: hidden;
-    transition: opacity .3s ease;
-  }
-  .lightbox.open{ opacity: 1; visibility: visible; }
-  .lb-figure{ margin: 0; max-width: 88vw; max-height: 84vh; text-align: center; }
-  .lb-figure img{
-    max-width: 88vw; max-height: 76vh;
-    object-fit: contain;
-    border: 1px solid rgba(255,255,255,0.18);
-  }
-  .lb-figure figcaption{
-    margin-top: 14px; font-size: 12px; letter-spacing: 0.04em; color: rgba(255,255,255,0.65);
-  }
-  .lb-close, .lb-nav{
-    position: absolute;
-    background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(16px) saturate(1.6);
-    -webkit-backdrop-filter: blur(16px) saturate(1.6);
-    border: 1px solid rgba(255,255,255,0.25); color: #FFFFFF;
-    cursor: pointer; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    transition: border-color .2s ease, color .2s ease, background .2s ease;
-  }
-  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
-    .lb-close, .lb-nav{ background: rgba(20,24,30,0.75); }
-  }
-  .lb-close:hover, .lb-nav:hover{ border-color: var(--brass); color: var(--brass); background: rgba(255,255,255,0.14); }
-  .lb-close{ top: 24px; right: 24px; width: 42px; height: 42px; font-size: 16px; }
-  .lb-nav{ top: 50%; transform: translateY(-50%); width: 52px; height: 52px; font-size: 26px; }
-  .lb-prev{ left: 24px; }
-  .lb-next{ right: 24px; }
-  @media (max-width: 640px){
-    .lb-nav{ width: 40px; height: 40px; }
-    .lb-prev{ left: 8px; }
-    .lb-next{ right: 8px; }
-    .lb-close{ top: 12px; right: 12px; }
   }
 </style>

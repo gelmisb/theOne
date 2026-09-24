@@ -1,7 +1,15 @@
+<!-- Now the sole content of its own page (src/pages/contact.astro) rather
+     than a homepage section - moved there so every "Book a Founder Shoot" /
+     "Get Your Listing Fixed" CTA across the standalone pages lands
+     somewhere consistent, instead of a #contact anchor-scroll back to the
+     homepage. The homepage's own equivalent moment is now a lighter
+     "Keep Me Updated" email signup (NewsletterSignup.astro) in the same
+     FRAME 007 slot this used to occupy. Frame number bumped to 020,
+     continuing the standalone-pages sequence after About (018/019). -->
 <section class="cta-section" id="contact">
   <div class="wrap">
     <div class="frame-tag" style="justify-content:center;" data-reveal data-reveal-group="contact-head">
-      <span class="num">FRAME 007</span> Get In Touch
+      <span class="num">FRAME 020</span> Get In Touch
     </div>
     <h2 class="section-h" data-reveal data-reveal-group="contact-head">
       Tell us a bit about your business, and we'll take it from there.
@@ -114,6 +122,14 @@
     border-top: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
     text-align: center;
+    /* First section on its own page now (below the fixed Header), not
+       mid-homepage where the preceding section's own padding already
+       cleared it - same 170px/130px treatment every other standalone
+       page's first section uses. */
+    padding-top: 170px;
+  }
+  @media (max-width: 640px){
+    .cta-section{ padding-top: 130px; }
   }
   .cta-section h2{ max-width: 700px; margin: 0 auto 20px; }
   .cta-section .section-sub{ max-width: 520px; margin: 0 auto 44px; }

@@ -1,12 +1,6 @@
 ---
 import { Image } from 'astro:assets';
 import logoMark from '../assets/photos/logo/logo_transparent.png';
-
-// Homepage-section anchors (used by Footer's Studio column, not here
-// anymore now that this nav points at standalone pages) need a leading
-// "/" when rendered off the homepage, or they're dead links - there's no
-// #offer element on e.g. /photography. See Footer.astro for the same fix.
-const homePrefix = Astro.url.pathname === '/' ? '' : '/';
 ---
 
 <header>
@@ -22,7 +16,7 @@ const homePrefix = Astro.url.pathname === '/' ? '' : '/';
         <a href="/local-seo">Local SEO</a>
         <a href="/web-projects">Websites</a>
         <a href="/about">About</a>
-        <a href={`${homePrefix}#contact`} class="nav-cta">Book a Shoot</a>
+        <a href="/contact" class="nav-cta">Book a Shoot</a>
       </nav>
       <!-- Mobile only (see @media max-width:860px below) - below that
            breakpoint .navlinks' own links are hidden and this is the only

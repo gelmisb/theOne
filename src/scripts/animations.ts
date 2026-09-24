@@ -1,5 +1,6 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import PhotoSwipeLightbox from 'photoswipe/lightbox';
 import { getLenis, destroySmoothScroll } from './lenis';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -35,6 +36,8 @@ export function teardownForTransition() {
   // across transitions rather than remounting.
   document.querySelector('header')?.classList.remove('nav-open');
   document.body.style.overflow = '';
+  portfolioLightbox?.destroy();
+  portfolioLightbox = null;
 }
 
 /**
@@ -59,17 +62,36 @@ export function initScrollHashFix() {
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   window.scrollTo(0, 0);
 
+  const measureAndScroll = () => {
+    ScrollTrigger.refresh();
+    const target = document.querySelector<HTMLElement>(hash);
+    if (!target) return;
+    const lenis = getLenis();
+    if (lenis) {
+      lenis.scrollTo(target, { immediate: true });
+    } else {
+      target.scrollIntoView();
+    }
+  };
+
+  // Double rAF, then a corrective re-run ~250ms later. A single rAF (this
+  // used to be just one) isn't reliably enough settle time specifically on
+  // a client-side transition landing on a hash (e.g. a "Book a Founder
+  // Shoot" button on /photography linking to /#contact) - confirmed by
+  // reproducing it: the scroll landed ~2000px short, right around Portfolio
+  // instead of Contact, on the very first attempt every time, but measuring
+  // again shortly after always found the correct position. Whatever's still
+  // settling (font metrics swapping in, images finishing decode) on the
+  // freshly-swapped page apparently isn't done by the next paint. A hard
+  // page load never showed this - 'load' already guarantees everything's
+  // settled - so this only actually matters for the transition path, but
+  // running it this way for both is strictly safer, not just equivalent.
   const settle = () => {
     requestAnimationFrame(() => {
-      ScrollTrigger.refresh();
-      const target = document.querySelector<HTMLElement>(hash);
-      if (!target) return;
-      const lenis = getLenis();
-      if (lenis) {
-        lenis.scrollTo(target, { immediate: true });
-      } else {
-        target.scrollIntoView();
-      }
+      requestAnimationFrame(() => {
+        measureAndScroll();
+        setTimeout(measureAndScroll, 250);
+      });
     });
   };
 
@@ -741,52 +763,35 @@ export function initWebMockTilt() {
 }
 
 /** Portfolio lightbox - click a developed frame to view it full-size, arrow/keyboard navigable. */
+// Module-scoped, not per-call: Portfolio only ever exists on the homepage
+// (destroyed with the rest of that page's DOM on every transition away, so
+// this doesn't need the transition:persist-aware idempotent-guard pattern
+// initMobileNav uses), but PhotoSwipeLightbox itself can bind listeners
+// beyond just the gallery's own children - destroying the previous
+// instance before creating a new one, and again in teardownForTransition,
+// keeps repeated homepage visits in one session from stacking instances.
+let portfolioLightbox: PhotoSwipeLightbox | null = null;
+
+/**
+ * Photo lightbox for Frame 003 (Portfolio.astro), via PhotoSwipe instead of
+ * the previous hand-rolled modal - founder-reported lag on both desktop and
+ * mobile with the old one. PhotoSwipe handles its own gesture/zoom/keyboard
+ * interaction and appends its own DOM straight to <body> on open, so
+ * Portfolio.astro's markup is just a plain gallery of real <a href> links
+ * (data-pswp-width/height come from getImage() at build time) - no custom
+ * modal markup to keep in sync here.
+ */
 export function initPortfolioLightbox() {
-  const lightbox = document.querySelector<HTMLElement>('[data-lightbox]');
-  const data = (window as any).__portfolioPhotos as { photoUrls: string[]; captions: string[] } | undefined;
-  if (!lightbox || !data) return;
+  const gallery = document.querySelector<HTMLElement>('#portfolio-gallery');
+  if (!gallery) return;
 
-  const triggers = gsap.utils.toArray<HTMLElement>('[data-lightbox-trigger]');
-  const img = lightbox.querySelector<HTMLImageElement>('[data-lightbox-img]');
-  const caption = lightbox.querySelector<HTMLElement>('[data-lightbox-caption]');
-  if (!img || !caption) return;
-
-  let index = 0;
-
-  const show = (i: number) => {
-    index = (i + data.photoUrls.length) % data.photoUrls.length;
-    img.src = data.photoUrls[index];
-    img.alt = data.captions[index];
-    caption.textContent = data.captions[index];
-  };
-
-  const open = (i: number) => {
-    show(i);
-    lightbox.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  };
-
-  const close = () => {
-    lightbox.classList.remove('open');
-    document.body.style.overflow = '';
-  };
-
-  triggers.forEach((trigger, i) => {
-    trigger.addEventListener('click', () => open(i));
+  portfolioLightbox?.destroy();
+  portfolioLightbox = new PhotoSwipeLightbox({
+    gallery: '#portfolio-gallery',
+    children: 'a.pswp-item',
+    pswpModule: () => import('photoswipe'),
   });
-
-  lightbox.querySelector('[data-lightbox-close]')?.addEventListener('click', close);
-  lightbox.querySelector('[data-lightbox-prev]')?.addEventListener('click', () => show(index - 1));
-  lightbox.querySelector('[data-lightbox-next]')?.addEventListener('click', () => show(index + 1));
-  lightbox.addEventListener('click', (e) => {
-    if (e.target === lightbox) close();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (!lightbox.classList.contains('open')) return;
-    if (e.key === 'Escape') close();
-    if (e.key === 'ArrowLeft') show(index - 1);
-    if (e.key === 'ArrowRight') show(index + 1);
-  });
+  portfolioLightbox.init();
 }
 
 /**
