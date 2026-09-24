@@ -142,7 +142,18 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
     pointer-events: none;
   }
 
-  .fr-strip-wrap{ width: 100%; position: relative; z-index: 1; }
+  /* A little bit diagonal (2026-09-24, founder request) - rotating the
+     whole wrap rather than just .fr-strip means the sprockets tilt with
+     it as one physical object, and initFilmRollIntro's translateX on
+     .fr-track (animations.ts) still composes correctly since CSS
+     transforms stack in the child's own rotated coordinate space - the
+     scroll-driven roll slides along the tilt instead of fighting it.
+     Positive degrees = clockwise, so the left end lifts and the right
+     end dips - matches the top-left-entry, bottom-right-exit diagonal
+     the founder originally referenced. Kept small; this is a light
+     polish pass, not the fuller curled/twisted 3D treatment explored on
+     dev2 - see filmroll_intro_deferred_work memory. */
+  .fr-strip-wrap{ width: 100%; position: relative; z-index: 1; transform: rotate(4deg); }
   /* .fr-strip is the fixed viewport - it never moves or transforms. It
      centres .fr-track (wider than the viewport by design) via flex, which
      is also what the no-JS/reduced-motion fallback relies on for its
