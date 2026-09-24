@@ -27,6 +27,14 @@ export function teardownForTransition() {
   ScrollTrigger.getAll().forEach((st) => st.kill());
   gsap.globalTimeline.clear();
   destroySmoothScroll();
+  // Safety net for the mobile nav panel (initMobileNav, below): its own
+  // close() fires on every link click inside the panel, but the brand/logo
+  // link sits outside it, and so does the browser's own back/forward
+  // navigation - either would otherwise carry .nav-open (and the resulting
+  // scroll lock) over onto whatever page loads next, since Header persists
+  // across transitions rather than remounting.
+  document.querySelector('header')?.classList.remove('nav-open');
+  document.body.style.overflow = '';
 }
 
 /**
@@ -217,7 +225,6 @@ export function initFilmRollIntro() {
   // function's doc comment) - "back.out" overshoots past 1 and settles on
   // its own, in one continuous curve.
   const positionEase = gsap.parseEase('back.out(1.2)');
-  const developEase = gsap.parseEase('power1.inOut');
   const expandEase = gsap.parseEase('power2.inOut');
 
   let lockX = 0;
@@ -379,6 +386,50 @@ export function initFilmRollIntro() {
       gsap.set([section, stripViewport], { overflow: te > 0 ? 'visible' : 'hidden' });
     },
   });
+}
+
+/**
+ * Mobile-only video background for FilmRollIntro, founder-supplied clip
+ * (src/assets/videos/intro-bg.mp4) - swaps in for the static film strip
+ * below the desktop breakpoint. Mirrors initFilmRollIntro's own
+ * isDesktop/reduced-motion gate exactly, rather than sharing state with
+ * it, since the two are deliberately mutually exclusive: this is what
+ * mobile gets *instead of* the pinned roll, not alongside it.
+ *
+ * The video itself ships with no `autoplay` and `preload="none"` in the
+ * markup - nothing is fetched until this function actually decides to add
+ * .fr-video-mode and call play(), so a no-JS or reduced-motion mobile
+ * visitor never downloads it and keeps the static strip (this component's
+ * documented fallback contract).
+ */
+export function initMobileIntroVideo() {
+  const section = document.querySelector<HTMLElement>('.filmroll-intro');
+  const video = document.querySelector<HTMLVideoElement>('.fr-mobile-video');
+  const content = document.querySelector<HTMLElement>('.fr-content');
+  if (!section || !video || !content) return;
+
+  if (prefersReducedMotion) return;
+  const isDesktop = window.matchMedia('(min-width: 641px)').matches;
+  if (isDesktop) return;
+
+  section.classList.add('fr-video-mode');
+  video.play().catch(() => {
+    // Autoplay can still be rejected on some browsers even when muted -
+    // the poster-less video just stays on its first frame, which is a
+    // harmless degrade (the scrim + heading still read fine over black).
+  });
+
+  // A livelier entrance than the plain "just there" static reveal the
+  // desktop-gated Phase 1 fallback used to leave mobile with - back.out
+  // overshoots slightly past full size before settling, the same ease
+  // family initFilmRollIntro uses for the desktop roll (see its own
+  // positionEase), so this reads as a variation on the site's existing
+  // motion language rather than a new one.
+  gsap.fromTo(
+    content.children,
+    { opacity: 0, y: 18, scale: 0.9 },
+    { opacity: 1, y: 0, scale: 1, duration: 0.8, stagger: 0.12, ease: 'back.out(1.6)' }
+  );
 }
 
 /**
@@ -558,6 +609,53 @@ export function initContactSheetReveal() {
 }
 
 /**
+ * Mobile nav toggle (the hamburger button, [data-nav-toggle]) - below
+ * Header's 860px breakpoint its primary links are hidden with nothing to
+ * replace them (a real bug found during the pre-launch shakedown: mobile
+ * visitors had no way to reach Photography/Videography/Local SEO/Websites/
+ * About at all). Toggles .nav-open on <header> itself, not on the button or
+ * panel, because Header persists across client-side page transitions
+ * (transition:persist, Layout.astro) while everything else on the page
+ * doesn't - <header> is the one stable element to key the open/closed state
+ * off across navigations.
+ *
+ * Guarded with a dataset flag rather than being safe-to-call-repeatedly
+ * like most init functions here: Header persisting means this only ever
+ * needs to wire its listeners once for the whole session (re-attaching on
+ * every astro:page-load, the way the other init calls in this file's
+ * shared caller do, would stack duplicate listeners on the same persisted
+ * button and panel forever).
+ */
+export function initMobileNav() {
+  const header = document.querySelector<HTMLElement>('header');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
+  const panel = document.querySelector<HTMLElement>('[data-nav-panel]');
+  if (!header || !toggle || !panel) return;
+  if (toggle.dataset.wired) return;
+  toggle.dataset.wired = 'true';
+
+  const close = () => {
+    header.classList.remove('nav-open');
+    toggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  };
+  const open = () => {
+    header.classList.add('nav-open');
+    toggle.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  };
+
+  toggle.addEventListener('click', () => {
+    if (header.classList.contains('nav-open')) close();
+    else open();
+  });
+  panel.querySelectorAll('a').forEach((a) => a.addEventListener('click', close));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && header.classList.contains('nav-open')) close();
+  });
+}
+
+/**
  * Nav background solidifies once the user scrolls past the hero. Triggers
  * off Hero's own top reaching the viewport top, not a fixed scroll offset -
  * with FilmRollIntro's ~280vh pin now occupying the very top of the page,
@@ -608,6 +706,37 @@ export function initMagneticButtons() {
       moveX(0);
       moveY(0);
     });
+  });
+}
+
+/**
+ * Web Projects' wireframe browser mockup ([data-mock-tilt]) tilts gently
+ * toward the cursor - a 3D perspective rotation driven by pointer position
+ * within the card, same quickTo-per-axis recipe as initMagneticButtons
+ * above. Only one such element exists on the site today, so this stays a
+ * single-element lookup rather than a querySelectorAll loop.
+ */
+export function initWebMockTilt() {
+  if (prefersReducedMotion) return;
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+  const mock = document.querySelector<HTMLElement>('[data-mock-tilt]');
+  if (!mock) return;
+
+  const strength = 10;
+  const rotateX = gsap.quickTo(mock, 'rotationX', { duration: 0.5, ease: 'power3.out' });
+  const rotateY = gsap.quickTo(mock, 'rotationY', { duration: 0.5, ease: 'power3.out' });
+
+  mock.addEventListener('mousemove', (e) => {
+    const rect = mock.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width - 0.5;
+    const py = (e.clientY - rect.top) / rect.height - 0.5;
+    rotateY(px * strength);
+    rotateX(py * -strength);
+  });
+  mock.addEventListener('mouseleave', () => {
+    rotateX(0);
+    rotateY(0);
   });
 }
 

@@ -1,0 +1,62 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+// Astro serves this statically for any unmatched path on Netlify - without
+// it, a broken/old link (a typo, a bookmarked pre-redesign URL, a stale
+// search result) fell through to Netlify's own generic, unbranded 404
+// instead of anything that looks like this site or gets a visitor back
+// into it. Found during the pre-launch shakedown, not previously wired up.
+---
+
+<Layout
+  title="Page Not Found — Horizon Vantage"
+  description="This page doesn't exist - find photography, videography, local SEO and web design work for Irish small businesses at Horizon Vantage."
+>
+  <Header transition:persist />
+
+  <section class="not-found">
+    <div class="wrap">
+      <div class="frame-tag" data-reveal><span class="num">FRAME 404</span> Not Found</div>
+      <h1 class="nf-h" data-reveal>This frame didn't develop.</h1>
+      <p class="nf-sub" data-reveal>
+        The page you're looking for doesn't exist - it may have moved, or the link was mistyped.
+      </p>
+      <div class="nf-links" data-reveal>
+        <a href="/" class="btn btn-primary">Back to Home</a>
+        <a href="/#contact" class="btn btn-ghost">Get In Touch</a>
+      </div>
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<style>
+  .not-found{
+    min-height: 60vh;
+    display: flex; align-items: center;
+    padding-top: 170px;
+    text-align: center;
+  }
+  .not-found .wrap{ display: flex; flex-direction: column; align-items: center; }
+  .not-found .frame-tag{ justify-content: center; }
+  .nf-h{
+    font-family: var(--font-display), serif; font-weight: 400;
+    font-size: clamp(36px, 6vw, 64px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin: 0 0 20px;
+  }
+  .nf-sub{
+    font-size: 18px; line-height: 1.6;
+    color: var(--paper-dim);
+    max-width: 480px;
+    margin: 0 0 40px;
+  }
+  .nf-links{ display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  @media (max-width: 640px){
+    .not-found{ padding-top: 130px; }
+  }
+</style>

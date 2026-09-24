@@ -1,16 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
-import PageHero from '../components/PageHero.astro';
 import Sprockets from '../components/Sprockets.astro';
 import Footer from '../components/Footer.astro';
-import type { ImageMetadata } from 'astro';
-
-const heroImages = import.meta.glob<{ default: ImageMetadata }>(
-  '/src/assets/photos/portfolio/training-floor.jpg',
-  { eager: true }
-);
-const heroImage = Object.values(heroImages)[0]?.default;
 
 // No example reels yet - this page ships copy-only until real client
 // video work exists to show. Revisit once footage is available and add
@@ -29,19 +21,20 @@ const deliverables = [
 >
   <Header transition:persist />
 
-  <PageHero
-    frameNum="011"
-    frameLabel="Videography"
-    title="Motion adds what a photo can't — and it's shot the same visit."
-    subtitle="A short promo clip and a handful of vertical cuts, filmed during the same on-site shoot as your photography — no separate booking, no separate crew."
-    image={heroImage}
-  />
-
+  <!-- Frame 011 (the standalone hero) removed, founder request - this page
+       now opens directly on "What's Included". Its heading is promoted to
+       the page's h1 (every page needs exactly one) via a locally-scoped
+       .video-intro-h rule that mirrors global.css's h2.section-h, since
+       that shared rule is tag-qualified and wouldn't otherwise apply to an
+       h1. Removing the hero also removed this page's only photo
+       (training-floor.jpg) - flagged in the handoff, since Videography had
+       just been given that photo specifically so it wouldn't look
+       identical to the other service pages. -->
   <section id="video-included">
     <div class="wrap">
       <div class="section-head" data-reveal data-reveal-group="video-head">
-        <div class="frame-tag"><span class="num">FRAME 012</span> What's Included</div>
-        <h2 class="section-h" data-split-reveal>Built for how people actually watch local business video.</h2>
+        <div class="frame-tag"><span class="num">FRAME 010</span> What's Included</div>
+        <h1 class="video-intro-h" data-split-reveal>Built for how people actually watch local business video.</h1>
         <p class="section-sub">
           Short, vertical, and native to the platform — not a polished ad, a real clip of a real
           business that stops a scroll.
@@ -63,7 +56,7 @@ const deliverables = [
   <section id="video-note">
     <div class="wrap">
       <div class="section-head" data-reveal data-reveal-group="video-note">
-        <div class="frame-tag"><span class="num">FRAME 013</span> A Note</div>
+        <div class="frame-tag"><span class="num">FRAME 011</span> A Note</div>
         <h2 class="section-h" data-split-reveal>This is a new service — the examples are still being <i>shot.</i></h2>
       </div>
       <p class="note-body" data-reveal data-reveal-group="video-note">
@@ -84,6 +77,18 @@ const deliverables = [
      play. -->
 
 <style>
+  #video-included{ padding-top: 170px; }
+  @media (max-width: 640px){ #video-included{ padding-top: 130px; } }
+
+  /* Mirrors global.css's h2.section-h - that rule is tag-qualified
+     (h2.section-h) so it doesn't reach this promoted h1. */
+  .video-intro-h{
+    font-family: var(--font-display), serif; font-weight: 400;
+    font-size: clamp(32px, 4vw, 50px);
+    line-height: 1.08;
+    margin: 0 0 18px;
+  }
+
   .video-strip{
     margin-top: 44px;
     display: flex; flex-wrap: wrap; gap: 0;

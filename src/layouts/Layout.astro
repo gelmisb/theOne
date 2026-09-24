@@ -26,7 +26,11 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 // tagline and most of the wordmark. background matches the source's own
 // near-black canvas so the letterbox bars this adds on either side are
 // invisible rather than a visible seam.
-const ogImageAsset = await getImage({ src: logoDark, width: 1200, height: 630, fit: 'contain', background: '#000000' });
+// format: 'jpg' explicitly - astro:assets defaults to webp, which most
+// social platforms handle fine today but is still an unnecessary risk for
+// a link-preview image specifically (the one place a crawler that mishandles
+// webp costs an actual bad first impression, not just a slower page).
+const ogImageAsset = await getImage({ src: logoDark, width: 1200, height: 630, fit: 'contain', background: '#000000', format: 'jpg' });
 const ogImageURL = new URL(ogImageAsset.src, Astro.site);
 
 // LocalBusiness structured data - this is what feeds Google's map-pack/
@@ -162,13 +166,16 @@ const persistImage = Object.values(persistImages)[0]?.default;
     teardownForTransition,
     initScrollHashFix,
     initFilmRollIntro,
+    initMobileIntroVideo,
     initScrollReveals,
     initPersistBgFade,
     initHeroTimeline,
     initHeroParallax,
     initContactSheetReveal,
     initNavOnScroll,
+    initMobileNav,
     initMagneticButtons,
+    initWebMockTilt,
     initPortfolioLightbox,
     initVideoLightbox,
     initScrollNav,
@@ -182,13 +189,16 @@ const persistImage = Object.values(persistImages)[0]?.default;
     initSmoothScroll();
     initScrollHashFix();
     initFilmRollIntro();
+    initMobileIntroVideo();
     initPersistBgFade();
     initHeroTimeline();
     initHeroParallax();
     initScrollReveals();
     initContactSheetReveal();
     initNavOnScroll();
+    initMobileNav();
     initMagneticButtons();
+    initWebMockTilt();
     initPortfolioLightbox();
     initVideoLightbox();
     initScrollNav();

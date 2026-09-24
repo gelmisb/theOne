@@ -24,6 +24,19 @@ const { frameNum, frameLabel, title, subtitle, image, variant } = Astro.props;
 ---
 
 <section class={`page-hero ${variant ? `page-hero--${variant}` : ''}`}>
+  {image && (
+    <div class="page-hero-bg" aria-hidden="true">
+      <Image
+        src={image}
+        alt=""
+        class="page-hero-img"
+        widths={[640, 960, 1280, 1600]}
+        sizes="100vw"
+        loading="eager"
+      />
+      <div class="page-hero-scrim"></div>
+    </div>
+  )}
   {variant === 'grid' && <div class="page-hero-grid" aria-hidden="true"></div>}
   <div class="wrap page-hero-inner">
     <div class="frame-tag"><span class="num">FRAME {frameNum}</span> {frameLabel}</div>
@@ -37,6 +50,12 @@ const { frameNum, frameLabel, title, subtitle, image, variant } = Astro.props;
     position: relative;
     padding: 170px 0 90px;
     overflow: hidden;
+  }
+  .page-hero-bg{ position: absolute; inset: 0; z-index: 0; }
+  .page-hero-img{
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
   }
   .page-hero-scrim{
     position: absolute; inset: 0;

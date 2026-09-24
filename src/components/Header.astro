@@ -16,7 +16,7 @@ const homePrefix = Astro.url.pathname === '/' ? '' : '/';
         <Image src={logoMark} alt="" class="brand-mark" width={64} height={64} />
         <span><em>Horizon</em> Vantage</span>
       </a>
-      <nav class="navlinks">
+      <nav class="navlinks" data-nav-panel id="mobile-nav-panel">
         <a href="/photography">Photography</a>
         <a href="/videography">Videography</a>
         <a href="/local-seo">Local SEO</a>
@@ -24,6 +24,27 @@ const homePrefix = Astro.url.pathname === '/' ? '' : '/';
         <a href="/about">About</a>
         <a href={`${homePrefix}#contact`} class="nav-cta">Book a Shoot</a>
       </nav>
+      <!-- Mobile only (see @media max-width:860px below) - below that
+           breakpoint .navlinks' own links are hidden and this is the only
+           way to reach them. Found missing during the pre-launch shakedown:
+           the site only just grew from a single scrolling homepage into 5
+           standalone pages, and this nav was still only ever built for
+           in-page anchors, never actual navigation - on mobile there was no
+           way to reach Photography/Videography/Local SEO/Websites/About at
+           all, not even through the footer (Footer.astro's links stayed
+           pointed at homepage sections). initMobileNav (animations.ts)
+           wires this up once for the session, since Header persists across
+           page transitions (transition:persist) rather than remounting. -->
+      <button
+        type="button"
+        class="nav-toggle"
+        data-nav-toggle
+        aria-expanded="false"
+        aria-controls="mobile-nav-panel"
+        aria-label="Menu"
+      >
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
 </header>
@@ -92,8 +113,55 @@ const homePrefix = Astro.url.pathname === '/' ? '' : '/';
     border-radius: var(--radius);
   }
   .nav-cta:hover{ background: var(--brass); color: var(--bg) !important; }
+
+  .nav-toggle{
+    display: none;
+    flex-direction: column; justify-content: center; align-items: center; gap: 5px;
+    width: 36px; height: 36px;
+    padding: 0; margin-left: 18px;
+    background: none; border: none; cursor: pointer;
+    flex-shrink: 0;
+  }
+  .nav-toggle span{
+    display: block; width: 20px; height: 2px;
+    background: var(--paper);
+    transition: transform .25s ease, opacity .2s ease;
+  }
+  header:global(.nav-open) .nav-toggle span:nth-child(1){ transform: translateY(7px) rotate(45deg); }
+  header:global(.nav-open) .nav-toggle span:nth-child(2){ opacity: 0; }
+  header:global(.nav-open) .nav-toggle span:nth-child(3){ transform: translateY(-7px) rotate(-45deg); }
+
   @media (max-width: 860px){
     .navlinks a:not(.nav-cta){ display: none; }
     .nav-cta{ font-size: 11px; padding: 9px 14px; }
+    .nav-toggle{ display: flex; }
+
+    /* Opened via initMobileNav (animations.ts) toggling .nav-open on
+       <header>, not on .navlinks itself - header is what's transition:persist,
+       so it's the one stable element to key this off across page loads. */
+    header:global(.nav-open) .navlinks{
+      position: fixed; inset: 0;
+      z-index: 40;
+      flex-direction: column; align-items: stretch;
+      justify-content: flex-start;
+      gap: 0;
+      background: rgba(10,14,19,0.98);
+      backdrop-filter: blur(20px) saturate(1.4);
+      -webkit-backdrop-filter: blur(20px) saturate(1.4);
+      padding: 110px 28px 40px;
+    }
+    header:global(.nav-open) .navlinks a:not(.nav-cta){
+      display: block;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 17px;
+      color: var(--paper);
+    }
+    header:global(.nav-open) .nav-cta{
+      margin-top: 28px;
+      text-align: center;
+      font-size: 14px;
+      padding: 14px 18px;
+    }
   }
 </style>

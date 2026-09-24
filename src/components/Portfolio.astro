@@ -24,6 +24,7 @@ const EXCLUDED_FILES = new Set([
   'IMG_8621.jpg', // gb Captured watermark, pending crop
   'IMG_8760.jpg', // gb Captured watermark, pending crop
   'gelmis-bartulis-XIfXPCAzR0Q-unsplash.jpg', // personal portrait shoot, not local-business client work
+  'IMG_4392.jpg', // visible "Gelmis Bartulis Photography" signature watermark bottom-right, pending crop - same issue as IMG_8621/IMG_8760 above
 ]);
 
 // Auto-derived captions from filenames read fine for hand-named files
@@ -37,6 +38,7 @@ const CAPTION_OVERRIDES: Record<string, string> = {
   'IMG_1643.jpg': 'Strength Training',
   'IMG_3033.jpg': 'Motorcycle Feature',
   'IMG_8758.jpg': 'Car Feature',
+  'IMG_5093.jpg': 'Local Produce',
   'gelmis-bartulis-aFjxblNID7Y-unsplash.jpg': 'Portrait Session',
   'gelmis-bartulis-UaFUhxyGNFY-unsplash.jpg': 'Touring Motorcycle',
 };
@@ -202,11 +204,6 @@ const hasVideos = videos.length > 0;
   .cs-grid{ display: grid; grid-template-columns: repeat(5, 1fr); }
   @media (max-width: 900px){ .cs-grid{ grid-template-columns: repeat(3,1fr); } }
   @media (max-width: 560px){ .cs-grid{ grid-template-columns: repeat(2,1fr); } }
-  /* Assumes exactly 6 photos: 5-wide desktop grid stays one clean row by
-     hiding the 6th tile there, while the 3-wide and 2-wide breakpoints
-     below both divide 6 evenly (two rows of 3, three rows of 2) and show
-     all of them. Revisit this rule if the photo count changes again. */
-  @media (min-width: 901px){ .cs-grid .frame:nth-child(6){ display: none; } }
   .frame{
     aspect-ratio: 1/1;
     border: 1px solid var(--line);

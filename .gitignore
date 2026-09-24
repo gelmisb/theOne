@@ -10,5 +10,7 @@ AGENTS.md
 CLAUDE (1).md
 skills-lock.json
 tools/raw-footage/
-.impeccable/config.local.json
-.impeccable/hook.cache.json
+.codex/
+.mcp.json
+.playwright-mcp/
+.impeccable/live/
