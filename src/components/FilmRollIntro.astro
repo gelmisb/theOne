@@ -52,6 +52,11 @@ const heroPhoto = heroPhotoEntry ? heroPhotoEntry[1].default : realPhotos[0];
 // in animations.ts.
 const FRAME_COUNT = 24;
 const HERO_FRAME_INDEX = 19; // leaves runway before it to roll through, and a few tail frames after it for the overshoot-then-settle
+// The track is flex-centred, so the frames on screen at first paint are the
+// middle of the strip (~010-016), not the first few. The old code marked
+// frames 0-3 eager - the offscreen ones - and left the visible ones lazy.
+const FIRST_VISIBLE = 9;
+const LAST_VISIBLE = 16;
 const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
   photo: i === HERO_FRAME_INDEX ? heroPhoto : realPhotos[i % realPhotos.length],
   num: String(i + 1).padStart(3, '0'),
@@ -77,8 +82,9 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
           <div class="fr-frame" data-hero-frame={f.isHero ? 'true' : undefined}>
             <span class="fr-fnum mono">{f.num}</span>
             {f.photo && (
-              // Every other frame only ever renders at ~130px, so 360px is
-              // already 2x-retina headroom. The hero frame is different: Beat
+              // Frames render at 500px wide on desktop (100px at <=900px), so
+              // the srcset goes up to 1000px for 2x retina - it used to top out
+              // at 360px, upscaling every frame. The hero frame is different: Beat
               // 4 (initFilmRollIntro, animations.ts) scales it via CSS
               // transform up to near full viewport width - capping it at the
               // same 360px source meant upscaling ~4-5x, producing real,
@@ -93,10 +99,11 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
                 class="fr-photo"
                 width={500}
                 height={500}
-                widths={f.isHero ? [180, 240, 360, 640, 960, 1440] : [180, 240, 360]}
-                sizes={f.isHero ? '(max-width: 900px) 100vw, 1440px' : '500px'}
-                loading={i < 4 ? 'eager' : 'lazy'}
-                fetchpriority={i === 0 ? 'high' : undefined}
+                widths={f.isHero ? [500, 1000, 1440, 1920] : [250, 500, 750, 1000]}
+                sizes={f.isHero ? '(max-width: 900px) 100px, 1600px' : '(max-width: 900px) 100px, 500px'}
+                quality={85}
+                loading={i >= FIRST_VISIBLE && i <= LAST_VISIBLE ? 'eager' : 'lazy'}
+                fetchpriority={i >= FIRST_VISIBLE + 2 && i <= FIRST_VISIBLE + 4 ? 'high' : undefined}
               />
             )}
           </div>
@@ -212,21 +219,20 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
     object-fit: cover;
   }
 
-  @keyframes fadeInUp {
-    0% {
-      transform: translateY(100%);
-      opacity: 0;
-    }
-    100% {
-      transform: translateY(0%);
-      opacity: 1;
-    }
+  /* Entrance fade is driven by revealFilmRollPhotos (animations.ts) on each
+     image's own load, not a CSS animation - ScrollTrigger's pin re-parents
+     this whole section into a pin-spacer ~100ms after first paint, and a
+     browser restarts CSS animations on any re-inserted element, so the old
+     fadeInUp played twice whenever it had visibly started by then.
+     GSAP's inline styles survive re-parenting. Hidden only when scripting
+     is on and motion is allowed, so no-JS and reduced-motion visitors see
+     the photos straight away; the 4s failsafe animation guarantees they
+     appear even if the script never runs. */
+  @media (scripting: enabled) and (prefers-reduced-motion: no-preference){
+    .fr-frame :global(.fr-photo){ opacity: 0; animation: fr-photo-failsafe 0s 4s forwards; }
   }
+  @keyframes fr-photo-failsafe{ to{ opacity: 1; } }
 
-  .fr-photo {
-    animation: 1.5s fadeInUp;
-  }
-  
   .fr-fnum{
     position: absolute; top: 6px; left: 8px; z-index: 1;
     font-size: 9px; letter-spacing: 0.04em; color: var(--paper-dim);

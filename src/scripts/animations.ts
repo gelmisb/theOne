@@ -185,6 +185,25 @@ export function initScrollReveals() {
  * the hero frame itself, on top of the track's own x, since transforms on a
  * parent and child compose independently.
  */
+/**
+ * Fades each film-strip photo in once, when it has actually loaded. Replaces
+ * a CSS animation that restarted whenever ScrollTrigger's pin re-parented the
+ * section (see FilmRollIntro.astro) - inline GSAP styles survive that.
+ */
+function revealFilmRollPhotos(track: HTMLElement) {
+  gsap.utils.toArray<HTMLImageElement>('.fr-photo', track).forEach((img) => {
+    const show = () => {
+      gsap.fromTo(img, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out' });
+    };
+    const ready = () => (img.decode ? img.decode().catch(() => {}) : Promise.resolve()).then(show);
+    if (img.complete && img.naturalWidth > 0) ready();
+    else {
+      img.addEventListener('load', ready, { once: true });
+      img.addEventListener('error', () => gsap.set(img, { opacity: 1 }), { once: true });
+    }
+  });
+}
+
 export function initFilmRollIntro() {
   const section = document.querySelector<HTMLElement>('.filmroll-intro');
   const stripWrap = document.querySelector<HTMLElement>('.fr-strip-wrap');
@@ -196,6 +215,8 @@ export function initFilmRollIntro() {
   const content = document.querySelector<HTMLElement>('.fr-content');
   const sprockets = gsap.utils.toArray<HTMLElement>('.sprockets', section ?? undefined);
   if (!section || !stripWrap || !stripViewport || !track || !heroFrame || !heroImg || !heroFnum || !content) return;
+
+  if (!prefersReducedMotion) revealFilmRollPhotos(track);
 
   // .fr-strip-wrap carries the "little bit diagonal" tilt (its own CSS
   // `transform: rotate(4deg)`). Read the actual applied angle off computed
