@@ -4,6 +4,7 @@ import { Image, getImage } from 'astro:assets';
 import { ClientRouter } from 'astro:transitions';
 import type { ImageMetadata } from 'astro';
 import CookieBanner from '../components/CookieBanner.astro';
+import LocalBusinessSchema from '../components/LocalBusinessSchema.astro';
 import logoDark from '../assets/photos/logo/logo_dark.png';
 
 interface Props {
@@ -32,39 +33,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 // webp costs an actual bad first impression, not just a slower page).
 const ogImageAsset = await getImage({ src: logoDark, width: 1200, height: 630, fit: 'contain', background: '#000000', format: 'jpg' });
 const ogImageURL = new URL(ogImageAsset.src, Astro.site);
-
-// LocalBusiness structured data - this is what feeds Google's map-pack/
-// knowledge-panel understanding of the business, not just the meta tags.
-// Site-wide (every page gets the same entity), matching terms.astro's
-// registered address and the founder's confirmed Wicklow + Dublin/Leinster
-// service area.
-const structuredData = {
-  '@context': 'https://schema.org',
-  '@type': 'ProfessionalService',
-  '@id': `${Astro.site}#business`,
-  name: 'Horizon Vantage',
-  url: Astro.site,
-  image: ogImageURL.toString(),
-  description:
-    'On-site photography, videography, website development, and local SEO for small and medium-sized businesses in Ireland.',
-  telephone: '+353894939050',
-  email: 'info@horizonvantage.ie',
-  priceRange: '€350-€2500',
-  address: {
-    '@type': 'PostalAddress',
-    addressLocality: 'Wicklow',
-    addressCountry: 'IE',
-  },
-  areaServed: [
-    { '@type': 'AdministrativeArea', name: 'County Wicklow' },
-    { '@type': 'AdministrativeArea', name: 'County Dublin' },
-    { '@type': 'AdministrativeArea', name: 'Leinster' },
-  ],
-  founder: {
-    '@type': 'Person',
-    name: 'Gelmis Bartulis',
-  },
-};
 
 // Persistent journey background: revealed through Intro's portal, stays
 // fixed behind Hero, then fades out on scroll as Gap comes into view (see
@@ -109,7 +77,7 @@ const persistImage = Object.values(persistImages)[0]?.default;
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageURL} />
 
-    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} is:inline />
+    <LocalBusinessSchema image={ogImageURL.toString()} />
 
     <!-- SPA-style client-side navigation (astro:transitions) instead of a
          full page reload per link click - a hard reload was the actual
