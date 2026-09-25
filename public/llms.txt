@@ -1,0 +1,15 @@
+# Horizon Vantage
+> Photography, videography, website development, and local SEO for Irish SMBs, based in Co. Wicklow.
+
+## Services
+- Website development
+- Photography & videography
+- Local SEO
+
+## Pages
+- [Photography](https://horizonvantage.ie/photography)
+- [Videography](https://horizonvantage.ie/videography)
+- [Local SEO](https://horizonvantage.ie/local-seo)
+- [Web projects](https://horizonvantage.ie/web-projects)
+- [About](https://horizonvantage.ie/about)
+- [Contact](https://horizonvantage.ie/contact)
