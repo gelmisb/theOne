@@ -1,5 +1,5 @@
 <!-- Now the sole content of its own page (src/pages/contact.astro) rather
-     than a homepage section - moved there so every "Book a Founder Shoot" /
+     than a homepage section - moved there so every "Get a Free Listing Audit" /
      "Get Your Listing Fixed" CTA across the standalone pages lands
      somewhere consistent, instead of a #contact anchor-scroll back to the
      homepage. The homepage's own equivalent moment is now a lighter
@@ -48,21 +48,32 @@
           <input id="email" name="email" type="email" required placeholder="you@business.ie" />
         </div>
         <div>
-          <label for="tier">Interested in</label>
-          <select id="tier" name="tier">
-            <option>Tier 1 - Visual Refresh</option>
-            <option>Tier 2 - Growth Retainer</option>
-            <option>Tier 3 - Visual Visibility</option>
-            <option>Tier 4 - Complete Local Presence</option>
-            <option>Not sure yet</option>
+          <label for="business-type">Business type</label>
+          <select id="business-type" name="business_type">
+            <option>Holiday let</option>
+            <option>Glamping</option>
+            <option>B&amp;B or guesthouse</option>
+            <option>Activity provider</option>
+            <option>Food and drink producer</option>
+            <option>Other</option>
           </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div>
+          <label for="town">Town or area</label>
+          <input id="town" name="town" type="text" placeholder="e.g. Baltinglass" />
+        </div>
+        <div>
+          <label for="listing-url">Website or listing URL <span class="opt">(optional)</span></label>
+          <input id="listing-url" name="listing_url" type="url" placeholder="https://" />
         </div>
       </div>
       <div>
         <label for="msg">A little about your business</label>
         <textarea id="msg" name="message" placeholder="What you do, where you're based, and what prompted you to get in touch..."></textarea>
       </div>
-      <button type="submit" class="btn btn-primary">Send Enquiry</button>
+      <button type="submit" class="btn btn-primary">Request a Free Listing Audit</button>
       <p class="form-note form-success" id="form-success" hidden>
         Thanks - your enquiry is in. We'll reply within one business day.
       </p>
@@ -147,6 +158,7 @@
     font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: 0.06em;
     text-transform: uppercase; color: var(--paper-dim); margin-bottom: 6px; display: block;
   }
+  .cta-form label .opt{ text-transform: none; opacity: 0.6; letter-spacing: 0; }
   .cta-form input, .cta-form textarea, .cta-form select{
     width: 100%;
     background: var(--bg);
