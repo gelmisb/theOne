@@ -1,0 +1,58 @@
+---
+// REFOCUS_BRIEF.md section 3 (copy) + section 6 (FAQPage JSON-LD for SEO -
+// not explicitly asked for, but the content already exists verbatim and
+// FAQPage schema is a low-risk, real search-visibility win on top of it).
+// `only` lets a landing page show a relevant subset (section 6, task 6)
+// instead of the full list - pass an array of `id`s to filter to.
+export interface Props {
+  only?: string[];
+  frameNum?: string;
+}
+const { only, frameNum = '023' } = Astro.props;
+
+const allFaqs = [
+  { id: 'ai', q: 'Do you use AI-generated images?', a: 'No. Every image is shot at your property. Guests book on trust, so what they see should be what they get.' },
+  { id: 'audit', q: 'What is a listing audit?', a: 'A short, free review of your current photos, Google profile and booking page, with three quick wins. No obligation.' },
+  { id: 'area', q: 'Where do you work?', a: 'Based in Co. Wicklow, working with businesses across Ireland.' },
+  { id: 'timeline', q: 'How long does a project take?', a: 'It depends on scope and season. We agree a timeline before we start.' },
+  { id: 'grants', q: 'Are there grants for this?', a: 'Some supports exist, for example through your Local Enterprise Office, but eligibility varies and nothing is guaranteed. Ask your LEO, and we will share what we know.' },
+];
+const faqs = only ? allFaqs.filter((f) => only.includes(f.id)) : allFaqs;
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+---
+
+<section id="faq">
+  <div class="wrap">
+    <div class="section-head" data-reveal data-reveal-group="faq-head">
+      <div class="frame-tag"><span class="num">FRAME {frameNum}</span> Questions</div>
+      <h2 class="section-h" data-split-reveal>A few things people ask first.</h2>
+    </div>
+    <div class="faq-list">
+      {faqs.map((f) => (
+        <div class="faq-item" data-reveal data-reveal-group="faq-items">
+          <h3>{f.q}</h3>
+          <p>{f.a}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script type="application/ld+json" set:html={JSON.stringify(faqSchema)} is:inline />
+
+<style>
+  .faq-list{ max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; }
+  .faq-item{ padding: 26px 0; border-top: 1px solid var(--line); }
+  .faq-list .faq-item:last-child{ border-bottom: 1px solid var(--line); }
+  .faq-item h3{ font-family: var(--font-display), serif; font-weight: 400; font-size: 19px; margin: 0 0 10px; color: var(--paper); }
+  .faq-item p{ font-size: 15px; line-height: 1.65; color: var(--paper-dim); margin: 0; }
+</style>
