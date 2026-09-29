@@ -1,49 +1,18 @@
 ---
-const tiers = [
-  {
-    num: 'TIER 01',
-    name: 'Visual Refresh',
-    price: '€350–600',
-    purpose: 'Fast first sale, low commitment',
-    desc: 'A half-day on-site shoot. 15–20 edited photos plus one short promo video clip, delivered on a 5-day turnaround. No website work required - just new, real imagery for your existing listings and social channels.',
-    core: false,
-  },
-  {
-    num: 'TIER 02',
-    name: 'Growth Retainer',
-    price: '€75–150',
-    priceSuffix: '/mo',
-    purpose: 'Recurring, on top of the project fee',
-    desc: 'Hosting and maintenance, a quarterly content refresh - new seasonal photos and a short clip - plus ongoing review monitoring, so the site and listing stay current long after launch.',
-    core: false,
-  },
-  {
-    num: 'TIER 03',
-    name: 'Visual Visibility',
-    price: '€600–1,500',
-    purpose: 'Competitive with the Irish freelance market - website only',
-    desc: 'A custom website build, plus full Google Business Profile setup and optimisation - everything needed to fix a business\'s online presence, without a photo or video shoot.',
-    core: false,
-  },
-  {
-    num: 'TIER 04',
-    name: 'Complete Local Presence',
-    price: '€1,500–2,500',
-    purpose: 'The full package, shoot to search',
-    desc: 'On-site photo and video shoot, a custom website build designed around those images, and full Google Business Profile setup and optimisation. This is the package that actually fixes a business\'s online presence, not just its homepage.',
-    core: true,
-  },
-];
+// Prices/contents come from one shared data file (REFOCUS_BRIEF.md section
+// 6) - this component only renders, it never hard-codes a number. `visible`
+// lets a tier (e.g. a not-yet-confirmed price) be built without going live.
+import { packages } from '../data/packages';
+const tiers = packages.filter((t) => t.visible);
 ---
 
 <section id="offer">
   <div class="wrap">
     <div class="section-head" data-reveal data-reveal-group="offer-head">
       <div class="frame-tag"><span class="num">FRAME 002</span> The Offer</div>
-      <h2 class="section-h" data-split-reveal>Three tiers, built for how local businesses actually decide.</h2>
+      <h2 class="section-h" data-split-reveal>Packages built for how local businesses actually decide.</h2>
       <p class="section-sub">
-        Start small with a single decision-maker and no web build required, or go straight for the
-        full local presence package.
+        Start with a season refresh or the website alone, or go straight for the full booking-ready launch.
       </p>
     </div>
 
@@ -53,9 +22,12 @@ const tiers = [
           {t.core && <span class="badge">Core Offer</span>}
           <div class="tier-num mono">{t.num}</div>
           <h3>{t.name}</h3>
-          <div class="price">{t.price}{t.priceSuffix && <span class="suffix">{t.priceSuffix}</span>}</div>
+          <div class="price">{t.price}</div>
+          {t.priceNote && <div class="price-note">{t.priceNote}</div>}
           <div class="purpose">{t.purpose}</div>
-          <p class="desc">{t.desc}</p>
+          <ul class="includes">
+            {t.includes.map((line) => <li>{line}</li>)}
+          </ul>
         </div>
       ))}
     </div>
@@ -68,8 +40,10 @@ const tiers = [
 </section>
 
 <style>
-  .tiers{ display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-  @media (max-width: 760px){ .tiers{ grid-template-columns: 1fr; } }
+  /* 6 tiers now (was 4/2-col) - 3-col desktop, 2-col tablet, 1-col mobile. */
+  .tiers{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 1080px){ .tiers{ grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 620px){ .tiers{ grid-template-columns: 1fr; } }
   .tier{
     background: var(--panel);
     border: 1px solid var(--line);
@@ -103,11 +77,13 @@ const tiers = [
     border-radius: 0 var(--radius-glass) 0 var(--radius-glass);
   }
   .tier .tier-num{ font-family: var(--font-mono), monospace; color: var(--brass); font-size: 12px; margin-bottom: 16px; letter-spacing: 0.08em; }
-  .tier h3{ font-family: var(--font-display), serif; font-weight: 400; font-size: 28px; margin: 0 0 10px; }
-  .tier .price{ font-family: var(--font-mono), monospace; font-size: 22px; color: var(--brass); margin-bottom: 6px; }
-  .tier .price .suffix{ font-size: 14px; opacity: .7; }
-  .tier .purpose{ font-size: 13px; color: var(--paper-dim); font-style: italic; margin-bottom: 26px; }
-  .tier .desc{ font-size: 15px; line-height: 1.6; color: var(--paper-dim); margin: 0; flex-grow: 1; }
+  .tier h3{ font-family: var(--font-display), serif; font-weight: 400; font-size: 24px; margin: 0 0 8px; }
+  .tier .price{ font-family: var(--font-mono), monospace; font-size: 20px; color: var(--brass); margin-bottom: 4px; }
+  .tier .price-note{ font-size: 12px; color: var(--paper-dim); opacity: 0.75; margin-bottom: 18px; line-height: 1.4; }
+  .tier .purpose{ font-size: 13px; color: var(--paper-dim); font-style: italic; margin-bottom: 20px; }
+  .tier .includes{ font-size: 14px; line-height: 1.6; color: var(--paper-dim); margin: 0; padding: 0; list-style: none; flex-grow: 1; }
+  .tier .includes li{ padding-left: 18px; position: relative; margin-bottom: 8px; }
+  .tier .includes li::before{ content: "→"; position: absolute; left: 0; color: var(--brass); }
 
   .addon{
     margin-top: 28px;
