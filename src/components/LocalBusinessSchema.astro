@@ -21,20 +21,23 @@ const structuredData = {
   url: Astro.site,
   image,
   description:
-    'On-site photography, videography, website development, and local SEO for small and medium-sized businesses in Ireland.',
+    'On-site photography, videography, website development, and local SEO for tourism accommodation, experiences, and artisan food and drink producers, based in Co. Wicklow.',
   telephone: '+353894939050',
   email: 'info@horizonvantage.ie',
-  priceRange: '€350-€2500',
+  priceRange: '€150-€3200',
   address: {
     '@type': 'PostalAddress',
     addressLocality: 'Wicklow',
     addressRegion: 'Co. Wicklow',
     addressCountry: 'IE',
   },
+  // Kept lean deliberately - Google treats an oversized areaServed list (one
+  // entry per town) as a spam signal. Country + the two primary counties is
+  // the standard "based here, working nationwide" pattern.
   areaServed: [
+    { '@type': 'Country', name: 'Ireland' },
     { '@type': 'AdministrativeArea', name: 'County Wicklow' },
     { '@type': 'AdministrativeArea', name: 'County Dublin' },
-    { '@type': 'AdministrativeArea', name: 'Leinster' },
   ],
   makesOffer: [
     service('Photography', 'On-site business photography for small businesses in Ireland.'),
