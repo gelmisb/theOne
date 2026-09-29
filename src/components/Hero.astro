@@ -1,9 +1,14 @@
 ---
+// Positioning refresh (REFOCUS_BRIEF.md, 2026-09-29) - primary niche is
+// tourism accommodation/experiences in Co. Wicklow, secondary is artisan
+// food and drink producers. Stats below updated to match: the old "5-day
+// Visual Refresh" stat named a tier that no longer exists (see
+// src/data/packages.ts - it's "Season Refresh" now).
 const stats = [
   { k: 'Experience', v: '10+ years of software engineering experience behind every build' },
-  { k: '5 - day', v: 'Turnaround on a Visual Refresh shoot, edited and delivered' },
+  { k: 'On-site', v: 'Every image shot at your property - never AI-generated' },
   { k: 'Tailored', v: 'It\'s designed the way you imagine it' },
-  { k: 'Local', v: 'Built for cafés, salons, gyms, clinics and trades - not corporates' },
+  { k: 'Local', v: 'Based in Co. Wicklow, working across Ireland' },
 ];
 
 // No background image of its own - Layout.astro's persistent site
@@ -23,14 +28,14 @@ const stats = [
     <span class="vf-center"></span>
   </div>
   <div class="wrap hero-inner">
-    <div class="hero-eyebrow glass"><span class="rec"></span>Photography · Video · Websites · Local SEO - Ireland</div>
-    <h1 class="hero-h">Stock photos are why your website looks like <i>everyone else's.</i></h1>
+    <div class="hero-eyebrow glass"><span class="rec"></span>Photography · Video · Websites · Local SEO - Co. Wicklow</div>
+    <h1 class="hero-h">Honest photography and websites for Wicklow <i>stays and experiences.</i></h1>
     <p class="hero-sub">
-    We shoot your business on-site, build the website around it, and set up your local search presence - backed by 10+ years of software engineering and 5+ years behind the camera.
+    Real on-site photo and video of your place, built into a fast website that helps guests book direct. One local specialist, start to finish.
     </p>
     <div class="hero-ctas">
-      <a href="/contact" class="btn btn-primary">Book a Founder Shoot</a>
-      <a href="#offer" class="btn btn-ghost">See the Tiers</a>
+      <a href="/contact" class="btn btn-primary">Get a Free Listing Audit</a>
+      <a href="#offer" class="btn btn-ghost">See Packages</a>
     </div>
     <div class="hero-strip">
       {stats.map((s) => (

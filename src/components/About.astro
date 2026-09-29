@@ -2,7 +2,10 @@
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
-const tags = ['Cafés', 'Salons', 'Gyms & Studios', 'Clinics', 'Tradespeople', 'Small Retail'];
+// Matches the new niche (REFOCUS_BRIEF.md) - the old tag set (Cafés, Salons,
+// Gyms, Clinics...) contradicted the Hero/Gap/Offer sections above it once
+// those were repositioned around Wicklow stays and experiences.
+const tags = ['Holiday Lets', 'Glamping', 'B&Bs & Guesthouses', 'Activity Providers', 'Farm Shops & Producers', 'Small Venues'];
 
 const aboutImages = import.meta.glob<{ default: ImageMetadata }>(
   '/src/assets/photos/about.{jpg,jpeg,png,webp}',
