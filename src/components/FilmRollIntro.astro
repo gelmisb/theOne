@@ -1,0 +1,279 @@
+---
+// Phase 1: static layout only — no animation. Doubles as the reduced-
+// motion and no-JS fallback per FILM-ROLL-INTRO-BRIEF.md section 6: this
+// exact markup is what a reduced-motion visitor sees permanently, and
+// what every visitor sees before Phase 2+ adds the scroll-driven roll.
+//
+// Keeps id="intro" — ScrollNav.astro's dot-nav and initScrollHashFix (in
+// animations.ts) both depend on that id existing, regardless of what's
+// inside the section.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Sprockets from './Sprockets.astro';
+import logoWatermark from '../assets/photos/logo/logo_transparent.png';
+
+// Real photos only (brief section 4) — explicitly enumerated rather than a
+// bare wildcard so newly-dropped files (e.g. AI-generated portfolio
+// placeholders, or the two gb-Captured-watermarked shoots still pending a
+// watermark crop) don't silently join the roll. 8 real photos as of the
+// critique-driven photo refresh (/impeccable critique intro P2: 3 photos
+// cycling across 24 frames read as an obvious repeating loop) - each now
+// repeats roughly 3x across the strip instead of 8x (the hero photo
+// appears a little more often since HERO_FRAME_INDEX below overrides
+// whatever the i % realPhotos.length cycle would have placed there).
+const rollPhotoEntries = Object.entries(
+  import.meta.glob<{ default: ImageMetadata }>(
+    '/src/assets/photos/portfolio/{Barbershops,consumables,product advertisement,IMG_0839,IMG_0863,IMG_1643,IMG_3033,IMG_8758,motorcycle-rider}.jpg',
+    { eager: true }
+  )
+);
+const realPhotos = rollPhotoEntries.map(([, m]) => m.default);
+
+// Phase 3: the hero frame must be the same photo as Layout.astro's
+// persist-bg - Beat 4 expands this frame until it fills the viewport and
+// hands off into Hero, which is sitting on that same fixed background the
+// whole time. If the hero frame showed a different photo, the handoff
+// would visibly swap images instead of reading as one continuous reveal.
+//
+// motorcycle-rider.jpg, not IMG_0839 - second critique pass flagged the
+// gym-coaching candid (dim, off-angle, the coach the visible subject) as
+// compositionally weak for the one full-bleed "look what I can shoot"
+// moment. motorcycle-rider is direct-to-camera, sharp, and a selective-
+// color edit that reads as confident, considered photography - a founder
+// pick, not a code-driven one. IMG_0839 stays in the general roll rotation
+// (fine at strip size), just isn't the hero/full-bleed photo anymore.
+const heroPhotoEntry = rollPhotoEntries.find(([path]) => path.includes('motorcycle-rider'));
+const heroPhoto = heroPhotoEntry ? heroPhotoEntry[1].default : realPhotos[0];
+
+// Phase 2: more frames than Phase 1 used, and the hero frame sits well off
+// the strip's natural (flex-centred) resting position so the scroll-driven
+// roll has real distance to cover before it locks — see initFilmRollIntro
+// in animations.ts.
+const FRAME_COUNT = 24;
+const HERO_FRAME_INDEX = 19; // leaves runway before it to roll through, and a few tail frames after it for the overshoot-then-settle
+// The track is flex-centred, so the frames on screen at first paint are the
+// middle of the strip (~010-016), not the first few. The old code marked
+// frames 0-3 eager - the offscreen ones - and left the visible ones lazy.
+const FIRST_VISIBLE = 9;
+const LAST_VISIBLE = 16;
+const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
+  photo: i === HERO_FRAME_INDEX ? heroPhoto : realPhotos[i % realPhotos.length],
+  num: String(i + 1).padStart(3, '0'),
+  isHero: i === HERO_FRAME_INDEX,
+}));
+---
+
+<section class="filmroll-intro" id="intro">
+  <Image
+    src={logoWatermark}
+    alt=""
+    aria-hidden="true"
+    class="fr-watermark"
+    width={794}
+    height={702}
+    loading="eager"
+  />
+  <div class="fr-strip-wrap">
+    <Sprockets />
+    <div class="fr-strip">
+      <div class="fr-track" aria-hidden="true">
+        {frames.map((f, i) => (
+          <div class="fr-frame" data-hero-frame={f.isHero ? 'true' : undefined}>
+            <span class="fr-fnum mono">{f.num}</span>
+            {f.photo && (
+              // Frames render at 500px wide on desktop (100px at <=900px), so
+              // the srcset goes up to 1000px for 2x retina - it used to top out
+              // at 360px, upscaling every frame. The hero frame is different: Beat
+              // 4 (initFilmRollIntro, animations.ts) scales it via CSS
+              // transform up to near full viewport width - capping it at the
+              // same 360px source meant upscaling ~4-5x, producing real,
+              // visible blur that had nothing to do with the intentional
+              // develop-filter blur (which resolves to 0 well before the
+              // frame finishes expanding). Only the hero frame gets a larger
+              // srcset/sizes so the "sharp positive" payoff actually is sharp
+              // once it fills the screen.
+              <Image
+                src={f.photo}
+                alt=""
+                class="fr-photo"
+                width={500}
+                height={500}
+                widths={f.isHero ? [500, 1000, 1440, 1920] : [250, 500, 750, 1000]}
+                sizes={f.isHero ? '(max-width: 900px) 100px, 1600px' : '(max-width: 900px) 100px, 500px'}
+                quality={85}
+                loading={i >= FIRST_VISIBLE && i <= LAST_VISIBLE ? 'eager' : 'lazy'}
+                fetchpriority={i >= FIRST_VISIBLE + 2 && i <= FIRST_VISIBLE + 4 ? 'high' : undefined}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+    <Sprockets dark />
+  </div>
+
+  <!-- Mobile-only static photo background (shown below 641px via CSS, the
+       same breakpoint initFilmRollIntro uses to skip the pinned roll). This
+       replaced an autoplaying background video. Same photo as the hero
+       frame / persist-bg, so it stays consistent with the rest of the
+       page. The static photo strip above stays visible on top of it. -->
+  <Image
+    src={heroPhoto}
+    alt=""
+    aria-hidden="true"
+    class="fr-mobile-bg"
+    widths={[480, 720, 960]}
+    sizes="100vw"
+    quality={70}
+    loading="eager"
+  />
+  <div class="fr-mobile-bg-scrim" aria-hidden="true"></div>
+
+  <div class="wrap fr-content">
+    <h1 class="fr-word"><em>Horizon</em> Vantage</h1>
+    <p class="fr-tagline mono">See Further. Show It Better.</p>
+    <a href="/contact" class="btn btn-primary">Get a Free Listing Audit</a>
+  </div>
+</section>
+
+<style>
+  .filmroll-intro{
+    position: relative;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 54px;
+    overflow: hidden;
+    text-align: center;
+    padding: 140px 0 60px;
+    background: var(--bg);
+  }
+
+  /* Faint logo watermark behind everything - large, centred, barely there.
+     0.05 opacity matches global.css's .grain layer, the established
+     "atmospheric, not a focal element" convention in this system. An
+     earlier idea was the full leather-mockup logo render as the section's
+     actual background image, rejected because it has its own baked-in
+     "Horizon Vantage" wordmark and tagline that would sit right behind
+     .fr-content's live ones - two copies of the same text competing in
+     the first five seconds. This is the icon mark only, faint enough to
+     read as texture rather than a second logo. */
+  .fr-watermark{
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(60vw, 820px); height: auto;
+    opacity: 0.05;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* A little bit diagonal (2026-09-24, founder request) - rotating the
+     whole wrap rather than just .fr-strip means the sprockets tilt with
+     it as one physical object, and initFilmRollIntro's translateX on
+     .fr-track (animations.ts) still composes correctly since CSS
+     transforms stack in the child's own rotated coordinate space - the
+     scroll-driven roll slides along the tilt instead of fighting it.
+     Positive degrees = clockwise, so the left end lifts and the right
+     end dips - matches the top-left-entry, bottom-right-exit diagonal
+     the founder originally referenced. Kept small; this is a light
+     polish pass, not the fuller curled/twisted 3D treatment explored on
+     dev2 - see filmroll_intro_deferred_work memory. */
+  .fr-strip-wrap{ width: 100%; position: relative; z-index: 1; transform: rotate(4deg); }
+  /* .fr-strip is the fixed viewport - it never moves or transforms. It
+     centres .fr-track (wider than the viewport by design) via flex, which
+     is also what the no-JS/reduced-motion fallback relies on for its
+     static centred look. .fr-track is what initFilmRollIntro (Phase 2,
+     animations.ts) actually translates - keeping the transform off the
+     overflow:hidden element itself means the clip boundary stays put while
+     the frames slide past it, instead of the whole clipped box sliding as
+     one rigid unit. */
+  .fr-strip{
+    display: flex; justify-content: center;
+    overflow: hidden;
+    padding: 3px 0;
+  }
+  .fr-track{
+    display: flex;
+    gap: 3px;
+    width: max-content;
+    will-change: transform;
+    height: 500px;
+  }
+  .fr-frame{
+    position: relative;
+    flex: 0 0 auto;
+    width: 130px; aspect-ratio: 1/1;
+    border: 1px solid var(--line);
+    overflow: hidden;
+    background: var(--panel);
+    width: 500px;
+  }
+  .fr-frame :global(.fr-photo){
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+
+  /* Entrance fade is driven by revealFilmRollPhotos (animations.ts) on each
+     image's own load, not a CSS animation - ScrollTrigger's pin re-parents
+     this whole section into a pin-spacer ~100ms after first paint, and a
+     browser restarts CSS animations on any re-inserted element, so the old
+     fadeInUp played twice whenever it had visibly started by then.
+     GSAP's inline styles survive re-parenting. Hidden only when scripting
+     is on and motion is allowed, so no-JS and reduced-motion visitors see
+     the photos straight away; the 4s failsafe animation guarantees they
+     appear even if the script never runs. */
+  @media (scripting: enabled) and (prefers-reduced-motion: no-preference){
+    .fr-frame :global(.fr-photo){ opacity: 0; animation: fr-photo-failsafe 0s 4s forwards; }
+  }
+  @keyframes fr-photo-failsafe{ to{ opacity: 1; } }
+
+  .fr-fnum{
+    position: absolute; top: 6px; left: 8px; z-index: 1;
+    font-size: 9px; letter-spacing: 0.04em; color: var(--paper-dim);
+    opacity: 0.7;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  }
+
+  .fr-content{ position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
+  .fr-word{
+    font-family: var(--font-display), serif; font-weight: 400;
+    font-size: clamp(40px, 8vw, 96px);
+    line-height: 1;
+    letter-spacing: -0.01em;
+    margin: 0 0 18px;
+  }
+  .fr-word em{ color: var(--brass); font-style: italic; }
+  .fr-tagline{
+    font-size: 14px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--brass);
+    margin: 0 0 30px;
+  }
+
+  /* Mobile static photo background - hidden on desktop, where the pinned
+     film roll owns the section. */
+  .filmroll-intro :global(.fr-mobile-bg),
+  .fr-mobile-bg-scrim{ display: none; }
+
+  @media (max-width: 900px){
+    .fr-frame{ width: 100px; }
+  }
+  @media (max-width: 640px){
+    .filmroll-intro{ padding: 120px 0 50px; gap: 40px; }
+    .fr-frame{ width: 78px; }
+    .fr-track{ gap: 2px; height: auto; }
+    .filmroll-intro :global(.fr-mobile-bg){
+      display: block;
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+    .fr-mobile-bg-scrim{
+      display: block;
+      position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 100% 60% at 50% 15%, rgba(230,196,104,0.14), transparent 60%),
+        linear-gradient(180deg, rgba(10,14,19,0.55) 0%, rgba(10,14,19,0.72) 55%, rgba(10,14,19,0.92) 100%);
+    }
+  }
+</style>

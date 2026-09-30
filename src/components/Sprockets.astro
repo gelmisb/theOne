@@ -1,0 +1,8 @@
+---
+interface Props {
+  dark?: boolean;
+}
+const { dark = false } = Astro.props;
+---
+
+<div class:list={['sprockets', { dark }]}></div>

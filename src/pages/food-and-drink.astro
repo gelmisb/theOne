@@ -1,0 +1,111 @@
+---
+// New landing page, REFOCUS_BRIEF.md section 6 task 6 - secondary niche
+// (artisan food/drink producers, farm shops, makers). Same structure as
+// stays-and-experiences.astro; kept as two separate files rather than one
+// parameterised template since their outcome copy and package framing
+// genuinely differ (booking vs. ordering), not just the page title.
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import PageHero from '../components/PageHero.astro';
+import Sprockets from '../components/Sprockets.astro';
+import FAQ from '../components/FAQ.astro';
+import Footer from '../components/Footer.astro';
+import { packages } from '../data/packages';
+
+const flagship = packages.find((p) => p.id === 'launch')!;
+
+const outcomes = [
+  { title: 'Product photography that sells', desc: 'Real shots of what you actually make - on the shelf, in the kitchen, at the market stall.' },
+  { title: 'A site that takes orders', desc: 'A fast website designed around your product photography, with ordering or enquiries set up properly.' },
+  { title: 'Found by the right search', desc: 'A Google Business Profile that\'s actually finished, so local searches for your product find you.' },
+];
+---
+
+<Layout
+  title="Food & Drink Producer Photography — Horizon Vantage"
+  description="On-site product and process photography, video and websites for artisan food and drink producers, farm shops and makers in Co. Wicklow."
+>
+  <Header transition:persist />
+
+  <PageHero
+    frameNum="028"
+    frameLabel="Food & Drink"
+    title="Product and process imagery that sells, for artisan producers."
+    subtitle="Farm shops, makers and artisan food and drink producers. Real photos of what you make, built into a site that takes orders."
+    variant="grid"
+  />
+
+  <section id="food-outcomes">
+    <div class="wrap">
+      <div class="section-head" data-reveal data-reveal-group="food-outcomes-head">
+        <div class="frame-tag"><span class="num">FRAME 029</span> What You Get</div>
+        <h2 class="section-h" data-split-reveal>Your product is not generic. Your photos shouldn't be either.</h2>
+      </div>
+      <div class="outcomes-grid">
+        {outcomes.map((o) => (
+          <div class="outcome" data-reveal data-reveal-group="food-outcomes">
+            <h3>{o.title}</h3>
+            <p>{o.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <Sprockets />
+
+  <section id="food-package">
+    <div class="wrap">
+      <div class="section-head" data-reveal data-reveal-group="food-package-head">
+        <div class="frame-tag"><span class="num">FRAME 030</span> Recommended</div>
+        <h2 class="section-h" data-split-reveal>The Booking-Ready Launch.</h2>
+      </div>
+      <div class="package-card glass" data-reveal data-reveal-group="food-package-head">
+        <div class="price">{flagship.price}</div>
+        <div class="price-note">{flagship.priceNote}</div>
+        <ul class="includes">
+          {flagship.includes.map((line) => <li>{line}</li>)}
+        </ul>
+        <a href="/contact" class="btn btn-primary">Get a Free Listing Audit</a>
+      </div>
+      <p class="package-alt">
+        Just need the site, or the Google profile sorted? See the full <a href="/#offer">range of packages</a>.
+      </p>
+    </div>
+  </section>
+
+  <Sprockets dark />
+
+  <FAQ frameNum="031" only={['ai', 'audit', 'area']} />
+
+  <Footer />
+</Layout>
+
+<!-- Animation bootstrap lives in Layout.astro's single shared script, not
+     here - see that file's script comment for why a per-page script can't
+     reliably do this once Astro's client-side page transitions are in
+     play. -->
+
+<style>
+  #food-outcomes{ padding-top: 90px; }
+  .outcomes-grid{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--line); border: 1px solid var(--line); }
+  @media (max-width: 760px){ .outcomes-grid{ grid-template-columns: 1fr; } }
+  .outcome{ background: var(--bg); padding: 34px 30px; }
+  .outcome h3{ font-family: var(--font-display), serif; font-weight: 400; font-size: 20px; margin: 0 0 12px; color: var(--brass); }
+  .outcome p{ font-size: 14px; line-height: 1.6; color: var(--paper-dim); margin: 0; }
+
+  .package-card{
+    max-width: 520px; margin: 0 auto;
+    padding: 38px 36px;
+    border-radius: var(--radius-glass);
+    text-align: left;
+  }
+  .package-card .price{ font-family: var(--font-mono), monospace; font-size: 26px; color: var(--brass); margin-bottom: 4px; }
+  .package-card .price-note{ font-size: 13px; color: var(--paper-dim); opacity: 0.75; margin-bottom: 24px; }
+  .package-card .includes{ font-size: 15px; line-height: 1.6; color: var(--paper-dim); margin: 0 0 30px; padding: 0; list-style: none; }
+  .package-card .includes li{ padding-left: 18px; position: relative; margin-bottom: 10px; }
+  .package-card .includes li::before{ content: "→"; position: absolute; left: 0; color: var(--brass); }
+  .package-alt{ text-align: center; font-size: 14px; color: var(--paper-dim); margin: 24px 0 0; }
+  .package-alt a{ color: var(--brass); text-decoration: none; }
+  .package-alt a:hover{ text-decoration: underline; }
+</style>

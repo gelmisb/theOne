@@ -1,0 +1,89 @@
+---
+// No background image of its own - Layout.astro's persistent site
+// background (revealed by Intro's portal, carried through Hero) fades out
+// as this section scrolls through (see initPersistBgFade in
+// animations.ts). Keeping this section's own background transparent lets
+// that fade read as the statue photo genuinely disappearing here, rather
+// than crossfading into a different photo.
+
+const typical = [
+  'Template layout, swapped colours and a logo',
+  'Stock photography licensed from an image bank',
+  'Google Business Profile left half-finished',
+  'Site handed over, then no further contact',
+];
+const ours = [
+  'On-site photo & video shoot of the actual business',
+  'Custom-built website designed around those images',
+  'Google Business Profile fully set up and optimised',
+  'Optional retainer: quarterly refresh shoots + review monitoring',
+];
+---
+
+<section id="offer-intro">
+  <div class="gap-scrim" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="section-head" data-reveal data-reveal-group="gap-head">
+      <div class="frame-tag"><span class="num">FRAME 001</span> The Gap</div>
+      <h2 class="section-h">Nearly every local web studio in Ireland is selling <i>the same thing.</i></h2>
+      <p class="section-sub">
+        Entry-level builds start around €499 because the whole category competes on price -
+        templated layouts, filled with stock photography. We shoot the real
+        thing and build the site to match it.
+      </p>
+    </div>
+    <div class="gap-grid">
+      <div class="gap-card no" data-reveal data-reveal-group="gap-cards">
+        <h3 class="mono">Typical Web Studio</h3>
+        <ul>
+          {typical.map((t) => (
+            <li><span class="mark">✕</span>{t}</li>
+          ))}
+        </ul>
+      </div>
+      <div class="gap-card yes" data-reveal data-reveal-group="gap-cards">
+        <h3>Horizon Vantage</h3>
+        <ul>
+          {ours.map((t) => (
+            <li><span class="mark">→</span>{t}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  section#offer-intro{ position: relative; overflow: hidden; }
+  .gap-scrim{
+    position: absolute; inset: 0; z-index: 0;
+    background: linear-gradient(180deg, rgba(10,14,19,0.5), rgba(10,14,19,0.88) 55%, var(--bg) 100%);
+  }
+  section#offer-intro .wrap{ position: relative; z-index: 1; }
+
+  .gap-grid{
+    display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  @media (max-width: 760px){ .gap-grid{ grid-template-columns: 1fr; } }
+  .gap-card{ background: var(--bg); padding: 44px 40px; }
+  .gap-card h3{
+    font-family: var(--font-mono), monospace;
+    font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+    margin: 0 0 20px;
+  }
+  .gap-card.no h3{ color: var(--paper-dim); }
+  .gap-card.yes h3{ color: var(--brass); font-family: var(--font-display), serif; font-size: 22px; text-transform: none; letter-spacing: 0; }
+  .gap-card ul{ list-style: none; margin: 0; padding: 0; }
+  .gap-card li{
+    padding: 14px 0; border-top: 1px solid var(--line);
+    font-size: 16px; line-height: 1.5; color: var(--paper-dim);
+    display: flex; gap: 12px;
+  }
+  .gap-card li:first-child{ border-top: none; }
+  .gap-card.yes li{ color: var(--paper); }
+  .gap-card li .mark{ flex-shrink: 0; font-family: var(--font-mono), monospace; font-size: 13px; margin-top: 2px; }
+  .gap-card.no .mark{ color: var(--safelight); }
+  .gap-card.yes .mark{ color: var(--brass); }
+</style>

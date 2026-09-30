@@ -1,0 +1,134 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+// Matches the new niche (REFOCUS_BRIEF.md) - the old tag set (Cafés, Salons,
+// Gyms, Clinics...) contradicted the Hero/Gap/Offer sections above it once
+// those were repositioned around Wicklow stays and experiences.
+const tags = ['Holiday Lets', 'Glamping', 'B&Bs & Guesthouses', 'Activity Providers', 'Farm Shops & Producers', 'Small Venues'];
+
+const aboutImages = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/photos/about.{jpg,jpeg,png,webp}',
+  { eager: true }
+);
+const aboutImage = Object.values(aboutImages)[0]?.default;
+---
+
+<section id="about">
+  <div class="wrap">
+    <div class="about">
+      <div class="about-visual" data-reveal data-reveal-group="about-block">
+        {aboutImage && (
+          <Image
+            src={aboutImage}
+            alt="Founder of Horizon Vantage on a client shoot"
+            class="about-img"
+            widths={[400, 600, 900]}
+            sizes="(max-width: 860px) 100vw, 40vw"
+            loading="lazy"
+          />
+        )}
+        <span class="cap mono">EXPERIENCE - ROLL 01, FRAME 12</span>
+      </div>
+      <div class="about-body" data-reveal data-reveal-group="about-block">
+        <div class="frame-tag"><span class="num">FRAME 005</span> About</div>
+        <h2 class="section-h" style="margin-bottom:26px;">
+          10+ years building software. 5+ years shooting professionally.
+        </h2>
+
+        <div class="cred-strip">
+          <div>
+            <span class="cred-k">10+ yrs</span>
+            <span class="cred-v">Senior software engineering - production systems, not side projects</span>
+          </div>
+          <div>
+            <span class="cred-k">5+ yrs</span>
+            <span class="cred-v">Professional photography &amp; videography experience</span>
+          </div>
+        </div>
+
+        <p>
+          Most web studios have never held a camera on a paid job, and most photographers can't
+          ship production-grade software. <strong>That combination is the whole edge here</strong> -
+          real on-site photography and video, paired with the engineering background to build,
+          host and maintain the website it ends up on.
+        </p>
+        <p>
+          The result is a website built the way software should be: fast, maintainable, and
+          designed around real imagery rather than a template. Best suited to 
+          <strong>local, visible-decision-maker businesses</strong> with an active but
+          under-photographed Google presence - the kind of business that can say yes on a
+          five-minute phone call, not after three rounds of internal sign-off.
+        </p>
+        <div class="about-tags">
+          {tags.map((t) => <span>{t}</span>)}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about{ display: grid; grid-template-columns: 1fr 1.2fr; gap: 64px; align-items: start; }
+  @media (max-width: 860px){ .about{ grid-template-columns: 1fr; gap: 40px; } }
+  .about-visual{
+    aspect-ratio: 4/5;
+    background:
+      repeating-linear-gradient(135deg, rgba(79,168,222,0.12) 0 2px, transparent 2px 14px),
+      linear-gradient(160deg, #1A2029, #0A0E13);
+    border: 1px solid var(--line);
+    position: relative;
+    display: flex; align-items: flex-end; padding: 26px;
+    overflow: hidden;
+  }
+  .about-img{
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .6s ease;
+  }
+  .about-visual:hover .about-img{ transform: scale(1.04); }
+  .about-visual::after{
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(0deg, rgba(10,14,19,0.75), transparent 45%);
+    pointer-events: none;
+  }
+  .about-visual .cap{
+    position: relative; z-index: 1;
+    font-family: var(--font-mono), monospace; font-size: 12px; color: var(--paper-dim);
+  }
+
+  .cred-strip{
+    display: flex; gap: 0;
+    flex-wrap: wrap;
+    padding: 22px 24px;
+    margin-bottom: 30px;
+    border-radius: var(--radius-glass);
+    background: rgba(26,32,41,0.55);
+    backdrop-filter: blur(20px) saturate(1.7);
+    -webkit-backdrop-filter: blur(20px) saturate(1.7);
+    border: 1px solid rgba(234,242,248,0.16);
+    box-shadow:
+      0 8px 32px rgba(0,0,0,0.28),
+      inset 0 1px 0 rgba(255,255,255,0.07);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+    .cred-strip{ background: rgba(18,24,31,0.92); }
+  }
+  .cred-strip > div{ flex: 1; min-width: 180px; padding-right: 24px; }
+  .cred-k{
+    font-family: var(--font-display), serif; font-style: italic;
+    font-size: 26px; color: var(--brass); display: block; margin-bottom: 6px;
+  }
+  .cred-v{ font-size: 13px; color: var(--paper-dim); line-height: 1.45; display: block; }
+
+  .about-body p{ font-size: 17px; line-height: 1.75; color: var(--paper-dim); margin: 0 0 22px; }
+  .about-body p strong{ color: var(--paper); font-weight: 600; }
+  .about-tags{ display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
+  .about-tags span{
+    font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: 0.04em;
+    border: 1px solid var(--line-strong); color: var(--paper-dim);
+    padding: 8px 14px; text-transform: uppercase;
+  }
+</style>

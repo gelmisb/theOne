@@ -1,0 +1,35 @@
+---
+// New section, REFOCUS_BRIEF.md section 3/6 - three trust points, no
+// statistics (brief section 2: "No statistics on the site unless a visible
+// source is cited and Gelmis has approved it").
+const points = [
+  { title: 'Guests book on trust', desc: 'Accurate images mean fewer surprises and better reviews.' },
+  { title: 'Your place is not generic', desc: 'Stock and AI imagery cannot show your view, your rooms or your welcome.' },
+  { title: 'One local specialist', desc: 'Photos, film, website and Google profile all match, instead of four suppliers who never talk to each other.' },
+];
+---
+
+<section id="why-real-photos">
+  <div class="wrap">
+    <div class="section-head" data-reveal data-reveal-group="why-head">
+      <div class="frame-tag"><span class="num">FRAME 022</span> Why Real Photos</div>
+      <h2 class="section-h" data-split-reveal>What guests see should be what they get.</h2>
+    </div>
+    <div class="why-grid">
+      {points.map((p) => (
+        <div class="why-point" data-reveal data-reveal-group="why-points">
+          <h3>{p.title}</h3>
+          <p>{p.desc}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .why-grid{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--line); border: 1px solid var(--line); }
+  @media (max-width: 760px){ .why-grid{ grid-template-columns: 1fr; } }
+  .why-point{ background: var(--bg); padding: 36px 32px; }
+  .why-point h3{ font-family: var(--font-display), serif; font-weight: 400; font-size: 21px; margin: 0 0 12px; color: var(--brass); }
+  .why-point p{ font-size: 15px; line-height: 1.6; color: var(--paper-dim); margin: 0; }
+</style>

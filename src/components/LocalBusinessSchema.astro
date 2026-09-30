@@ -1,0 +1,55 @@
+---
+// name must match the Google Business Profile listing exactly. Type is
+// ProfessionalService (a LocalBusiness subtype) - schema.org has no
+// "MarketingAgency" type, and an invalid @type gets the whole block ignored.
+interface Props {
+  image: string;
+}
+
+const { image } = Astro.props;
+
+const service = (name: string, description: string) => ({
+  '@type': 'Offer',
+  itemOffered: { '@type': 'Service', name, description },
+});
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfessionalService',
+  '@id': `${Astro.site}#business`,
+  name: 'Horizon Vantage',
+  url: Astro.site,
+  image,
+  description:
+    'On-site photography, videography, website development, and local SEO for tourism accommodation, experiences, and artisan food and drink producers, based in Co. Wicklow.',
+  telephone: '+353894939050',
+  email: 'info@horizonvantage.ie',
+  priceRange: '€150-€3200',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Wicklow',
+    addressRegion: 'Co. Wicklow',
+    addressCountry: 'IE',
+  },
+  // Kept lean deliberately - Google treats an oversized areaServed list (one
+  // entry per town) as a spam signal. Country + the two primary counties is
+  // the standard "based here, working nationwide" pattern.
+  areaServed: [
+    { '@type': 'Country', name: 'Ireland' },
+    { '@type': 'AdministrativeArea', name: 'County Wicklow' },
+    { '@type': 'AdministrativeArea', name: 'County Dublin' },
+  ],
+  makesOffer: [
+    service('Photography', 'On-site business photography for small businesses in Ireland.'),
+    service('Videography', 'On-site short-form and promotional video for small businesses in Ireland.'),
+    service('Website development', 'Custom-built websites designed around real on-site photography.'),
+    service('Local SEO', 'Google Business Profile setup and local search optimisation.'),
+  ],
+  founder: {
+    '@type': 'Person',
+    name: 'Gelmis Bartulis',
+  },
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(structuredData)} is:inline />

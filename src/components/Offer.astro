@@ -1,0 +1,99 @@
+---
+// Prices/contents come from one shared data file (REFOCUS_BRIEF.md section
+// 6) - this component only renders, it never hard-codes a number. `visible`
+// lets a tier (e.g. a not-yet-confirmed price) be built without going live.
+import { packages } from '../data/packages';
+const tiers = packages.filter((t) => t.visible);
+---
+
+<section id="offer">
+  <div class="wrap">
+    <div class="section-head" data-reveal data-reveal-group="offer-head">
+      <div class="frame-tag"><span class="num">FRAME 002</span> The Offer</div>
+      <h2 class="section-h" data-split-reveal>Packages built for how local businesses actually decide.</h2>
+      <p class="section-sub">
+        Start with a season refresh or the website alone, or go straight for the full booking-ready launch.
+      </p>
+    </div>
+
+    <div class="tiers">
+      {tiers.map((t) => (
+        <div class:list={['tier', { core: t.core, glass: t.core }]} data-reveal data-reveal-group="tier-cards">
+          {t.core && <span class="badge">Core Offer</span>}
+          <div class="tier-num mono">{t.num}</div>
+          <h3>{t.name}</h3>
+          <div class="price">{t.price}</div>
+          {t.priceNote && <div class="price-note">{t.priceNote}</div>}
+          <div class="purpose">{t.purpose}</div>
+          <ul class="includes">
+            {t.includes.map((line) => <li>{line}</li>)}
+          </ul>
+        </div>
+      ))}
+    </div>
+
+    <div class="addon glass" data-reveal data-reveal-group="offer-head">
+      <div class="t"><strong>NFC "Tap to Review" card</strong> - bundled into Tier 2/3, or sold on its own</div>
+      <div class="price">€25–35 <span class="unit">/ card</span></div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* 6 tiers now (was 4/2-col) - 3-col desktop, 2-col tablet, 1-col mobile. */
+  .tiers{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 1080px){ .tiers{ grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 620px){ .tiers{ grid-template-columns: 1fr; } }
+  .tier{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    padding: 38px 32px;
+    display: flex; flex-direction: column;
+    position: relative;
+    transition: border-color .2s ease, transform .2s ease;
+  }
+  .tier:hover{ border-color: var(--line-strong); transform: translateY(-4px); }
+  .tier.core{ border-color: var(--brass); background: var(--panel-2); }
+  .tier.core.glass{
+    border-radius: var(--radius-glass);
+    background: rgba(44,110,156,0.22);
+    backdrop-filter: blur(20px) saturate(1.7);
+    -webkit-backdrop-filter: blur(20px) saturate(1.7);
+    border-color: rgba(79,168,222,0.5);
+    box-shadow:
+      0 8px 32px rgba(0,0,0,0.28),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+    .tier.core.glass{ background: var(--panel-2); }
+  }
+  .tier.core:hover{ transform: translateY(-6px); }
+  .tier .badge{
+    position: absolute; top: 0; right: 0;
+    background: var(--brass); color: var(--bg);
+    font-family: var(--font-mono), monospace; font-size: 10px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 0 var(--radius-glass) 0 var(--radius-glass);
+  }
+  .tier .tier-num{ font-family: var(--font-mono), monospace; color: var(--brass); font-size: 12px; margin-bottom: 16px; letter-spacing: 0.08em; }
+  .tier h3{ font-family: var(--font-display), serif; font-weight: 400; font-size: 24px; margin: 0 0 8px; }
+  .tier .price{ font-family: var(--font-mono), monospace; font-size: 20px; color: var(--brass); margin-bottom: 4px; }
+  .tier .price-note{ font-size: 12px; color: var(--paper-dim); opacity: 0.75; margin-bottom: 18px; line-height: 1.4; }
+  .tier .purpose{ font-size: 13px; color: var(--paper-dim); font-style: italic; margin-bottom: 20px; }
+  .tier .includes{ font-size: 14px; line-height: 1.6; color: var(--paper-dim); margin: 0; padding: 0; list-style: none; flex-grow: 1; }
+  .tier .includes li{ padding-left: 18px; position: relative; margin-bottom: 8px; }
+  .tier .includes li::before{ content: "→"; position: absolute; left: 0; color: var(--brass); }
+
+  .addon{
+    margin-top: 28px;
+    border-radius: var(--radius-glass);
+    padding: 22px 24px;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 20px; flex-wrap: wrap;
+  }
+  .addon .t{ font-size: 14px; color: var(--paper-dim); }
+  .addon .t strong{ color: var(--paper); font-weight: 600; }
+  .addon .price{ font-family: var(--font-mono), monospace; color: var(--brass); font-size: 16px; white-space: nowrap; }
+  .addon .unit{ opacity: .6; font-size: 12px; }
+</style>

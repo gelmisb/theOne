@@ -1,0 +1,166 @@
+---
+import { Image } from 'astro:assets';
+import logoMark from '../assets/photos/logo/logo_transparent.png';
+---
+
+<header>
+  <div class="nav-shell">
+    <div class="wrap nav">
+      <a class="brand" href="/">
+        <Image src={logoMark} alt="" class="brand-mark" width={64} height={64} />
+        <span><em>Horizon</em> Vantage</span>
+      </a>
+      <nav class="navlinks" data-nav-panel id="mobile-nav-panel">
+        <a href="/stays-and-experiences">Stays</a>
+        <a href="/food-and-drink">Food &amp; Drink</a>
+        <a href="/photography">Photography</a>
+        <a href="/videography">Videography</a>
+        <a href="/local-seo">Local SEO</a>
+        <a href="/web-projects">Websites</a>
+        <a href="/about">About</a>
+        <a href="/contact" class="nav-cta">Get an Audit</a>
+      </nav>
+      <!-- Mobile only (see @media max-width:1010px below) - below that
+           breakpoint .navlinks' own links are hidden and this is the only
+           way to reach them. Found missing during the pre-launch shakedown:
+           the site only just grew from a single scrolling homepage into 5
+           standalone pages, and this nav was still only ever built for
+           in-page anchors, never actual navigation - on mobile there was no
+           way to reach Photography/Videography/Local SEO/Websites/About at
+           all, not even through the footer (Footer.astro's links stayed
+           pointed at homepage sections). initMobileNav (animations.ts)
+           wires this up once for the session, since Header persists across
+           page transitions (transition:persist) rather than remounting. -->
+      <button
+        type="button"
+        class="nav-toggle"
+        data-nav-toggle
+        aria-expanded="false"
+        aria-controls="mobile-nav-panel"
+        aria-label="Menu"
+      >
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<style>
+  header{
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    padding: 0;
+  }
+  .nav-shell{
+    margin: 0 auto;
+    max-width: 1180px;
+    border-radius: 0;
+    border: 1px solid transparent;
+    background: linear-gradient(180deg, rgba(10,14,19,0.35), rgba(10,14,19,0.05));
+    box-shadow: none;
+    transition: margin .35s ease, border-radius .35s ease, background .35s ease,
+      border-color .35s ease, box-shadow .35s ease, backdrop-filter .35s ease;
+  }
+  header:global(.scrolled) .nav-shell{
+    margin: 12px auto 0;
+    border-radius: var(--radius-glass);
+    background: rgba(26,32,41,0.55);
+    backdrop-filter: blur(20px) saturate(1.7);
+    -webkit-backdrop-filter: blur(20px) saturate(1.7);
+    border: 1px solid rgba(234,242,248,0.16);
+    box-shadow:
+      0 8px 32px rgba(0,0,0,0.28),
+      inset 0 1px 0 rgba(255,255,255,0.07);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+    header:global(.scrolled) .nav-shell{ background: rgba(10,14,19,0.94); }
+  }
+  .nav{
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 32px;
+  }
+  header:global(.scrolled) .nav{ padding: 14px 28px; }
+  @media (max-width: 640px){
+    .nav{ padding: 18px 20px; }
+    header:global(.scrolled) .nav-shell{ margin: 8px 12px 0; }
+  }
+  .brand{
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-display), serif;
+    font-size: 22px;
+    letter-spacing: 0.01em;
+    color: var(--paper);
+    text-decoration: none;
+  }
+  .brand em{ color: var(--brass); font-style: italic; }
+  .brand :global(.brand-mark){ width: 30px; height: 30px; object-fit: contain; flex-shrink: 0; }
+  /* 7 links now (was 5) - tightened gap/size to still fit the 1180px shell
+     without wrapping at typical desktop widths. */
+  .navlinks{ display: flex; gap: 22px; align-items: center; }
+  .navlinks a{
+    text-decoration: none; color: var(--paper-dim);
+    font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase;
+    font-family: var(--font-mono), monospace;
+    white-space: nowrap;
+    transition: color .2s ease;
+  }
+  .navlinks a:hover, .navlinks a:focus-visible{ color: var(--brass); }
+  .navlinks a:focus-visible{ outline: 1px solid var(--brass); outline-offset: 4px; }
+  .nav-cta{
+    padding: 10px 18px;
+    border: 1px solid var(--brass);
+    color: var(--brass) !important;
+    border-radius: var(--radius);
+  }
+  .nav-cta:hover{ background: var(--brass); color: var(--bg) !important; }
+
+  .nav-toggle{
+    display: none;
+    flex-direction: column; justify-content: center; align-items: center; gap: 5px;
+    width: 36px; height: 36px;
+    padding: 0; margin-left: 18px;
+    background: none; border: none; cursor: pointer;
+    flex-shrink: 0;
+  }
+  .nav-toggle span{
+    display: block; width: 20px; height: 2px;
+    background: var(--paper);
+    transition: transform .25s ease, opacity .2s ease;
+  }
+  header:global(.nav-open) .nav-toggle span:nth-child(1){ transform: translateY(7px) rotate(45deg); }
+  header:global(.nav-open) .nav-toggle span:nth-child(2){ opacity: 0; }
+  header:global(.nav-open) .nav-toggle span:nth-child(3){ transform: translateY(-7px) rotate(-45deg); }
+
+  @media (max-width: 1010px){
+    .navlinks a:not(.nav-cta){ display: none; }
+    .nav-cta{ font-size: 11px; padding: 9px 14px; }
+    .nav-toggle{ display: flex; }
+
+    /* Opened via initMobileNav (animations.ts) toggling .nav-open on
+       <header>, not on .navlinks itself - header is what's transition:persist,
+       so it's the one stable element to key this off across page loads. */
+    header:global(.nav-open) .navlinks{
+      position: fixed; inset: 0;
+      z-index: 40;
+      flex-direction: column; align-items: stretch;
+      justify-content: flex-start;
+      gap: 0;
+      background: rgba(10,14,19,0.98);
+      backdrop-filter: blur(20px) saturate(1.4);
+      -webkit-backdrop-filter: blur(20px) saturate(1.4);
+      padding: 110px 28px 40px;
+    }
+    header:global(.nav-open) .navlinks a:not(.nav-cta){
+      display: block;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 17px;
+      color: var(--paper);
+    }
+    header:global(.nav-open) .nav-cta{
+      margin-top: 28px;
+      text-align: center;
+      font-size: 14px;
+      padding: 14px 18px;
+    }
+  }
+</style>

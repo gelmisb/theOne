@@ -1,0 +1,136 @@
+---
+// Replaces Contact.astro in this FRAME 007 slot on the homepage - the full
+// enquiry form now lives on its own page (src/pages/contact.astro), linked
+// from every "Get a Free Listing Audit" style CTA across the site instead of a
+// #contact anchor-scroll back here. This is the lighter, homepage-native
+// equivalent: a low-commitment email signup rather than the full form,
+// since a visitor already scrolling the homepage hasn't necessarily
+// decided to book yet.
+//
+// Submit handling (initNewsletterSignup, animations.ts) lives in the
+// shared script module rather than an inline <script> here, on purpose -
+// this component only ever appears on the homepage, which gets revisited
+// many times per session via Astro's client-side page transitions, and an
+// inline script tag only reliably re-executes on genuinely new content
+// (see Layout.astro's own script comment for the full explanation of that
+// trap). The shared module's astro:page-load handler doesn't have that
+// problem.
+---
+
+<section class="updates-section" id="updates">
+  <div class="wrap">
+    <div class="frame-tag" style="justify-content:center;" data-reveal data-reveal-group="updates-head">
+      <span class="num">FRAME 007</span> Stay In The Loop
+    </div>
+    <h2 class="section-h" data-reveal data-reveal-group="updates-head">Keep me updated.</h2>
+    <p class="section-sub" data-reveal data-reveal-group="updates-head">
+      Occasional news, new work, and offers - no spam, unsubscribe any time.
+    </p>
+
+    <div class="updates-panel-wrap">
+      <form
+        class="updates-form glass"
+        id="newsletter-form"
+        name="newsletter-signup"
+        data-reveal
+        data-reveal-group="updates-head"
+      >
+        <!-- Posts to /api/subscribe (a Netlify Function, see
+             netlify/functions/subscribe.ts) instead of Netlify Forms - this
+             signup goes straight into Brevo (contact list + welcome email),
+             not a form-submissions log, so there's nothing for Netlify's
+             own form detection to do here. bot-field is still a honeypot,
+             just checked server-side in the function instead of by
+             Netlify's netlify-honeypot attribute. -->
+        <p style="display:none;">
+          <label>Leave this field blank: <input name="bot-field" id="news-bot-field" /></label>
+        </p>
+        <div class="updates-row">
+          <label for="news-email" class="sr-only">Email address</label>
+          <input id="news-email" name="email" type="email" required placeholder="you@business.ie" />
+          <button type="submit" class="btn btn-primary">Keep Me Updated</button>
+        </div>
+        <label class="updates-consent">
+          <input type="checkbox" name="consent" required />
+          <span>
+            I'd like to receive occasional news and offers from Horizon Vantage, and I agree to the <a href="/terms">Terms of Service</a>.
+          </span>
+        </label>
+        <p class="form-note form-error" id="news-error" hidden>Something went wrong - please try again or email us directly.</p>
+      </form>
+
+      <div class="updates-thanks glass" id="newsletter-thanks" hidden aria-live="polite">
+        <h3>Thanks for choosing to hear more from us.</h3>
+        <p>You're on the list - we'll only reach out with real updates, never spam.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .updates-section{
+    background:
+      radial-gradient(ellipse 700px 400px at 50% 0%, rgba(230,196,104,0.16), transparent 60%),
+      var(--panel);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    text-align: center;
+  }
+  .updates-section h2{ max-width: 700px; margin: 0 auto 20px; }
+  .updates-section .section-sub{ max-width: 480px; margin: 0 auto 44px; }
+  .updates-panel-wrap{ max-width: 520px; margin: 0 auto; }
+  .updates-form{
+    display: flex; flex-direction: column; gap: 16px;
+    text-align: left;
+    padding: 32px;
+    border-radius: var(--radius-glass);
+  }
+  @media (max-width: 640px){ .updates-form{ padding: 24px 20px; } }
+
+  .sr-only{
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  .updates-row{ display: flex; gap: 10px; }
+  @media (max-width: 480px){ .updates-row{ flex-direction: column; } }
+  .updates-row input{
+    flex: 1; min-width: 0;
+    background: var(--bg);
+    border: 1px solid var(--line-strong);
+    color: var(--paper);
+    padding: 13px 14px;
+    font-family: var(--font-body), sans-serif;
+    font-size: 14px;
+    border-radius: var(--radius);
+  }
+  .updates-row input:focus{ outline: none; border-color: var(--brass); }
+  .updates-row button{ flex-shrink: 0; }
+
+  .updates-consent{
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 13px; line-height: 1.5; color: var(--paper-dim);
+    cursor: pointer;
+  }
+  .updates-consent input{ margin-top: 3px; flex-shrink: 0; accent-color: var(--brass); }
+  .updates-consent a{ color: var(--brass); text-decoration: none; }
+  .updates-consent a:hover{ text-decoration: underline; }
+
+  .form-note{ font-size: 12px; color: var(--paper-dim); margin: 0; opacity: 0.7; }
+
+  /* Thank-you panel - swapped in for the form (initNewsletterSignup,
+     animations.ts) on successful submit, or immediately on any later visit
+     from a browser that's already subscribed (see the localStorage note
+     there, and CookieBanner.astro for the matching consent-notice copy). */
+  .updates-thanks{
+    padding: 32px;
+    border-radius: var(--radius-glass);
+    text-align: center;
+  }
+  @media (max-width: 640px){ .updates-thanks{ padding: 24px 20px; } }
+  .updates-thanks h3{
+    font-family: var(--font-display), serif; font-weight: 400;
+    font-size: 22px; margin: 0 0 10px; color: var(--brass);
+  }
+  .updates-thanks p{ margin: 0; font-size: 14px; color: var(--paper-dim); line-height: 1.5; }
+</style>

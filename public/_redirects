@@ -1,0 +1,8 @@
+https://horizonvantage.netlify.app/*  https://horizonvantage.ie/:splat  301!
+
+# Friendlier path for the newsletter signup's Netlify Function
+# (netlify/functions/subscribe.ts) than the default /.netlify/functions/*.
+/api/subscribe  /.netlify/functions/subscribe  200
+
+# Contact form email delivery (netlify/functions/enquiry.ts)
+/api/enquiry  /.netlify/functions/enquiry  200

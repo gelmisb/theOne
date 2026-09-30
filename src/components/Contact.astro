@@ -1,0 +1,198 @@
+<!-- Now the sole content of its own page (src/pages/contact.astro) rather
+     than a homepage section - moved there so every "Get a Free Listing Audit" /
+     "Get Your Listing Fixed" CTA across the standalone pages lands
+     somewhere consistent, instead of a #contact anchor-scroll back to the
+     homepage. The homepage's own equivalent moment is now a lighter
+     "Keep Me Updated" email signup (NewsletterSignup.astro) in the same
+     FRAME 007 slot this used to occupy. Frame number bumped to 020,
+     continuing the standalone-pages sequence after About (018/019). -->
+<section class="cta-section" id="contact">
+  <div class="wrap">
+    <div class="frame-tag" style="justify-content:center;" data-reveal data-reveal-group="contact-head">
+      <span class="num">FRAME 020</span> Get In Touch
+    </div>
+    <h2 class="section-h" data-reveal data-reveal-group="contact-head">
+      Tell us a bit about your business, and we'll take it from there.
+    </h2>
+    <p class="section-sub" data-reveal data-reveal-group="contact-head">
+      Founder shoots are booking now - first come, first slotted. No obligation, no generic pitch.
+    </p>
+
+    <form
+      class="cta-form glass"
+      id="enquiry-form"
+      name="enquiry-form"
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      data-reveal
+      data-reveal-group="contact-head"
+    >
+      <input type="hidden" name="form-name" value="enquiry-form" />
+      <p style="display:none;">
+        <label>Leave this field blank: <input name="bot-field" /></label>
+      </p>
+      <div class="row2">
+        <div>
+          <label for="name">Your name</label>
+          <input id="name" name="name" type="text" required placeholder="Full name" />
+        </div>
+        <div>
+          <label for="business">Business name</label>
+          <input id="business" name="business" type="text" required placeholder="Business name" />
+        </div>
+      </div>
+      <div class="row2">
+        <div>
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required placeholder="you@business.ie" />
+        </div>
+        <div>
+          <label for="business-type">Business type</label>
+          <select id="business-type" name="business_type">
+            <option>Holiday let</option>
+            <option>Glamping</option>
+            <option>B&amp;B or guesthouse</option>
+            <option>Activity provider</option>
+            <option>Food and drink producer</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div>
+          <label for="town">Town or area</label>
+          <input id="town" name="town" type="text" placeholder="e.g. Baltinglass" />
+        </div>
+        <div>
+          <label for="listing-url">Website or listing URL <span class="opt">(optional)</span></label>
+          <input id="listing-url" name="listing_url" type="url" placeholder="https://" />
+        </div>
+      </div>
+      <div>
+        <label for="msg">A little about your business</label>
+        <textarea id="msg" name="message" placeholder="What you do, where you're based, and what prompted you to get in touch..."></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Request a Free Listing Audit</button>
+      <p class="form-note form-success" id="form-success" hidden>
+        Thanks - your enquiry is in. We'll reply within one business day.
+      </p>
+      <p class="form-note form-error" id="form-error" hidden>
+        Something went wrong sending that - please email us directly instead.
+      </p>
+      <p class="form-note" id="form-hint">Usually replies within one business day.</p>
+    </form>
+  </div>
+</section>
+
+<script>
+  // Netlify Forms: the <form>'s data-netlify="true" attribute (see markup
+  // above) makes Netlify's build bot detect and provision this form from
+  // the static HTML alone - no server code needed. Submissions land in the
+  // Netlify dashboard and, once a notification is configured there
+  // (Site settings > Forms > Form notifications), get emailed to
+  // info@horizonvantage.ie. Posting via fetch instead of a native submit
+  // keeps the page from navigating away, so we can show the inline
+  // success/error state below. Emails are sent by the enquiry function
+  // (see the two-post note in the handler), not by Netlify.
+  const form = document.getElementById('enquiry-form') as HTMLFormElement | null;
+  const success = document.getElementById('form-success');
+  const error = document.getElementById('form-error');
+  const hint = document.getElementById('form-hint');
+  const submitBtn = form?.querySelector('button[type="submit"]');
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!form) return;
+
+    const data = new FormData(form);
+    const params = new URLSearchParams();
+    const obj: Record<string, string> = {};
+    data.forEach((value, key) => {
+      params.append(key, value.toString());
+      obj[key] = value.toString();
+    });
+
+    // Two posts: Netlify Forms keeps a stored copy in the dashboard, and
+    // /api/enquiry (netlify/functions/enquiry.ts) sends the emails - Netlify
+    // Forms alone emails nobody. Succeed if either lands.
+    const [stored, emailed] = await Promise.allSettled([
+      fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString(),
+      }),
+      fetch('/api/enquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(obj),
+      }),
+    ]);
+    const ok = (r: PromiseSettledResult<Response>) => r.status === 'fulfilled' && r.value.ok;
+
+    try {
+      if (!ok(stored) && !ok(emailed)) throw new Error('Form submission failed');
+      if (!ok(emailed)) console.warn('Enquiry saved but email function failed');
+
+      success?.removeAttribute('hidden');
+      error?.setAttribute('hidden', '');
+      hint?.setAttribute('hidden', '');
+      submitBtn?.setAttribute('style', 'display:none;');
+    } catch {
+      error?.removeAttribute('hidden');
+    }
+  });
+</script>
+
+<style>
+  .cta-section{
+    background:
+      radial-gradient(ellipse 700px 400px at 50% 0%, rgba(230,196,104,0.16), transparent 60%),
+      var(--panel);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    text-align: center;
+    /* First section on its own page now (below the fixed Header), not
+       mid-homepage where the preceding section's own padding already
+       cleared it - same 170px/130px treatment every other standalone
+       page's first section uses. */
+    padding-top: 170px;
+  }
+  @media (max-width: 640px){
+    .cta-section{ padding-top: 130px; }
+  }
+  .cta-section h2{ max-width: 700px; margin: 0 auto 20px; }
+  .cta-section .section-sub{ max-width: 520px; margin: 0 auto 44px; }
+  .cta-form{
+    max-width: 560px; margin: 0 auto;
+    display: flex; flex-direction: column; gap: 14px;
+    text-align: left;
+    padding: 32px;
+    border-radius: var(--radius-glass);
+  }
+  @media (max-width: 640px){ .cta-form{ padding: 24px 20px; } }
+  .cta-form .row2{ display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 560px){ .cta-form .row2{ grid-template-columns: 1fr; } }
+  .cta-form label{
+    font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--paper-dim); margin-bottom: 6px; display: block;
+  }
+  .cta-form label .opt{ text-transform: none; opacity: 0.6; letter-spacing: 0; }
+  .cta-form input, .cta-form textarea, .cta-form select{
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--line-strong);
+    color: var(--paper);
+    padding: 13px 14px;
+    font-family: var(--font-body), sans-serif;
+    font-size: 14px;
+    border-radius: var(--radius);
+  }
+  .cta-form input:focus, .cta-form textarea:focus, .cta-form select:focus{
+    outline: none; border-color: var(--brass);
+  }
+  .cta-form textarea{ resize: vertical; min-height: 100px; }
+  .cta-form button{ margin-top: 8px; align-self: flex-start; }
+  .form-note{ font-size: 12px; color: var(--paper-dim); margin-top: 10px; opacity: 0.7; }
+  .form-success{ color: var(--brass); opacity: 1; }
+</style>

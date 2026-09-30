@@ -1,0 +1,142 @@
+---
+// Positioning refresh (REFOCUS_BRIEF.md, 2026-09-29) - primary niche is
+// tourism accommodation/experiences in Co. Wicklow, secondary is artisan
+// food and drink producers. Stats below updated to match: the old "5-day
+// Visual Refresh" stat named a tier that no longer exists (see
+// src/data/packages.ts - it's "Season Refresh" now).
+const stats = [
+  { k: 'Experience', v: '10+ years of software engineering experience behind every build' },
+  { k: 'On-site', v: 'Every image shot at your property - never AI-generated' },
+  { k: 'Tailored', v: 'It\'s designed the way you imagine it' },
+  { k: 'Local', v: 'Based in Co. Wicklow, working across Ireland' },
+];
+
+// No background image of its own - Layout.astro's persistent site
+// background (.persist-bg) shows through, the same photo FilmRollIntro's
+// hero frame expands into at the end of its scroll sequence, fading out
+// later as Gap comes into view (initPersistBgFade in animations.ts). Hero's
+// own section background stays transparent below for that to work.
+---
+
+<section class="hero" id="hero">
+  <div class="hero-scrim"></div>
+  <div class="viewfinder">
+    <span class="vf-corner tl"></span>
+    <span class="vf-corner tr"></span>
+    <span class="vf-corner bl"></span>
+    <span class="vf-corner br"></span>
+    <span class="vf-center"></span>
+  </div>
+  <div class="wrap hero-inner">
+    <div class="hero-eyebrow glass"><span class="rec"></span>Photography · Video · Websites · Local SEO - Co. Wicklow</div>
+    <h1 class="hero-h">Honest photography and websites for Wicklow <i>stays and experiences.</i></h1>
+    <p class="hero-sub">
+    Real on-site photo and video of your place, built into a fast website that helps guests book direct. One local specialist, start to finish.
+    </p>
+    <div class="hero-ctas">
+      <a href="/contact" class="btn btn-primary">Get a Free Listing Audit</a>
+      <a href="#offer" class="btn btn-ghost">See Packages</a>
+    </div>
+    <div class="hero-strip">
+      {stats.map((s) => (
+        <div>
+          <span class="k">{s.k}</span>
+          <span class="v">{s.v}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero{
+    position: relative;
+    min-height: 92vh;
+    display: flex; align-items: center;
+    padding: 120px 0 90px;
+    overflow: hidden;
+  }
+  .hero-scrim{
+    position: absolute; inset: 0; z-index: 1;
+    background:
+      linear-gradient(180deg, rgba(10,14,19,0.65), rgba(10,14,19,0.85) 65%, var(--bg) 100%),
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(230,196,104,0.16), transparent 60%);
+  }
+  .viewfinder{ position: absolute; inset: 28px; pointer-events: none; z-index: 1; }
+  .vf-corner{
+    position: absolute; width: 34px; height: 34px;
+    border-color: var(--paper-dim);
+    opacity: 0;
+  }
+  .vf-corner.tl{ top: 0; left: 0; border-top: 2px solid; border-left: 2px solid; }
+  .vf-corner.tr{ top: 0; right: 0; border-top: 2px solid; border-right: 2px solid; }
+  .vf-corner.bl{ bottom: 0; left: 0; border-bottom: 2px solid; border-left: 2px solid; }
+  .vf-corner.br{ bottom: 0; right: 0; border-bottom: 2px solid; border-right: 2px solid; }
+  .vf-center{
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 26px; height: 26px; opacity: 0.25;
+  }
+  .vf-center::before, .vf-center::after{ content: ""; position: absolute; background: var(--paper-dim); }
+  .vf-center::before{ top: 50%; left: 0; width: 100%; height: 1px; }
+  .vf-center::after{ left: 50%; top: 0; height: 100%; width: 1px; }
+
+  .hero-inner{ position: relative; z-index: 2; }
+  .hero-eyebrow{
+    font-family: var(--font-mono), monospace;
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--brass);
+    margin-bottom: 26px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    display: inline-flex; align-items: center; gap: 10px;
+    width: fit-content;
+    opacity: 0;
+  }
+  .hero-eyebrow .rec{
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--safelight);
+    box-shadow: 0 0 10px 2px rgba(224,141,75,0.6);
+  }
+  h1.hero-h{
+    font-family: var(--font-display), serif;
+    font-weight: 400;
+    font-size: clamp(40px, 6.2vw, 84px);
+    line-height: 1.02;
+    letter-spacing: -0.01em;
+    max-width: 920px;
+    margin: 0 0 28px;
+  }
+  h1.hero-h i{ font-style: italic; color: var(--brass); }
+  .hero-sub{
+    font-size: 19px; line-height: 1.6;
+    color: var(--paper-dim);
+    max-width: 560px;
+    margin: 0 0 44px;
+    opacity: 0;
+  }
+  .hero-ctas{ display: flex; gap: 16px; flex-wrap: wrap; align-items: center; opacity: 0; }
+
+  .hero-strip{
+    margin-top: 78px;
+    display: flex; gap: 0;
+    flex-wrap: wrap;
+    padding: 26px 28px;
+    border-radius: var(--radius-glass);
+    background: rgba(26,32,41,0.55);
+    backdrop-filter: blur(20px) saturate(1.7);
+    -webkit-backdrop-filter: blur(20px) saturate(1.7);
+    border: 1px solid rgba(234,242,248,0.16);
+    box-shadow:
+      0 8px 32px rgba(0,0,0,0.28),
+      inset 0 1px 0 rgba(255,255,255,0.07);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+    .hero-strip{ background: rgba(18,24,31,0.92); }
+  }
+  .hero-strip > div{ flex: 1; min-width: 150px; padding-right: 24px; opacity: 0; }
+  .hero-strip .k{
+    font-family: var(--font-display), serif; font-style: italic;
+    font-size: 28px; color: var(--brass); display: block; margin-bottom: 4px;
+  }
+  .hero-strip .v{ font-size: 13px; color: var(--paper-dim); line-height: 1.4; }
+</style>

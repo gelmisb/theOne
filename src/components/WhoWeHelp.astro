@@ -1,0 +1,54 @@
+---
+// New section, REFOCUS_BRIEF.md section 3/6 - two audience cards linking to
+// the new niche landing pages, so a visitor can self-identify early instead
+// of reading the whole page to find out if this applies to them.
+const audiences = [
+  {
+    title: 'Stays and experiences',
+    desc: 'Holiday lets, glamping, B&Bs, guesthouses, activity providers and small venues. Show guests the real place before they arrive.',
+    href: '/stays-and-experiences',
+  },
+  {
+    title: 'Food and drink producers',
+    desc: 'Artisan producers, farm shops and makers. Product and process imagery that sells, on a site that takes orders.',
+    href: '/food-and-drink',
+  },
+];
+---
+
+<section id="who-we-help">
+  <div class="wrap">
+    <div class="section-head" data-reveal data-reveal-group="who-head">
+      <div class="frame-tag"><span class="num">FRAME 021</span> Who We Help</div>
+      <h2 class="section-h" data-split-reveal>Two kinds of business, one way of working.</h2>
+    </div>
+    <div class="who-grid">
+      {audiences.map((a) => (
+        <a class="who-card glass" href={a.href} data-reveal data-reveal-group="who-cards">
+          <h3>{a.title}</h3>
+          <p>{a.desc}</p>
+          <span class="who-link mono">See how →</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .who-grid{ display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  @media (max-width: 700px){ .who-grid{ grid-template-columns: 1fr; } }
+  .who-card{
+    display: block;
+    padding: 38px 32px;
+    border-radius: var(--radius-glass);
+    text-decoration: none;
+    transition: transform .2s ease, border-color .2s ease;
+  }
+  .who-card:hover{ transform: translateY(-4px); border-color: rgba(79,168,222,0.5); }
+  .who-card h3{
+    font-family: var(--font-display), serif; font-weight: 400; font-size: 26px;
+    color: var(--paper); margin: 0 0 14px;
+  }
+  .who-card p{ font-size: 15px; line-height: 1.65; color: var(--paper-dim); margin: 0 0 24px; }
+  .who-link{ font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--brass); }
+</style>

@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.astro/
+.env
+.DS_Store
+.agents/
+.claude/
+.vscode/
+AGENTS.md
+CLAUDE (1).md
+skills-lock.json
+tools/raw-footage/
+.codex/
+.mcp.json
+.playwright-mcp/
+.impeccable/live/

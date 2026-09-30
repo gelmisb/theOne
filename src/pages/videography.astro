@@ -1,0 +1,109 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Sprockets from '../components/Sprockets.astro';
+import Footer from '../components/Footer.astro';
+
+// No example reels yet - this page ships copy-only until real client
+// video work exists to show. Revisit once footage is available and add
+// a video grid here (same pattern as Portfolio.astro's `videos` array).
+
+const deliverables = [
+  { k: 'Short-form clips', v: 'Vertical-friendly cuts built for Instagram, TikTok, and Google Business Profile posts.' },
+  { k: 'One promo video', v: "Bundled into every Season Refresh shoot — a 15–30 second clip alongside the stills." },
+  { k: 'Shot on-site', v: 'Same visit as your photography, so it captures the same real space, staff, and product.' },
+];
+---
+
+<Layout
+  title="Business Video in Wicklow — Horizon Vantage"
+  description="On-site video for cafés, salons, gyms, clinics and tradespeople in Wicklow — short-form clips and promo video, shot alongside your photography."
+>
+  <Header transition:persist />
+
+  <!-- Frame 011 (the standalone hero) removed, founder request - this page
+       now opens directly on "What's Included". Its heading is promoted to
+       the page's h1 (every page needs exactly one) via a locally-scoped
+       .video-intro-h rule that mirrors global.css's h2.section-h, since
+       that shared rule is tag-qualified and wouldn't otherwise apply to an
+       h1. Removing the hero also removed this page's only photo
+       (training-floor.jpg) - flagged in the handoff, since Videography had
+       just been given that photo specifically so it wouldn't look
+       identical to the other service pages. -->
+  <section id="video-included">
+    <div class="wrap">
+      <div class="section-head" data-reveal data-reveal-group="video-head">
+        <div class="frame-tag"><span class="num">FRAME 010</span> What's Included</div>
+        <h1 class="video-intro-h" data-split-reveal>Built for how people actually watch local business video.</h1>
+        <p class="section-sub">
+          Short, vertical, and native to the platform — not a polished ad, a real clip of a real
+          business that stops a scroll.
+        </p>
+      </div>
+      <div class="video-strip glass">
+        {deliverables.map((s) => (
+          <div>
+            <span class="k">{s.k}</span>
+            <span class="v">{s.v}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <Sprockets />
+
+  <section id="video-note">
+    <div class="wrap">
+      <div class="section-head" data-reveal data-reveal-group="video-note">
+        <div class="frame-tag"><span class="num">FRAME 011</span> A Note</div>
+        <h2 class="section-h" data-split-reveal>This is a new service — the examples are still being <i>shot.</i></h2>
+      </div>
+      <p class="note-body" data-reveal data-reveal-group="video-note">
+        Horizon Vantage is booking founder shoots now, and video examples will be added here as real
+        client work is delivered. If you'd rather see the process described than wait for a gallery,
+        get in touch — happy to talk through exactly what a shoot looks like before you book.
+      </p>
+      <a href="/contact" class="btn btn-primary" data-reveal data-reveal-group="video-note">Get a Free Listing Audit</a>
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<!-- Animation bootstrap lives in Layout.astro's single shared script, not
+     here - see that file's script comment for why a per-page script can't
+     reliably do this once Astro's client-side page transitions are in
+     play. -->
+
+<style>
+  #video-included{ padding-top: 170px; }
+  @media (max-width: 640px){ #video-included{ padding-top: 130px; } }
+
+  /* Mirrors global.css's h2.section-h - that rule is tag-qualified
+     (h2.section-h) so it doesn't reach this promoted h1. */
+  .video-intro-h{
+    font-family: var(--font-display), serif; font-weight: 400;
+    font-size: clamp(32px, 4vw, 50px);
+    line-height: 1.08;
+    margin: 0 0 18px;
+  }
+
+  .video-strip{
+    margin-top: 44px;
+    display: flex; flex-wrap: wrap; gap: 0;
+    padding: 26px 28px;
+    border-radius: var(--radius-glass);
+  }
+  .video-strip > div{ flex: 1; min-width: 220px; padding-right: 24px; }
+  .video-strip .k{
+    font-family: var(--font-display), serif; font-style: italic;
+    font-size: 20px; color: var(--brass); display: block; margin-bottom: 8px;
+  }
+  .video-strip .v{ font-size: 14px; color: var(--paper-dim); line-height: 1.5; }
+
+  .note-body{
+    max-width: 720px; font-size: 17px; line-height: 1.75; color: var(--paper-dim);
+    margin: 0 0 30px;
+  }
+</style>

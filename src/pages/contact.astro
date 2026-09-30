@@ -1,0 +1,20 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Contact from '../components/Contact.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout
+  title="Contact — Horizon Vantage"
+  description="Get in touch with Horizon Vantage for on-site photography, videography, website design and local SEO for small businesses in Wicklow."
+>
+  <Header transition:persist />
+  <Contact />
+  <Footer />
+</Layout>
+
+<!-- Animation bootstrap lives in Layout.astro's single shared script, not
+     here - see that file's script comment for why a per-page script can't
+     reliably do this once Astro's client-side page transitions are in
+     play. -->
