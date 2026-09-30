@@ -93,7 +93,8 @@
   // (Site settings > Forms > Form notifications), get emailed to
   // info@horizonvantage.ie. Posting via fetch instead of a native submit
   // keeps the page from navigating away, so we can show the inline
-  // success/error state below.
+  // success/error state below. Emails are sent by the enquiry function
+  // (see the two-post note in the handler), not by Netlify.
   const form = document.getElementById('enquiry-form') as HTMLFormElement | null;
   const success = document.getElementById('form-success');
   const error = document.getElementById('form-error');
@@ -104,16 +105,34 @@
     e.preventDefault();
     if (!form) return;
 
+    const data = new FormData(form);
     const params = new URLSearchParams();
-    new FormData(form).forEach((value, key) => params.append(key, value.toString()));
+    const obj: Record<string, string> = {};
+    data.forEach((value, key) => {
+      params.append(key, value.toString());
+      obj[key] = value.toString();
+    });
 
-    try {
-      const res = await fetch('/', {
+    // Two posts: Netlify Forms keeps a stored copy in the dashboard, and
+    // /api/enquiry (netlify/functions/enquiry.ts) sends the emails - Netlify
+    // Forms alone emails nobody. Succeed if either lands.
+    const [stored, emailed] = await Promise.allSettled([
+      fetch('/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params.toString(),
-      });
-      if (!res.ok) throw new Error(`Form submission failed: ${res.status}`);
+      }),
+      fetch('/api/enquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(obj),
+      }),
+    ]);
+    const ok = (r: PromiseSettledResult<Response>) => r.status === 'fulfilled' && r.value.ok;
+
+    try {
+      if (!ok(stored) && !ok(emailed)) throw new Error('Form submission failed');
+      if (!ok(emailed)) console.warn('Enquiry saved but email function failed');
 
       success?.removeAttribute('hidden');
       error?.setAttribute('hidden', '');
