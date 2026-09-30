@@ -12,6 +12,8 @@
 //    the actual number (from €1,400) was not - it sits between Starter
 //    (€900, template) and Launch (€2,400, full shoot+site+SEO).
 //  - local-seo: "one-off setup" was confirmed, the number (€150) was not.
+// Listed in ascending order of displayed price (Care & Visibility's
+// monthly fee counts at its face value); TIER numbers follow the order.
 export interface PackageTier {
   id: string;
   num: string;
@@ -28,36 +30,8 @@ const AUDIT_NOTE = 'Final quote after your free audit.';
 
 export const packages: PackageTier[] = [
   {
-    id: 'launch',
-    num: 'TIER 01',
-    name: 'Booking-Ready Launch',
-    price: 'from €2,400',
-    priceNote: `Scope can extend to €3,200. ${AUDIT_NOTE}`,
-    purpose: 'The flagship package - shoot to search, fully booking-ready',
-    includes: [
-      'Half-day on-site shoot - 25 to 40 edited images',
-      '60 to 90 second property film, plus 3 vertical social cuts',
-      '5 to 8 page website with booking or ordering set up',
-      'Google Business Profile optimisation',
-      '30-day check-in after launch',
-    ],
-    core: true,
-    visible: true,
-  },
-  {
-    id: 'refresh',
-    num: 'TIER 02',
-    name: 'Season Refresh',
-    price: 'from €450',
-    priceNote: AUDIT_NOTE,
-    purpose: 'Keep an existing site and listing current through the seasons',
-    includes: ['New on-site imagery each spring or autumn', 'A short social video to match'],
-    core: false,
-    visible: true,
-  },
-  {
     id: 'care',
-    num: 'TIER 03',
+    num: 'TIER 01',
     name: 'Care & Visibility',
     price: 'from €120',
     priceNote: `/month. ${AUDIT_NOTE}`,
@@ -68,6 +42,28 @@ export const packages: PackageTier[] = [
       'A quarterly photo drop',
       'Monthly enquiry and booking report',
     ],
+    core: false,
+    visible: true,
+  },
+  {
+    id: 'local-seo',
+    num: 'TIER 02',
+    name: 'Local SEO Help Only',
+    price: 'from €150',
+    priceNote: `One-off setup. ${AUDIT_NOTE}`,
+    purpose: 'For a business with a site already, elsewhere',
+    includes: ['Google Business Profile setup and clean-up', 'Category, service area and NAP consistency check'],
+    core: false,
+    visible: true,
+  },
+  {
+    id: 'refresh',
+    num: 'TIER 03',
+    name: 'Season Refresh',
+    price: 'from €450',
+    priceNote: AUDIT_NOTE,
+    purpose: 'Keep an existing site and listing current through the seasons',
+    includes: ['New on-site imagery each spring or autumn', 'A short social video to match'],
     core: false,
     visible: true,
   },
@@ -94,14 +90,20 @@ export const packages: PackageTier[] = [
     visible: true,
   },
   {
-    id: 'local-seo',
+    id: 'launch',
     num: 'TIER 06',
-    name: 'Local SEO Help Only',
-    price: 'from €150',
-    priceNote: `One-off setup. ${AUDIT_NOTE}`,
-    purpose: 'For a business with a site already, elsewhere',
-    includes: ['Google Business Profile setup and clean-up', 'Category, service area and NAP consistency check'],
-    core: false,
+    name: 'Booking-Ready Launch',
+    price: 'from €2,400',
+    priceNote: `Scope can extend to €3,200. ${AUDIT_NOTE}`,
+    purpose: 'The flagship package - shoot to search, fully booking-ready',
+    includes: [
+      'Half-day on-site shoot - 25 to 40 edited images',
+      '60 to 90 second property film, plus 3 vertical social cuts',
+      '5 to 8 page website with booking or ordering set up',
+      'Google Business Profile optimisation',
+      '30-day check-in after launch',
+    ],
+    core: true,
     visible: true,
   },
 ];
