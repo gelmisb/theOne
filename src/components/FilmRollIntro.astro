@@ -11,7 +11,6 @@ import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import Sprockets from './Sprockets.astro';
 import logoWatermark from '../assets/photos/logo/logo_transparent.png';
-import introBgVideo from '../assets/videos/intro-bg.mp4';
 
 // Real photos only (brief section 4) — explicitly enumerated rather than a
 // bare wildcard so newly-dropped files (e.g. AI-generated portfolio
@@ -113,27 +112,22 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
     <Sprockets dark />
   </div>
 
-  <!-- Mobile-only video background (founder-supplied clip, src/assets/videos/
-       intro-bg.mp4), replacing the static film strip below the 640px
-       breakpoint. Hidden by default (no `autoplay`, `preload="none"`) and
-       only ever revealed + played by initMobileIntroVideo (animations.ts)
-       once it's confirmed both mobile AND motion-safe - a no-JS or
-       prefers-reduced-motion mobile visitor still gets the static strip
-       above, exactly the existing fallback contract this component
-       documents at the top of this file. Desktop never loads this: the JS
-       gate never adds .fr-video-mode there, so the video's `preload="none"`
-       means the browser never fetches it. -->
-  <video
-    class="fr-mobile-video"
-    muted
-    loop
-    playsinline
-    preload="none"
+  <!-- Mobile-only static photo background (shown below 641px via CSS, the
+       same breakpoint initFilmRollIntro uses to skip the pinned roll). This
+       replaced an autoplaying background video. Same photo as the hero
+       frame / persist-bg, so it stays consistent with the rest of the
+       page. The static photo strip above stays visible on top of it. -->
+  <Image
+    src={heroPhoto}
+    alt=""
     aria-hidden="true"
-  >
-    <source src={introBgVideo} type="video/mp4" />
-  </video>
-  <div class="fr-mobile-video-scrim" aria-hidden="true"></div>
+    class="fr-mobile-bg"
+    widths={[480, 720, 960]}
+    sizes="100vw"
+    quality={70}
+    loading="eager"
+  />
+  <div class="fr-mobile-bg-scrim" aria-hidden="true"></div>
 
   <div class="wrap fr-content">
     <h1 class="fr-word"><em>Horizon</em> Vantage</h1>
@@ -255,49 +249,10 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
     margin: 0 0 30px;
   }
 
-  /* Mobile video background - hidden by default (both visually and via the
-     `preload="none"`/no-`autoplay` markup above, so nothing loads until
-     JS confirms it should). initMobileIntroVideo (animations.ts) adds
-     .fr-video-mode to the section once it's confirmed mobile + motion-safe;
-     everything below is scoped under that class so a no-JS or
-     reduced-motion mobile visitor is completely unaffected and keeps
-     seeing the static strip. */
-  .fr-mobile-video{
-    display: none;
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-    z-index: 0;
-  }
-  .fr-mobile-video-scrim{
-    display: none;
-    position: absolute; inset: 0;
-    z-index: 0;
-    background:
-      radial-gradient(ellipse 100% 60% at 50% 15%, rgba(230,196,104,0.14), transparent 60%),
-      linear-gradient(180deg, rgba(10,14,19,0.55) 0%, rgba(10,14,19,0.72) 55%, rgba(10,14,19,0.92) 100%);
-  }
-  .fr-video-mode .fr-strip-wrap,
-  .fr-video-mode .fr-watermark{ display: none; }
-  .fr-video-mode .fr-mobile-video,
-  .fr-video-mode .fr-mobile-video-scrim{ display: block; }
-
-  /* "Ecstatic" heading, founder request (2026-09-24) - scoped to
-     video-mode only, so the desktop strip's heading is untouched. A
-     continuous soft glow on the brass italic word gives the mostly-static
-     heading some life of its own alongside the real motion now playing
-     behind it, instead of just sitting inertly over top of it. The
-     scale/fade entrance itself is handled by initMobileIntroVideo
-     (animations.ts) with a back.out overshoot ease - the same ease family
-     initFilmRollIntro already uses for the desktop roll, so the "excited"
-     feel stays a variation on this codebase's existing motion language
-     rather than a one-off. */
-  .fr-video-mode .fr-word{ font-size: clamp(44px, 12vw, 72px); }
-  .fr-video-mode .fr-word em{ animation: fr-glow 3s ease-in-out infinite; }
-  @keyframes fr-glow{
-    0%, 100%{ text-shadow: 0 0 18px rgba(230,196,104,0.25); }
-    50%{ text-shadow: 0 0 34px rgba(230,196,104,0.6); }
-  }
+  /* Mobile static photo background - hidden on desktop, where the pinned
+     film roll owns the section. */
+  .filmroll-intro :global(.fr-mobile-bg),
+  .fr-mobile-bg-scrim{ display: none; }
 
   @media (max-width: 900px){
     .fr-frame{ width: 100px; }
@@ -305,6 +260,20 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
   @media (max-width: 640px){
     .filmroll-intro{ padding: 120px 0 50px; gap: 40px; }
     .fr-frame{ width: 78px; }
-    .fr-track{ gap: 2px; }
+    .fr-track{ gap: 2px; height: auto; }
+    .filmroll-intro :global(.fr-mobile-bg){
+      display: block;
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+    .fr-mobile-bg-scrim{
+      display: block;
+      position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 100% 60% at 50% 15%, rgba(230,196,104,0.14), transparent 60%),
+        linear-gradient(180deg, rgba(10,14,19,0.55) 0%, rgba(10,14,19,0.72) 55%, rgba(10,14,19,0.92) 100%);
+    }
   }
 </style>
