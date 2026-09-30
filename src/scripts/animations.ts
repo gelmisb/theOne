@@ -432,50 +432,6 @@ export function initFilmRollIntro() {
 }
 
 /**
- * Mobile-only video background for FilmRollIntro, founder-supplied clip
- * (src/assets/videos/intro-bg.mp4) - swaps in for the static film strip
- * below the desktop breakpoint. Mirrors initFilmRollIntro's own
- * isDesktop/reduced-motion gate exactly, rather than sharing state with
- * it, since the two are deliberately mutually exclusive: this is what
- * mobile gets *instead of* the pinned roll, not alongside it.
- *
- * The video itself ships with no `autoplay` and `preload="none"` in the
- * markup - nothing is fetched until this function actually decides to add
- * .fr-video-mode and call play(), so a no-JS or reduced-motion mobile
- * visitor never downloads it and keeps the static strip (this component's
- * documented fallback contract).
- */
-export function initMobileIntroVideo() {
-  const section = document.querySelector<HTMLElement>('.filmroll-intro');
-  const video = document.querySelector<HTMLVideoElement>('.fr-mobile-video');
-  const content = document.querySelector<HTMLElement>('.fr-content');
-  if (!section || !video || !content) return;
-
-  if (prefersReducedMotion) return;
-  const isDesktop = window.matchMedia('(min-width: 641px)').matches;
-  if (isDesktop) return;
-
-  section.classList.add('fr-video-mode');
-  video.play().catch(() => {
-    // Autoplay can still be rejected on some browsers even when muted -
-    // the poster-less video just stays on its first frame, which is a
-    // harmless degrade (the scrim + heading still read fine over black).
-  });
-
-  // A livelier entrance than the plain "just there" static reveal the
-  // desktop-gated Phase 1 fallback used to leave mobile with - back.out
-  // overshoots slightly past full size before settling, the same ease
-  // family initFilmRollIntro uses for the desktop roll (see its own
-  // positionEase), so this reads as a variation on the site's existing
-  // motion language rather than a new one.
-  gsap.fromTo(
-    content.children,
-    { opacity: 0, y: 18, scale: 0.9 },
-    { opacity: 1, y: 0, scale: 1, duration: 0.8, stagger: 0.12, ease: 'back.out(1.6)' }
-  );
-}
-
-/**
  * Fades Layout.astro's persistent journey background (visible through Hero,
  * which has no background image of its own) out as Gap scrolls through the
  * viewport, scrubbed to scroll position - fully faded by the time Gap has
