@@ -1,0 +1,63 @@
+---
+import { clients } from '../data/clients';
+---
+
+<section id="clients">
+  <div class="wrap">
+    <div class="section-head" data-reveal data-reveal-group="clients-head">
+      <div class="frame-tag"><span class="num">FRAME 004</span> Previous Clients</div>
+      <h2 class="section-h">Businesses already <i>working with us.</i></h2>
+      <p class="section-sub">
+        A few of the local businesses we've helped get found and booked online, shown here with their permission.
+      </p>
+    </div>
+
+    <div class="client-grid" data-reveal data-reveal-group="clients-head">
+      {clients.map((c) => (
+        <div class:list={['client-card glass', { placeholder: c.placeholder }]}>
+          <h3>{c.name}</h3>
+          <p>{c.summary}</p>
+          {c.work.length > 0 && (
+            <ul class="client-tags mono">
+              {c.work.map((w) => <li>{w}</li>)}
+            </ul>
+          )}
+          {c.placeholder ? (
+            <span class="client-soon mono">Coming soon</span>
+          ) : (
+            c.href && (
+              <a href={c.href} target="_blank" rel="noopener noreferrer" class="client-link">
+                {c.hrefLabel ?? c.href} →
+              </a>
+            )
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .client-grid{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 1080px){ .client-grid{ grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 620px){ .client-grid{ grid-template-columns: 1fr; } }
+  .client-card{
+    border-radius: var(--radius-glass);
+    padding: 32px 28px;
+    display: flex; flex-direction: column; gap: 12px;
+    transition: border-color .2s ease, transform .2s ease;
+  }
+  .client-card:hover{ transform: translateY(-4px); }
+  .client-card h3{ font-family: var(--font-display), serif; font-weight: 400; font-size: 24px; margin: 0; }
+  .client-card p{ font-size: 14px; line-height: 1.6; color: var(--paper-dim); margin: 0; flex-grow: 1; }
+  .client-tags{ display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+  .client-tags li{
+    font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--brass); border: 1px solid var(--line-strong);
+    padding: 4px 10px; border-radius: 999px;
+  }
+  .client-link{ font-family: var(--font-mono), monospace; font-size: 13px; color: var(--brass); }
+  .client-link:hover{ text-decoration: underline; }
+  .client-card.placeholder{ border-style: dashed; opacity: 0.75; }
+  .client-soon{ font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--paper-dim); }
+</style>
