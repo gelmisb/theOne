@@ -11,7 +11,7 @@ target_path: "D:\\Projects\\_theOneStudio\\src\\components\\FilmRollIntro.astro"
 timestamp: 2026-09-23T11-12-42Z
 slug: src-components-filmrollintro-astro
 ---
-# Design Critique — Film-Roll Intro
+# Design Critique - Film-Roll Intro
 
 ## Design Health Score
 

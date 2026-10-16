@@ -40,7 +40,7 @@ in a separate cleanup commit at the end. Check what `persist-bg` and
 One pinned section with a scroll-scrubbed GSAP timeline. Progress ranges
 are starting points; tune them by feel.
 
-**Beat 0 — Arrival (before any scroll)**
+**Beat 0 - Arrival (before any scroll)**
 - A film strip spans the viewport, frames filled with real shoots from
   `src/assets/photos/portfolio/`. Sprocket holes and edge frame numbers,
   reusing the visual language of `Sprockets.astro`.
@@ -49,55 +49,55 @@ are starting points; tune them by feel.
 - The wordmark (the real `<h1>`), one plain-language line, and the primary
   CTA are visible and clickable at first paint. No entrance delay on text.
 
-**Beat 1 — The roll (0 → ~0.35)**
+**Beat 1 - The roll (0 → ~0.35)**
 - Scroll takes over from the idle drift and drives the strip sideways. The
   handoff must be seamless: no jump in position or speed.
 - Optional: slight perspective or curve so it reads as film coming off a
   spool. The wordmark and tagline move out of the way.
 
-**Beat 2 — The stop (~0.35 → ~0.5)**
+**Beat 2 - The stop (~0.35 → ~0.5)**
 - The strip decelerates and one chosen hero frame locks to centre. The
   neighbouring frames dim. It should feel like picking a frame off a
   contact sheet.
 
-**Beat 3 — Develop (~0.5 → ~0.7)**
+**Beat 3 - Develop (~0.5 → ~0.7)**
 - The hero frame develops: it starts as a colour negative (inverted, with
   an orange film-base cast) and resolves to the final positive image.
 - First pass uses CSS filters (`invert`, `sepia`/`hue-rotate`, `contrast`)
   on that single image only. Move to canvas/WebGL only if CSS looks cheap,
   and only after asking.
 
-**Beat 4 — The build (~0.7 → 1.0)** — revised after Phase 0
+**Beat 4 - The build (~0.7 → 1.0)** - revised after Phase 0
 - The developed hero frame expands directly into the real Hero section's
-  hero image — no mock website, no simulated UI. Animate with transforms
+  hero image - no mock website, no simulated UI. Animate with transforms
   (FLIP-style), not width/height.
 - As the frame expands, the pin releases into the actual page: Hero.astro,
   unchanged, with the real fixed header, real headline, and real CTA
-  already working. This must read as one continuous reveal, not a cut —
+  already working. This must read as one continuous reveal, not a cut -
   the visitor should feel like they've arrived on the real site, not
   watched a preview of one.
 - No fabricated GBP-style card, no mock nav, no mock CTA. Proof now comes
   from landing on the real, live site itself, not a simulated mock-up of
-  one — a stronger version of the same claim.
+  one - a stronger version of the same claim.
 - The "see your own business" proof-by-example moment (a real Grafton
   Barbers case study) moves to the Portfolio section as a separate, later
-  task — not part of this component.
+  task - not part of this component.
 
-## 4. Content rules — revised after Phase 0
+## 4. Content rules - revised after Phase 0
 
 - Real photos only. No stock and no AI-generated imagery anywhere in this
   section.
 - No mock website and no fictional or third-party client business. Beat 4
-  hands off into Horizon Vantage's own real Hero section — this is our
+  hands off into Horizon Vantage's own real Hero section - this is our
   site, shown as itself, not a simulated one for someone else.
 - `D:\Photos\Edited\Events\Grafton Barbers - J6` is cleared for reuse in
   Horizon Vantage's own marketing. The specific photo used as the hero
-  frame — the one that becomes Hero's own hero image — needs a signed
+  frame - the one that becomes Hero's own hero image - needs a signed
   release before it ships, since that's the most prominent use. Until
   that's in hand, use a different rights-cleared real photo as the hero
   frame (roll frames that aren't the hero don't need the release).
 - The roll itself (Beats 0–2) can include other real, rights-cleared
-  photos — portfolio work or personal-archive shoots — for variety, even
+  photos - portfolio work or personal-archive shoots - for variety, even
   ones that aren't candidates for the hero frame.
 
 ## 5. Technical constraints
@@ -122,16 +122,16 @@ are starting points; tune them by feel.
 - Respect the fixed header (see `CLAUDE.md`) and keep the section ids that
   `ScrollNav.astro` relies on working.
 
-## 6. Accessibility and fallbacks — revised after Phase 0
+## 6. Accessibility and fallbacks - revised after Phase 0
 
 - `prefers-reduced-motion`: no drift, no scrub, no pin. Show the final
-  state — the developed hero photo positioned as Hero's own hero image,
-  with Hero's real headline and CTA already visible — as a static
+  state - the developed hero photo positioned as Hero's own hero image,
+  with Hero's real headline and CTA already visible - as a static
   composition. No simulated build to fake.
 - No JavaScript: the same static final state is visible. Only hide things
   for entrance animation when a `.js` class is present on `<html>`.
 - The film strip is decorative (`aria-hidden="true"`). (The mock-website
-  screen-reader concern from the original brief no longer applies — there
+  screen-reader concern from the original brief no longer applies - there
   is no mock website; Hero's own markup was already real, accessible
   HTML.)
 - The CTA is keyboard-reachable from first paint. Add a "Skip intro" link
@@ -166,7 +166,7 @@ Stop at the end of each phase, summarise what changed, and wait for me.
 Commit at the end of each phase with a message that explains why, not just
 what.
 
-**Phase 0 — Recon and plan (no code)**
+**Phase 0 - Recon and plan (no code)**
 - Read `CLAUDE.md`, `Intro.astro`, the relevant inits in `animations.ts`,
   `Layout.astro` (persist-bg) and `index.astro`.
 - Report what the current intro depends on, what's safe to replace, and
@@ -175,24 +175,24 @@ what.
   quick ASCII sketch of each beat.
 - Ask the open questions in section 10.
 
-**Phase 1 — Static layout**
+**Phase 1 - Static layout**
 - Build `FilmRollIntro.astro` with no animation: strip, frames, wordmark,
   CTA, and the final mock-website state, fully responsive. This doubles as
   the reduced-motion and no-JS fallback. I review it in the browser.
 
-**Phase 2 — Roll and stop**
+**Phase 2 - Roll and stop**
 - Idle drift, scroll-driven roll with a seamless handoff, deceleration, and
   the lock onto the hero frame. Desktop first.
 
-**Phase 3 — Develop and build**
+**Phase 3 - Develop and build**
 - Negative-to-positive develop, frame expansion, website assembly, and the
   handoff to the next section.
 
-**Phase 4 — Mobile, reduced motion, polish**
+**Phase 4 - Mobile, reduced motion, polish**
 - `matchMedia` variants, skip link, drift pausing, performance pass, and
   Lighthouse numbers.
 
-**Phase 5 — Cleanup (only after I approve)**
+**Phase 5 - Cleanup (only after I approve)**
 - Remove the old portal intro code and assets, and update `CLAUDE.md` to
   describe the new intro and why it's built the way it is.
 
