@@ -13,20 +13,22 @@ const heroImages = import.meta.glob<{ default: ImageMetadata }>(
 const heroImage = Object.values(heroImages)[0]?.default;
 
 const included = [
-  { k: 'Half-day on-site shoot', v: 'Shot at your business, not a studio — real premises, real staff, real product.' },
+  { k: 'Half-day on-site shoot', v: 'Shot at your business, not a studio - real premises, real staff, real product.' },
   { k: '15–20 edited photos', v: 'Colour-graded and delivered ready for your website, social channels, and Google Business Profile.' },
-  { k: '5-day turnaround', v: 'From shoot day to delivered gallery — fast enough to fit around a launch or a seasonal push.' },
+  { k: '5-day turnaround', v: 'From shoot day to delivered gallery - fast enough to fit around a launch or a seasonal push.' },
   { k: 'No web work required', v: "Works as a standalone refresh for existing listings, or as the foundation for a full website build." },
 ];
 ---
 
 <Layout
-  title="Business Photography in Wicklow — Horizon Vantage"
-  description="On-site business photography for cafés, salons, gyms, clinics and tradespeople in Wicklow — shot by a working photographer, edited and delivered in 5 days."
+  title="Business Photography in Wicklow - Horizon Vantage"
+  description="On-site photography for Wicklow holiday lets, glamping, B&Bs and food producers - shot at your property, edited and delivered in 5 days."
 >
   <Header transition:persist />
 
-  <!-- Frames 008 (hero) + 009 (What's Included) merged into one two-column
+  <!-- Frame numbers on this page count from 001 in reading order, like every
+       standalone page (homepage numbers live in data/homeFrames.ts). The
+       hero and What's Included frames are merged into one two-column
        intro, founder request - the pitch and the concrete deliverables
        read as one connected statement instead of two stacked full-width
        sections. Reuses About.astro's image-card grid pattern (same
@@ -47,10 +49,10 @@ const included = [
               fetchpriority="high"
             />
           )}
-          <span class="cap mono">PHOTOGRAPHY — FRAME 008</span>
+          <span class="cap mono">PHOTOGRAPHY - FRAME 001</span>
         </div>
         <div class="ph-copy">
-          <div class="frame-tag" data-reveal data-reveal-group="ph-merge"><span class="num">FRAME 008</span> Photography</div>
+          <div class="frame-tag" data-reveal data-reveal-group="ph-merge"><span class="num">FRAME 001</span> Photography</div>
           <h1 class="ph-h" data-reveal data-reveal-group="ph-merge">Real photos of your actual business, not another stock library.</h1>
           <p class="ph-lead" data-reveal data-reveal-group="ph-merge">
             Half a day on-site is enough to replace every generic stock photo on your website, your
@@ -82,18 +84,18 @@ const included = [
   <section id="photography-why">
     <div class="wrap">
       <div class="section-head" data-reveal data-reveal-group="photo-why">
-        <div class="frame-tag"><span class="num">FRAME 009</span> Why It Matters</div>
+        <div class="frame-tag"><span class="num">FRAME 002</span> Why It Matters</div>
         <h2 class="section-h" data-split-reveal>Stock photos are why your website looks like <i>everyone else's.</i></h2>
       </div>
       <p class="why-body" data-reveal data-reveal-group="photo-why">
         Every competitor using the same stock library looks identical to a customer scrolling
-        search results — same lighting, same staged smiles, same generic interiors. A real photo of
+        search results - same lighting, same staged smiles, same generic interiors. A real photo of
         your actual counter, your actual staff, your actual space is the fastest way to look like a
         real, trustworthy, currently-open business rather than a placeholder page. It's also what
         Google Business Profile rewards: listings with real, recent photos consistently outperform
         ones leaning on a logo and a stock banner.
       </p>
-      <a href="/contact" class="btn btn-primary" data-reveal data-reveal-group="photo-why">Get a Free Listing Audit</a>
+      <a href="/contact/" class="btn btn-primary" data-reveal data-reveal-group="photo-why">Get a Free Listing Audit</a>
     </div>
   </section>
 

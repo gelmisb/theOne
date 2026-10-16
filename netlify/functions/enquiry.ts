@@ -57,6 +57,8 @@ export const handler: Handler = async (event) => {
     ['Business type', clean('business_type')],
     ['Town or area', clean('town')],
     ['Website / listing', clean('listing_url')],
+    ['Budget in mind', clean('budget')],
+    ['Saw our pricing', clean('saw_pricing')],
     ['Message', clean('message')],
   ];
   const sender = { name: 'Horizon Vantage', email: BREVO_SENDER_EMAIL };

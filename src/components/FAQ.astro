@@ -4,11 +4,15 @@
 // FAQPage schema is a low-risk, real search-visibility win on top of it).
 // `only` lets a landing page show a relevant subset (section 6, task 6)
 // instead of the full list - pass an array of `id`s to filter to.
+import { frameNumber } from '../data/homeFrames';
+
 export interface Props {
   only?: string[];
+  /** Standalone pages number their own sections and pass theirs in; the
+   * homepage omits it and takes its place from data/homeFrames.ts. */
   frameNum?: string;
 }
-const { only, frameNum = '023' } = Astro.props;
+const { only, frameNum = frameNumber('faq') } = Astro.props;
 
 const allFaqs = [
   { id: 'ai', q: 'Do you use AI-generated images?', a: 'No. Every image is shot at your property. Guests book on trust, so what they see should be what they get.' },

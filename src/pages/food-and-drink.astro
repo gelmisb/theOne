@@ -22,13 +22,13 @@ const outcomes = [
 ---
 
 <Layout
-  title="Food & Drink Producer Photography — Horizon Vantage"
+  title="Food & Drink Producer Photography - Horizon Vantage"
   description="On-site product and process photography, video and websites for artisan food and drink producers, farm shops and makers in Co. Wicklow."
 >
   <Header transition:persist />
 
   <PageHero
-    frameNum="028"
+    frameNum="001"
     frameLabel="Food & Drink"
     title="Product and process imagery that sells, for artisan producers."
     subtitle="Farm shops, makers and artisan food and drink producers. Real photos of what you make, built into a site that takes orders."
@@ -38,7 +38,7 @@ const outcomes = [
   <section id="food-outcomes">
     <div class="wrap">
       <div class="section-head" data-reveal data-reveal-group="food-outcomes-head">
-        <div class="frame-tag"><span class="num">FRAME 029</span> What You Get</div>
+        <div class="frame-tag"><span class="num">FRAME 002</span> What You Get</div>
         <h2 class="section-h" data-split-reveal>Your product is not generic. Your photos shouldn't be either.</h2>
       </div>
       <div class="outcomes-grid">
@@ -57,16 +57,17 @@ const outcomes = [
   <section id="food-package">
     <div class="wrap">
       <div class="section-head" data-reveal data-reveal-group="food-package-head">
-        <div class="frame-tag"><span class="num">FRAME 030</span> Recommended</div>
+        <div class="frame-tag"><span class="num">FRAME 003</span> Recommended</div>
         <h2 class="section-h" data-split-reveal>The Booking-Ready Launch.</h2>
       </div>
       <div class="package-card glass" data-reveal data-reveal-group="food-package-head">
         <div class="price">{flagship.price}</div>
+        {flagship.typical && <div class="typical">{flagship.typical}</div>}
         <div class="price-note">{flagship.priceNote}</div>
         <ul class="includes">
           {flagship.includes.map((line) => <li>{line}</li>)}
         </ul>
-        <a href="/contact" class="btn btn-primary">Get a Free Listing Audit</a>
+        <a href="/contact/" class="btn btn-primary">Get a Free Listing Audit</a>
       </div>
       <p class="package-alt">
         Just need the site, or the Google profile sorted? See the full <a href="/#offer">range of packages</a>.
@@ -76,7 +77,7 @@ const outcomes = [
 
   <Sprockets dark />
 
-  <FAQ frameNum="031" only={['ai', 'audit', 'area']} />
+  <FAQ frameNum="004" only={['ai', 'audit', 'area']} />
 
   <Footer />
 </Layout>
@@ -101,6 +102,7 @@ const outcomes = [
     text-align: left;
   }
   .package-card .price{ font-family: var(--font-mono), monospace; font-size: 26px; color: var(--brass); margin-bottom: 4px; }
+  .package-card .typical{ font-size: 15px; color: var(--paper); margin-bottom: 6px; }
   .package-card .price-note{ font-size: 13px; color: var(--paper-dim); opacity: 0.75; margin-bottom: 24px; }
   .package-card .includes{ font-size: 15px; line-height: 1.6; color: var(--paper-dim); margin: 0 0 30px; padding: 0; list-style: none; }
   .package-card .includes li{ padding-left: 18px; position: relative; margin-bottom: 10px; }

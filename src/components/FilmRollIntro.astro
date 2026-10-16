@@ -1,10 +1,10 @@
 ---
-// Phase 1: static layout only — no animation. Doubles as the reduced-
+// Phase 1: static layout only - no animation. Doubles as the reduced-
 // motion and no-JS fallback per FILM-ROLL-INTRO-BRIEF.md section 6: this
 // exact markup is what a reduced-motion visitor sees permanently, and
 // what every visitor sees before Phase 2+ adds the scroll-driven roll.
 //
-// Keeps id="intro" — ScrollNav.astro's dot-nav and initScrollHashFix (in
+// Keeps id="intro" - ScrollNav.astro's dot-nav and initScrollHashFix (in
 // animations.ts) both depend on that id existing, regardless of what's
 // inside the section.
 import { Image } from 'astro:assets';
@@ -12,7 +12,7 @@ import type { ImageMetadata } from 'astro';
 import Sprockets from './Sprockets.astro';
 import logoWatermark from '../assets/photos/logo/logo_transparent.png';
 
-// Real photos only (brief section 4) — explicitly enumerated rather than a
+// Real photos only (brief section 4) - explicitly enumerated rather than a
 // bare wildcard so newly-dropped files (e.g. AI-generated portfolio
 // placeholders, or the two gb-Captured-watermarked shoots still pending a
 // watermark crop) don't silently join the roll. 8 real photos as of the
@@ -47,7 +47,7 @@ const heroPhoto = heroPhotoEntry ? heroPhotoEntry[1].default : realPhotos[0];
 
 // Phase 2: more frames than Phase 1 used, and the hero frame sits well off
 // the strip's natural (flex-centred) resting position so the scroll-driven
-// roll has real distance to cover before it locks — see initFilmRollIntro
+// roll has real distance to cover before it locks - see initFilmRollIntro
 // in animations.ts.
 const FRAME_COUNT = 24;
 const HERO_FRAME_INDEX = 19; // leaves runway before it to roll through, and a few tail frames after it for the overshoot-then-settle
@@ -130,9 +130,12 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
   <div class="fr-mobile-bg-scrim" aria-hidden="true"></div>
 
   <div class="wrap fr-content">
-    <h1 class="fr-word"><em>Horizon</em> Vantage</h1>
+    <!-- A <p>, not an <h1>: this is the brand wordmark, and the homepage's one
+         real H1 is Hero's keyword headline just below it. Two H1s split the
+         page's primary heading signal between the brand name and the pitch. -->
+    <p class="fr-word"><em>Horizon</em> Vantage</p>
     <p class="fr-tagline mono">See Further. Show It Better.</p>
-    <a href="/contact" class="btn btn-primary">Get a Free Listing Audit</a>
+    <a href="/contact/" class="btn btn-primary">Get a Free Listing Audit</a>
   </div>
 </section>
 

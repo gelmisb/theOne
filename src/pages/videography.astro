@@ -10,19 +10,20 @@ import Footer from '../components/Footer.astro';
 
 const deliverables = [
   { k: 'Short-form clips', v: 'Vertical-friendly cuts built for Instagram, TikTok, and Google Business Profile posts.' },
-  { k: 'One promo video', v: "Bundled into every Season Refresh shoot — a 15–30 second clip alongside the stills." },
+  { k: 'One promo video', v: "Bundled into every Season Refresh shoot - a 15–30 second clip alongside the stills." },
   { k: 'Shot on-site', v: 'Same visit as your photography, so it captures the same real space, staff, and product.' },
 ];
 ---
 
 <Layout
-  title="Business Video in Wicklow — Horizon Vantage"
-  description="On-site video for cafés, salons, gyms, clinics and tradespeople in Wicklow — short-form clips and promo video, shot alongside your photography."
+  title="Business Video in Wicklow - Horizon Vantage"
+  description="On-site video for Wicklow holiday lets, glamping, B&Bs and food producers - short vertical clips and promo film, shot alongside your photography."
 >
   <Header transition:persist />
 
-  <!-- Frame 011 (the standalone hero) removed, founder request - this page
-       now opens directly on "What's Included". Its heading is promoted to
+  <!-- The standalone hero frame was removed, founder request - this page
+       now opens directly on "What's Included" (frame numbers count from 001
+       in reading order, like every standalone page). Its heading is promoted to
        the page's h1 (every page needs exactly one) via a locally-scoped
        .video-intro-h rule that mirrors global.css's h2.section-h, since
        that shared rule is tag-qualified and wouldn't otherwise apply to an
@@ -33,10 +34,10 @@ const deliverables = [
   <section id="video-included">
     <div class="wrap">
       <div class="section-head" data-reveal data-reveal-group="video-head">
-        <div class="frame-tag"><span class="num">FRAME 010</span> What's Included</div>
+        <div class="frame-tag"><span class="num">FRAME 001</span> What's Included</div>
         <h1 class="video-intro-h" data-split-reveal>Built for how people actually watch local business video.</h1>
         <p class="section-sub">
-          Short, vertical, and native to the platform — not a polished ad, a real clip of a real
+          Short, vertical, and native to the platform - not a polished ad, a real clip of a real
           business that stops a scroll.
         </p>
       </div>
@@ -56,15 +57,15 @@ const deliverables = [
   <section id="video-note">
     <div class="wrap">
       <div class="section-head" data-reveal data-reveal-group="video-note">
-        <div class="frame-tag"><span class="num">FRAME 011</span> A Note</div>
-        <h2 class="section-h" data-split-reveal>This is a new service — the examples are still being <i>shot.</i></h2>
+        <div class="frame-tag"><span class="num">FRAME 002</span> A Note</div>
+        <h2 class="section-h" data-split-reveal>This is a new service - the examples are still being <i>shot.</i></h2>
       </div>
       <p class="note-body" data-reveal data-reveal-group="video-note">
         Horizon Vantage is booking founder shoots now, and video examples will be added here as real
         client work is delivered. If you'd rather see the process described than wait for a gallery,
-        get in touch — happy to talk through exactly what a shoot looks like before you book.
+        get in touch - happy to talk through exactly what a shoot looks like before you book.
       </p>
-      <a href="/contact" class="btn btn-primary" data-reveal data-reveal-group="video-note">Get a Free Listing Audit</a>
+      <a href="/contact/" class="btn btn-primary" data-reveal data-reveal-group="video-note">Get a Free Listing Audit</a>
     </div>
   </section>
 

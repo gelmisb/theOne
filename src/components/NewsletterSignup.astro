@@ -1,5 +1,7 @@
 ---
-// Replaces Contact.astro in this FRAME 007 slot on the homepage - the full
+import { frameNumber } from '../data/homeFrames';
+
+// Replaces Contact.astro as the homepage's closing frame - the full
 // enquiry form now lives on its own page (src/pages/contact.astro), linked
 // from every "Get a Free Listing Audit" style CTA across the site instead of a
 // #contact anchor-scroll back here. This is the lighter, homepage-native
@@ -20,7 +22,7 @@
 <section class="updates-section" id="updates">
   <div class="wrap">
     <div class="frame-tag" style="justify-content:center;" data-reveal data-reveal-group="updates-head">
-      <span class="num">FRAME 007</span> Stay In The Loop
+      <span class="num">FRAME {frameNumber('updates')}</span> Stay In The Loop
     </div>
     <h2 class="section-h" data-reveal data-reveal-group="updates-head">Keep me updated.</h2>
     <p class="section-sub" data-reveal data-reveal-group="updates-head">
@@ -53,7 +55,7 @@
         <label class="updates-consent">
           <input type="checkbox" name="consent" required />
           <span>
-            I'd like to receive occasional news and offers from Horizon Vantage, and I agree to the <a href="/terms">Terms of Service</a>.
+            I'd like to receive occasional news and offers from Horizon Vantage, and I agree to the <a href="/terms/">Terms of Service</a>.
           </span>
         </label>
         <p class="form-note form-error" id="news-error" hidden>Something went wrong - please try again or email us directly.</p>

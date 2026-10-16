@@ -1,4 +1,6 @@
 ---
+import { frameNumber } from '../data/homeFrames';
+
 const rows = [
   { lbl: 'Category', val: 'Set & verified' },
   { lbl: 'Service area', val: 'Correctly defined' },
@@ -12,12 +14,12 @@ const rows = [
   <div class="wrap">
     <div class="seo-block">
       <div data-reveal data-reveal-group="seo-block">
-        <div class="frame-tag"><span class="num">FRAME 006</span> Local SEO</div>
+        <div class="frame-tag"><span class="num">FRAME {frameNumber('seo')}</span> Local SEO</div>
         <h2 class="section-h">Your Google listing is doing more selling than your homepage.</h2>
         <p class="section-sub" style="margin-bottom:0;">
           Most local searches never make it past the map pack. A finished, verified, correctly
           categorised Google Business Profile - backed by real photos and consistent details
-          everywhere you're listed - is worked into every Tier 1 and 3 package, not treated as an
+          everywhere you're listed - is built into every Booking-Ready Launch, not treated as an
           afterthought.
         </p>
       </div>

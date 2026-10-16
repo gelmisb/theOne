@@ -1,15 +1,17 @@
 # Horizon Vantage
-> Photography, videography, website development, and local SEO for Irish SMBs, based in Co. Wicklow.
+> On-site photography, video and fast websites for holiday lets, glamping, B&Bs, experiences and artisan food and drink producers in Co. Wicklow, working across Ireland. One local specialist, from shoot to search.
+
+## Who it's for
+- [Stays & experiences](https://horizonvantage.ie/stays-and-experiences/): holiday lets, glamping, B&Bs, guesthouses, activity providers and small venues
+- [Food & drink producers](https://horizonvantage.ie/food-and-drink/): artisan producers, farm shops and makers
 
 ## Services
-- Website development
-- Photography & videography
-- Local SEO
+- [Photography](https://horizonvantage.ie/photography/): on-site photography, shot at your property, never AI-generated
+- [Videography](https://horizonvantage.ie/videography/): short vertical clips and promo film
+- [Local SEO](https://horizonvantage.ie/local-seo/): Google Business Profile setup and local search
+- [Websites](https://horizonvantage.ie/web-projects/): fast, custom-built sites designed around real photography
 
-## Pages
-- [Photography](https://horizonvantage.ie/photography)
-- [Videography](https://horizonvantage.ie/videography)
-- [Local SEO](https://horizonvantage.ie/local-seo)
-- [Web projects](https://horizonvantage.ie/web-projects)
-- [About](https://horizonvantage.ie/about)
-- [Contact](https://horizonvantage.ie/contact)
+## About
+- [About Horizon Vantage](https://horizonvantage.ie/about/)
+- [Contact and free listing audit](https://horizonvantage.ie/contact/)
+- [Terms of Service](https://horizonvantage.ie/terms/)

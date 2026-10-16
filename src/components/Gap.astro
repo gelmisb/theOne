@@ -1,4 +1,6 @@
 ---
+import { frameNumber } from '../data/homeFrames';
+
 // No background image of its own - Layout.astro's persistent site
 // background (revealed by Intro's portal, carried through Hero) fades out
 // as this section scrolls through (see initPersistBgFade in
@@ -24,7 +26,7 @@ const ours = [
   <div class="gap-scrim" aria-hidden="true"></div>
   <div class="wrap">
     <div class="section-head" data-reveal data-reveal-group="gap-head">
-      <div class="frame-tag"><span class="num">FRAME 001</span> The Gap</div>
+      <div class="frame-tag"><span class="num">FRAME {frameNumber('offer-intro')}</span> The Gap</div>
       <h2 class="section-h">Nearly every local web studio in Ireland is selling <i>the same thing.</i></h2>
       <p class="section-sub">
         Entry-level builds start around €499 because the whole category competes on price -

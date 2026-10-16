@@ -1,4 +1,6 @@
 ---
+import { frameNumber } from '../data/homeFrames';
+
 // New section, REFOCUS_BRIEF.md section 3/6 - two audience cards linking to
 // the new niche landing pages, so a visitor can self-identify early instead
 // of reading the whole page to find out if this applies to them.
@@ -6,12 +8,12 @@ const audiences = [
   {
     title: 'Stays and experiences',
     desc: 'Holiday lets, glamping, B&Bs, guesthouses, activity providers and small venues. Show guests the real place before they arrive.',
-    href: '/stays-and-experiences',
+    href: '/stays-and-experiences/',
   },
   {
     title: 'Food and drink producers',
     desc: 'Artisan producers, farm shops and makers. Product and process imagery that sells, on a site that takes orders.',
-    href: '/food-and-drink',
+    href: '/food-and-drink/',
   },
 ];
 ---
@@ -19,7 +21,7 @@ const audiences = [
 <section id="who-we-help">
   <div class="wrap">
     <div class="section-head" data-reveal data-reveal-group="who-head">
-      <div class="frame-tag"><span class="num">FRAME 021</span> Who We Help</div>
+      <div class="frame-tag"><span class="num">FRAME {frameNumber('who-we-help')}</span> Who We Help</div>
       <h2 class="section-h" data-split-reveal>Two kinds of business, one way of working.</h2>
     </div>
     <div class="who-grid">

@@ -1,4 +1,6 @@
 ---
+import { frameNumber } from '../data/homeFrames';
+
 // 5 steps (was 3) - REFOCUS_BRIEF.md section 3, matching the free-audit-led
 // funnel the rest of the site now points to (Hero's primary CTA, Offer's
 // "final quote after your free audit" line on every tier).
@@ -34,7 +36,7 @@ const steps = [
 <section id="process">
   <div class="wrap">
     <div class="section-head" data-reveal data-reveal-group="process-head">
-      <div class="frame-tag"><span class="num">FRAME 004</span> How It Works</div>
+      <div class="frame-tag"><span class="num">FRAME {frameNumber('process')}</span> How It Works</div>
       <h2 class="section-h">Free audit first. Nothing else until you say go.</h2>
     </div>
     <div class="process">
