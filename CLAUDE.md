@@ -96,8 +96,18 @@ un-smoothed scroll position felt choppy.
 
 ## Working conventions from prior sessions
 
-- Prices and copy changes go through `Offer.astro`'s `tiers` array at the
-  top of the file - keep `num`/order fields consistent if reordering.
+- Prices and copy changes go through `src/data/packages.ts`, which
+  `Offer.astro` and the stays/food landing pages all read from. Each entry's
+  `group` (`core` / `ongoing` / `addon`) decides which Offer section it
+  lands in; array order is display order within a group. Payment/VAT lines
+  on the Offer section mirror `terms.astro` - change them together.
+- "FRAME 00N" tags number sections in reading order, per page, from 001.
+  Homepage sections take their number from `src/data/homeFrames.ts` (which
+  also drives `ScrollNav`'s dot numbers) - add or move a homepage section
+  there, never hard-code its number. Standalone pages number their own
+  sections directly in their templates. A page's tags must always read
+  001, 002, 003... top to bottom, and any caption that quotes a frame
+  number (e.g. "PHOTOGRAPHY - FRAME 001") must match its section's tag.
 - Prefer `git format-patch` / small focused commits over one large diff
   when handing off work between sessions - makes bisecting issues easier
   given how much of this site is scroll-effect timing that's hard to
