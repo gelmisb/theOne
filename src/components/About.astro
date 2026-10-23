@@ -3,10 +3,11 @@ import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import { frameNumber } from '../data/homeFrames';
 
-// Matches the new niche (REFOCUS_BRIEF.md) - the old tag set (Cafés, Salons,
-// Gyms, Clinics...) contradicted the Hero/Gap/Offer sections above it once
-// those were repositioned around Wicklow stays and experiences.
-const tags = ['Holiday Lets', 'Glamping', 'B&Bs & Guesthouses', 'Activity Providers', 'Farm Shops & Producers', 'Small Venues'];
+// The kinds of business actually shot and built for - keep in step with
+// WhoWeHelp.astro's sector cards. (Was stays-only after the REFOCUS_BRIEF.md
+// repositioning; widened again 2026-10-23 to include cafés, bakeries, pet
+// shops and barbershops.)
+const tags = ['Cafés & Bakeries', 'Barbershops & Salons', 'Pet Shops & Retail', 'Farm Shops & Producers', 'Holiday Lets & Glamping', 'B&Bs & Guesthouses', 'Activity Providers'];
 
 const aboutImages = import.meta.glob<{ default: ImageMetadata }>(
   '/src/assets/photos/about.{jpg,jpeg,png,webp}',

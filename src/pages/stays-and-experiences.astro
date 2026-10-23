@@ -27,6 +27,7 @@ const outcomes = [
   description="On-site photography and websites for holiday lets, glamping and B&Bs in Co. Wicklow - real photos, built into a site that helps guests book direct."
 >
   <Header transition:persist />
+  <main id="main-content">
 
   <PageHero
     frameNum="001"
@@ -80,6 +81,7 @@ const outcomes = [
 
   <FAQ frameNum="004" only={['ai', 'audit', 'area']} />
 
+  </main>
   <Footer />
 </Layout>
 
@@ -109,6 +111,6 @@ const outcomes = [
   .package-card .includes li{ padding-left: 18px; position: relative; margin-bottom: 10px; }
   .package-card .includes li::before{ content: "→"; position: absolute; left: 0; color: var(--brass); }
   .package-alt{ text-align: center; font-size: 14px; color: var(--paper-dim); margin: 24px 0 0; }
-  .package-alt a{ color: var(--brass); text-decoration: none; }
-  .package-alt a:hover{ text-decoration: underline; }
+  .package-alt a{ color: var(--brass); text-decoration: underline; text-underline-offset: 3px; }
+  .package-alt a:hover{ color: var(--brass-light); }
 </style>

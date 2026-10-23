@@ -9,6 +9,7 @@
 // grouped by `group` in the data file.
 import { packages } from '../data/packages';
 import { frameNumber } from '../data/homeFrames';
+import CallLink from './CallLink.astro';
 const visible = packages.filter((t) => t.visible);
 const core = visible.filter((t) => t.group === 'core');
 const ongoing = visible.filter((t) => t.group === 'ongoing');
@@ -98,6 +99,19 @@ const goodToKnow = [
                 <div class="tier-num mono">{t.label}</div>
                 <h4>{t.name}</h4>
                 <p class="addon-desc">{[t.purpose, ...t.includes].join(' · ')}</p>
+                {t.suggestedTools && (
+                  <details class="addon-tools">
+                    <summary>Suggested tools by sector</summary>
+                    <dl>
+                      {t.suggestedTools.map((s) => (
+                        <div>
+                          <dt>{s.sector}</dt>
+                          <dd>{s.tools}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </details>
+                )}
               </div>
               <div class="addon-price">
                 <div class="price">{t.price}</div>
@@ -128,9 +142,10 @@ const goodToKnow = [
     <div class="offer-cta" data-reveal data-reveal-group="offer-cta">
       <h3 class="group-h">Not sure which fits? Start with the free audit.</h3>
       <p class="group-sub">
-        A short review of your current photos, Google profile and booking page, with three quick wins. No obligation.
+        A short review of your current photos, Google profile and website or booking page, with three quick wins. No obligation.
       </p>
       <a href="/contact/" class="btn btn-primary">Get a Free Listing Audit</a>
+      <CallLink class="offer-call" lead="Already had your audit?" />
     </div>
   </div>
 </section>
@@ -223,6 +238,19 @@ const goodToKnow = [
   .addon-row .tier-num{ margin-bottom: 8px; }
   .addon-row h4{ font-family: var(--font-display), serif; font-weight: 400; font-size: 20px; margin: 0 0 6px; }
   .addon-desc{ font-size: 14px; line-height: 1.6; color: var(--paper-dim); margin: 0; }
+  /* Collapsed by default so the add-ons stay as light as the rest of this
+     list; native <details>, no JS. */
+  .addon-tools{ margin-top: 12px; font-size: 14px; }
+  .addon-tools summary{
+    cursor: pointer; width: fit-content;
+    font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--brass);
+  }
+  .addon-tools summary:hover{ text-decoration: underline; }
+  .addon-tools dl{ margin: 12px 0 0; display: grid; gap: 8px; }
+  .addon-tools dl > div{ display: flex; flex-wrap: wrap; gap: 2px 12px; }
+  .addon-tools dt{ flex: 0 1 270px; color: var(--paper); }
+  .addon-tools dd{ flex: 1 1 160px; margin: 0; color: var(--paper-dim); }
   .addon-price{ flex: 0 1 260px; text-align: right; }
   .addon-price .price{ font-size: 18px; }
   .addon-price .price-note{ margin-bottom: 0; }
@@ -245,4 +273,5 @@ const goodToKnow = [
   .offer-cta{ margin-top: 72px; text-align: center; }
   .offer-cta .group-h{ max-width: 620px; margin: 0 auto 10px; }
   .offer-cta .group-sub{ max-width: 520px; margin: 0 auto 28px; }
+  .offer-cta :global(.offer-call){ margin-top: 20px; }
 </style>

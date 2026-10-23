@@ -13,6 +13,8 @@ Owners of small Irish businesses that aren't designers - cafés, salons, gyms, c
 - A new or rebranding business that needs a first website and real photography from scratch.
 - An established business whose current site and photos look templated/stock and wants a real refresh.
 
+Client mix, confirmed 2026-10-23: local businesses of every kind - cafés, bakeries, pet shops, barbershops, salons, shops, holiday lets, B&Bs, experiences, and food and drink producers. Stays (`/stays-and-experiences/`) and food and drink (`/food-and-drink/`, which covers cafés and bakeries too) have their own landing pages, but they are sectors within that mix, not the whole positioning - REFOCUS_BRIEF.md narrowed the site to stays and producers, and that was reversed. Site-wide copy says "customers" and "your business", not "guests" and "your property"; "guests" belongs on the stays page only.
+
 ## Product Purpose
 
 On-site photography, videography, custom website design/build, and local SEO (Google Business Profile) setup for small Irish businesses, delivered by one person. The website is built around real, on-site photography of the actual business rather than a template filled with stock imagery. Success is a business that gets real photography, a site built around those specific images, and local search visibility - ideally leading into the Growth Retainer for ongoing content.
@@ -55,7 +57,7 @@ Videography is a real, bookable service today (confirmed), not an aspirational o
 
 - Real client photos: 3 of the 5 files in `src/assets/photos/portfolio/` are real, non-generated shoots (`Barbershops.jpg`, `consumables.jpg`, `product advertisement.jpg`). The other 2 are AI-generated placeholders, tracked via `Portfolio.astro`'s `GENERATED_FILES` set - future work must not present these as authentic client work, and should replace them with real shoots as they become available.
 - A real Grafton Barbers shoot exists outside the repo (`D:\Photos\Edited\Events\Grafton Barbers - J6`), rights-cleared generally for reuse in Horizon Vantage's own marketing. A signed release is still required before any specific photo from it is used in a prominent/hero placement. Every currently-sampled photo from that shoot shows visible COVID-era face masks, which dates them - a fresh shoot is preferable before wider use.
-- No real client testimonials or completed website case studies exist yet. The Web Projects page currently ships as a scaffold with placeholder entries pending real project data.
+- No real client testimonials exist yet. Brands worked with are listed in `src/data/clients.ts` (homepage "Brands" section): Irish Exotic Pets (website we built - the first live case study, on the Web Projects page), Frascati Car Wash (photography refresh, no website) and Furry Butts, Blessington (in progress). Each links to the business's own site or its Google Maps listing. Names go live only with the client's OK.
 - No demonstrated video portfolio yet, despite Video being a real offered service (see Capabilities and Constraints) - this is a content gap, not a feature to downplay.
 
 ## Product Principles

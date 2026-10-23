@@ -1,12 +1,13 @@
 # Horizon Vantage
-> On-site photography, video and fast websites for holiday lets, glamping, B&Bs, experiences and artisan food and drink producers in Co. Wicklow, working across Ireland. One local specialist, from shoot to search.
+> On-site photography, video and fast websites for local businesses - cafés, bakeries, barbershops, pet shops and other shops, holiday lets, glamping, B&Bs, experiences and artisan food and drink producers - based in Co. Wicklow, working across Ireland. One local specialist, from shoot to search.
 
 ## Who it's for
+- [Cafés, bakeries & food producers](https://horizonvantage.ie/food-and-drink/): cafés, bakeries, farm shops, makers and artisan producers
+- [Shops, salons & barbershops](https://horizonvantage.ie/photography/): pet shops, barbershops, salons, gyms and independent retailers
 - [Stays & experiences](https://horizonvantage.ie/stays-and-experiences/): holiday lets, glamping, B&Bs, guesthouses, activity providers and small venues
-- [Food & drink producers](https://horizonvantage.ie/food-and-drink/): artisan producers, farm shops and makers
 
 ## Services
-- [Photography](https://horizonvantage.ie/photography/): on-site photography, shot at your property, never AI-generated
+- [Photography](https://horizonvantage.ie/photography/): on-site photography, shot at your business, never AI-generated
 - [Videography](https://horizonvantage.ie/videography/): short vertical clips and promo film
 - [Local SEO](https://horizonvantage.ie/local-seo/): Google Business Profile setup and local search
 - [Websites](https://horizonvantage.ie/web-projects/): fast, custom-built sites designed around real photography
@@ -15,3 +16,4 @@
 - [About Horizon Vantage](https://horizonvantage.ie/about/)
 - [Contact and free listing audit](https://horizonvantage.ie/contact/)
 - [Terms of Service](https://horizonvantage.ie/terms/)
+- [Privacy & Cookies](https://horizonvantage.ie/privacy/)
