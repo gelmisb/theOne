@@ -11,10 +11,12 @@ import Footer from '../components/Footer.astro';
 ---
 
 <Layout
-  title="Page Not Found — Horizon Vantage"
+  title="Page Not Found - Horizon Vantage"
   description="This page doesn't exist - find photography, videography, local SEO and web design work for Irish small businesses at Horizon Vantage."
+  noindex
 >
   <Header transition:persist />
+  <main id="main-content">
 
   <section class="not-found">
     <div class="wrap">
@@ -25,11 +27,12 @@ import Footer from '../components/Footer.astro';
       </p>
       <div class="nf-links" data-reveal>
         <a href="/" class="btn btn-primary">Back to Home</a>
-        <a href="/contact" class="btn btn-ghost">Get In Touch</a>
+        <a href="/contact/" class="btn btn-ghost">Get In Touch</a>
       </div>
     </div>
   </section>
 
+  </main>
   <Footer />
 </Layout>
 

@@ -1,17 +1,28 @@
 ---
-// New section, REFOCUS_BRIEF.md section 3/6 - two audience cards linking to
-// the new niche landing pages, so a visitor can self-identify early instead
-// of reading the whole page to find out if this applies to them.
+import { frameNumber } from '../data/homeFrames';
+
+// Audience cards, so a visitor can self-identify early instead of reading the
+// whole page to find out if this applies to them. The work is for local
+// businesses of every kind (founder confirmed 2026-10-23 - cafés, bakeries,
+// pet shops, barbershops and so on, not just stays and producers), so these
+// are sector groups, not a statement of who the site is exclusively for.
+// Stays and food/drink have their own landing pages; shops and salons don't
+// have one yet, so that card points at the on-site photography page.
 const audiences = [
+  {
+    title: 'Cafés, bakeries and food producers',
+    desc: 'Cafés, bakeries, farm shops, makers and artisan producers. Photos of what you serve and make, on a site that takes orders.',
+    href: '/food-and-drink/',
+  },
+  {
+    title: 'Shops, salons and barbershops',
+    desc: 'Pet shops, barbershops, salons, gyms and independent retailers. Real photos of your premises, your team and your products.',
+    href: '/photography/',
+  },
   {
     title: 'Stays and experiences',
     desc: 'Holiday lets, glamping, B&Bs, guesthouses, activity providers and small venues. Show guests the real place before they arrive.',
-    href: '/stays-and-experiences',
-  },
-  {
-    title: 'Food and drink producers',
-    desc: 'Artisan producers, farm shops and makers. Product and process imagery that sells, on a site that takes orders.',
-    href: '/food-and-drink',
+    href: '/stays-and-experiences/',
   },
 ];
 ---
@@ -19,8 +30,8 @@ const audiences = [
 <section id="who-we-help">
   <div class="wrap">
     <div class="section-head" data-reveal data-reveal-group="who-head">
-      <div class="frame-tag"><span class="num">FRAME 021</span> Who We Help</div>
-      <h2 class="section-h" data-split-reveal>Two kinds of business, one way of working.</h2>
+      <div class="frame-tag"><span class="num">FRAME {frameNumber('who-we-help')}</span> Who We Help</div>
+      <h2 class="section-h" data-split-reveal>Every kind of local business, one way of working.</h2>
     </div>
     <div class="who-grid">
       {audiences.map((a) => (
@@ -35,10 +46,10 @@ const audiences = [
 </section>
 
 <style>
-  .who-grid{ display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-  @media (max-width: 700px){ .who-grid{ grid-template-columns: 1fr; } }
+  .who-grid{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 860px){ .who-grid{ grid-template-columns: 1fr; } }
   .who-card{
-    display: block;
+    display: flex; flex-direction: column;
     padding: 38px 32px;
     border-radius: var(--radius-glass);
     text-decoration: none;
@@ -50,5 +61,5 @@ const audiences = [
     color: var(--paper); margin: 0 0 14px;
   }
   .who-card p{ font-size: 15px; line-height: 1.65; color: var(--paper-dim); margin: 0 0 24px; }
-  .who-link{ font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--brass); }
+  .who-link{ margin-top: auto; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--brass); }
 </style>

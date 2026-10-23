@@ -2,27 +2,57 @@
 // Prices/contents come from one shared data file (REFOCUS_BRIEF.md section
 // 6) - this component only renders, it never hard-codes a number. `visible`
 // lets a tier (e.g. a not-yet-confirmed price) be built without going live.
+//
+// Laid out per pricing-page-fixes.md: the core packages are the only things
+// in the main row, so the first number a visitor sees is the flagship, not a
+// €120/month plan. The recurring plan and the small one-offs sit below it,
+// grouped by `group` in the data file.
 import { packages } from '../data/packages';
-const tiers = packages.filter((t) => t.visible);
+import { frameNumber } from '../data/homeFrames';
+import CallLink from './CallLink.astro';
+const visible = packages.filter((t) => t.visible);
+const core = visible.filter((t) => t.group === 'core');
+const ongoing = visible.filter((t) => t.group === 'ongoing');
+const addons = visible.filter((t) => t.group === 'addon');
+
+// Every quote is built from these - listed so a firm number after the audit
+// reads as explained, not arbitrary.
+const priceFactors = [
+  'Number of pages',
+  'A booking or ordering system',
+  'Travel outside Co. Wicklow',
+  'Extra shoot time',
+  'Extra video cuts',
+];
+
+// Payment/VAT lines mirror terms.astro ("Quotes, Fees & Payment") - change
+// them in both places together.
+const goodToKnow = [
+  'Prices shown are for 2026, and reviewed each season.',
+  'Prices shown, no VAT charged - Horizon Vantage is not currently VAT-registered.',
+  'A 50% deposit secures your booking. The balance is due on delivery, or as set out in your quote.',
+  'Every quote is confirmed in writing before any work begins.',
+];
 ---
 
 <section id="offer">
   <div class="wrap">
     <div class="section-head" data-reveal data-reveal-group="offer-head">
-      <div class="frame-tag"><span class="num">FRAME 002</span> The Offer</div>
+      <div class="frame-tag"><span class="num">FRAME {frameNumber('offer')}</span> The Offer</div>
       <h2 class="section-h" data-split-reveal>Packages built for how local businesses actually decide.</h2>
       <p class="section-sub">
-        Start with a season refresh or the website alone, or go straight for the full booking-ready launch.
+        Go straight for the full booking-ready launch, or start with the website alone. Ongoing care and smaller one-off jobs are listed below.
       </p>
     </div>
 
     <div class="tiers">
-      {tiers.map((t) => (
+      {core.map((t) => (
         <div class:list={['tier', { core: t.core, glass: t.core }]} data-reveal data-reveal-group="tier-cards">
           {t.core && <span class="badge">Core Offer</span>}
-          <div class="tier-num mono">{t.num}</div>
+          <div class="tier-num mono">{t.label}</div>
           <h3>{t.name}</h3>
           <div class="price">{t.price}</div>
+          {t.typical && <div class="typical">{t.typical}</div>}
           {t.priceNote && <div class="price-note">{t.priceNote}</div>}
           <div class="purpose">{t.purpose}</div>
           <ul class="includes">
@@ -32,18 +62,101 @@ const tiers = packages.filter((t) => t.visible);
       ))}
     </div>
 
-    <div class="addon glass" data-reveal data-reveal-group="offer-head">
-      <div class="t"><strong>NFC "Tap to Review" card</strong> - bundled into Tier 2/3, or sold on its own</div>
-      <div class="price">€25–35 <span class="unit">/ card</span></div>
+    {ongoing.length > 0 && (
+      <div class="offer-group">
+        <div class="group-head" data-reveal data-reveal-group="offer-ongoing">
+          <h3 class="group-h">Keep it working</h3>
+          <p class="group-sub">Once you are live, a monthly plan keeps the site, the listing and the photos fresh.</p>
+        </div>
+        {ongoing.map((t) => (
+          <div class="tier wide" data-reveal data-reveal-group="offer-ongoing">
+            <div class="tier-main">
+              <div class="tier-num mono">{t.label}</div>
+              <h3>{t.name}</h3>
+              <div class="price">{t.price}</div>
+              {t.typical && <div class="typical">{t.typical}</div>}
+              {t.priceNote && <div class="price-note">{t.priceNote}</div>}
+              <div class="purpose">{t.purpose}</div>
+            </div>
+            <ul class="includes">
+              {t.includes.map((line) => <li>{line}</li>)}
+            </ul>
+          </div>
+        ))}
+      </div>
+    )}
+
+    {addons.length > 0 && (
+      <div class="offer-group">
+        <div class="group-head" data-reveal data-reveal-group="offer-addons">
+          <h3 class="group-h">Quick wins &amp; add-ons</h3>
+          <p class="group-sub">Smaller one-off jobs, for a business that already has most of what it needs.</p>
+        </div>
+        <ul class="addon-list">
+          {addons.map((t) => (
+            <li class="addon-row" data-reveal data-reveal-group="offer-addons">
+              <div class="addon-body">
+                <div class="tier-num mono">{t.label}</div>
+                <h4>{t.name}</h4>
+                <p class="addon-desc">{[t.purpose, ...t.includes].join(' · ')}</p>
+                {t.suggestedTools && (
+                  <details class="addon-tools">
+                    <summary>Suggested tools by sector</summary>
+                    <dl>
+                      {t.suggestedTools.map((s) => (
+                        <div>
+                          <dt>{s.sector}</dt>
+                          <dd>{s.tools}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </details>
+                )}
+              </div>
+              <div class="addon-price">
+                <div class="price">{t.price}</div>
+                {t.priceNote && <div class="price-note">{t.priceNote}</div>}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    <div class="pricing-info">
+      <div class="info-panel" data-reveal data-reveal-group="offer-info">
+        <h3 class="info-h">What changes the price</h3>
+        <ul class="info-list">
+          {priceFactors.map((line) => <li>{line}</li>)}
+        </ul>
+      </div>
+      <div class="info-panel" data-reveal data-reveal-group="offer-info">
+        <h3 class="info-h">Good to know</h3>
+        <ul class="info-list">
+          {goodToKnow.map((line) => <li>{line}</li>)}
+        </ul>
+        <p class="info-link"><a href="/terms/">Read the full terms</a></p>
+      </div>
+    </div>
+
+    <div class="offer-cta" data-reveal data-reveal-group="offer-cta">
+      <h3 class="group-h">Not sure which fits? Start with the free audit.</h3>
+      <p class="group-sub">
+        A short review of your current photos, Google profile and website or booking page, with three quick wins. No obligation.
+      </p>
+      <a href="/contact/" class="btn btn-primary">Get a Free Listing Audit</a>
+      <CallLink class="offer-call" lead="Already had your audit?" />
     </div>
   </div>
 </section>
 
 <style>
-  /* 6 tiers now (was 4/2-col) - 3-col desktop, 2-col tablet, 1-col mobile. */
-  .tiers{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  @media (max-width: 1080px){ .tiers{ grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 620px){ .tiers{ grid-template-columns: 1fr; } }
+  /* Core packages. A flex-wrap row rather than a fixed column count: two
+     packages split the row evenly, a third (see the note in
+     data/packages.ts) joins them with no template change, and each wraps to
+     full width once it can't stay above 340px. */
+  .tiers{ display: flex; flex-wrap: wrap; gap: 20px; }
+  .tiers > .tier{ flex: 1 1 340px; min-width: 0; }
   .tier{
     background: var(--panel);
     border: 1px solid var(--line);
@@ -76,24 +189,89 @@ const tiers = packages.filter((t) => t.visible);
     padding: 6px 12px;
     border-radius: 0 var(--radius-glass) 0 var(--radius-glass);
   }
-  .tier .tier-num{ font-family: var(--font-mono), monospace; color: var(--brass); font-size: 12px; margin-bottom: 16px; letter-spacing: 0.08em; }
+  .tier-num{ font-family: var(--font-mono), monospace; color: var(--brass); font-size: 12px; margin-bottom: 16px; letter-spacing: 0.08em; }
   .tier h3{ font-family: var(--font-display), serif; font-weight: 400; font-size: 24px; margin: 0 0 8px; }
-  .tier .price{ font-family: var(--font-mono), monospace; font-size: 20px; color: var(--brass); margin-bottom: 4px; }
-  .tier .price-note{ font-size: 12px; color: var(--paper-dim); opacity: 0.75; margin-bottom: 18px; line-height: 1.4; }
+  .price{ font-family: var(--font-mono), monospace; font-size: 20px; color: var(--brass); margin-bottom: 4px; }
+  /* "Most clients spend..." - the figure people should actually budget
+     against, so it sits directly under the "from" price at full-strength
+     paper colour, not dimmed like the audit note below it. */
+  .typical{ font-size: 14px; color: var(--paper); margin-bottom: 6px; line-height: 1.4; }
+  .price-note{ font-size: 12px; color: var(--paper-dim); opacity: 0.75; margin-bottom: 18px; line-height: 1.4; }
   .tier .purpose{ font-size: 13px; color: var(--paper-dim); font-style: italic; margin-bottom: 20px; }
   .tier .includes{ font-size: 14px; line-height: 1.6; color: var(--paper-dim); margin: 0; padding: 0; list-style: none; flex-grow: 1; }
   .tier .includes li{ padding-left: 18px; position: relative; margin-bottom: 8px; }
   .tier .includes li::before{ content: "→"; position: absolute; left: 0; color: var(--brass); }
 
-  .addon{
-    margin-top: 28px;
-    border-radius: var(--radius-glass);
-    padding: 22px 24px;
-    display: flex; justify-content: space-between; align-items: center;
-    gap: 20px; flex-wrap: wrap;
+  /* Secondary groups sit below the main row with real separation, so they
+     read as a different tier of decision, not more cards in the same row. */
+  .offer-group{ margin-top: 72px; }
+  .group-head{ max-width: 620px; margin-bottom: 26px; }
+  .group-h{
+    font-family: var(--font-display), serif; font-weight: 400;
+    font-size: clamp(26px, 3vw, 34px); line-height: 1.15;
+    margin: 0 0 10px;
   }
-  .addon .t{ font-size: 14px; color: var(--paper-dim); }
-  .addon .t strong{ color: var(--paper); font-weight: 600; }
-  .addon .price{ font-family: var(--font-mono), monospace; color: var(--brass); font-size: 16px; white-space: nowrap; }
-  .addon .unit{ opacity: .6; font-size: 12px; }
+  .group-sub{ font-size: 15px; line-height: 1.6; color: var(--paper-dim); margin: 0; }
+
+  /* Wide variant: one recurring plan across the full row - identity and
+     price on the left, what's included on the right. Hover-lift is kept off
+     (it's a resting reference card, not a pick-one choice). */
+  .tier.wide{
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 24px 56px; align-items: start;
+  }
+  .tier.wide:hover{ transform: none; }
+  .tier.wide .price-note{ margin-bottom: 14px; }
+  .tier.wide .includes{ align-self: center; }
+  @media (max-width: 760px){ .tier.wide{ grid-template-columns: 1fr; } }
+
+  /* Add-ons: flat hairline rows, not cards - small jobs shouldn't compete
+     visually with the packages above. */
+  .addon-list{ list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .addon-row{
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 12px 32px; flex-wrap: wrap;
+    padding: 24px 4px;
+    border-bottom: 1px solid var(--line);
+  }
+  .addon-body{ flex: 1 1 340px; min-width: 0; }
+  .addon-row .tier-num{ margin-bottom: 8px; }
+  .addon-row h4{ font-family: var(--font-display), serif; font-weight: 400; font-size: 20px; margin: 0 0 6px; }
+  .addon-desc{ font-size: 14px; line-height: 1.6; color: var(--paper-dim); margin: 0; }
+  /* Collapsed by default so the add-ons stay as light as the rest of this
+     list; native <details>, no JS. */
+  .addon-tools{ margin-top: 12px; font-size: 14px; }
+  .addon-tools summary{
+    cursor: pointer; width: fit-content;
+    font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--brass);
+  }
+  .addon-tools summary:hover{ text-decoration: underline; }
+  .addon-tools dl{ margin: 12px 0 0; display: grid; gap: 8px; }
+  .addon-tools dl > div{ display: flex; flex-wrap: wrap; gap: 2px 12px; }
+  .addon-tools dt{ flex: 0 1 270px; color: var(--paper); }
+  .addon-tools dd{ flex: 1 1 160px; margin: 0; color: var(--paper-dim); }
+  .addon-price{ flex: 0 1 260px; text-align: right; }
+  .addon-price .price{ font-size: 18px; }
+  .addon-price .price-note{ margin-bottom: 0; }
+  @media (max-width: 620px){ .addon-price{ text-align: left; flex-basis: 100%; } }
+
+  .pricing-info{ margin-top: 72px; display: flex; flex-wrap: wrap; gap: 20px; }
+  .info-panel{ flex: 1 1 300px; min-width: 0; background: var(--panel); border: 1px solid var(--line); padding: 30px 32px; }
+  .info-h{
+    font-family: var(--font-mono), monospace; font-weight: 400;
+    font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--brass); margin: 0 0 16px;
+  }
+  .info-list{ list-style: none; margin: 0; padding: 0; font-size: 14px; line-height: 1.6; color: var(--paper-dim); }
+  .info-list li{ padding-left: 18px; position: relative; margin-bottom: 8px; }
+  .info-list li::before{ content: "→"; position: absolute; left: 0; color: var(--brass); }
+  .info-link{ margin: 16px 0 0; font-size: 13px; }
+  .info-link a{ color: var(--brass); text-decoration: none; }
+  .info-link a:hover{ text-decoration: underline; }
+
+  .offer-cta{ margin-top: 72px; text-align: center; }
+  .offer-cta .group-h{ max-width: 620px; margin: 0 auto 10px; }
+  .offer-cta .group-sub{ max-width: 520px; margin: 0 auto 28px; }
+  .offer-cta :global(.offer-call){ margin-top: 20px; }
 </style>

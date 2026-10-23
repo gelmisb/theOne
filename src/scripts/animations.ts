@@ -273,6 +273,7 @@ export function initFilmRollIntro() {
   let lockX = 0;
   let baseX = 0;
   let scaleCover = 1;
+  let expandTranslateX = 0;
   let expandTranslateY = 0;
 
   // offsetLeft/getBoundingClientRect read layout position, unaffected by the
@@ -300,10 +301,15 @@ export function initFilmRollIntro() {
   }
 
   function measure() {
-    const center = cumulativeOffsetLeft(heroFrame!, section!) + heroFrame!.offsetWidth / 2;
-    lockX = window.innerWidth / 2 - center;
+    // clientWidth, not innerWidth: innerWidth includes the classic desktop
+    // scrollbar (~15px), so centring/covering against it left the expanded
+    // frame shifted sideways with a dark sliver down one edge.
+    const vw = document.documentElement.clientWidth;
+    const vh = window.innerHeight;
 
-    const rect = heroFrame!.getBoundingClientRect();
+    const center = cumulativeOffsetLeft(heroFrame!, section!) + heroFrame!.offsetWidth / 2;
+    lockX = vw / 2 - center;
+
     // scaleCover has to be relative to the frame's own untransformed size
     // (offsetWidth/offsetHeight), not getBoundingClientRect's axis-aligned
     // box. With the strip tilted, rect.width/height are the *bounding box*
@@ -313,11 +319,42 @@ export function initFilmRollIntro() {
     // instead of reaching true full-bleed. The frame's own size doesn't
     // change with rotation, so offsetWidth/offsetHeight are the right divisor
     // regardless of the strip's tilt.
-    scaleCover = Math.max(window.innerWidth / heroFrame!.offsetWidth, window.innerHeight / heroFrame!.offsetHeight);
+    scaleCover = Math.max(vw / heroFrame!.offsetWidth, vh / heroFrame!.offsetHeight);
+
+    // Where the frame must travel to reach the viewport centre is measured
+    // with the roll already locked (track at lockX, frame untransformed), NOT
+    // from wherever the frame happens to sit right now. Before the lock it's
+    // ~3700px along a strip tilted 4deg, so the tilt alone has pushed it
+    // ~260px lower than it ends up - measuring from there made the frame land
+    // ~260px too high, hanging past the section's bottom edge into Hero.
+    // Position is taken relative to the section (which is pinned to the
+    // viewport top throughout Beat 4), so this stays right whether measure()
+    // runs at init, on refresh mid-pin, or after the pin has released.
+    const trackEl = track!;
+    const frameEl = heroFrame!;
+    const prevTrackX = Number(gsap.getProperty(trackEl, 'x')) || 0;
+    const prevFrame = {
+      x: Number(gsap.getProperty(frameEl, 'x')) || 0,
+      y: Number(gsap.getProperty(frameEl, 'y')) || 0,
+      scale: Number(gsap.getProperty(frameEl, 'scale')) || 1,
+      rotation: Number(gsap.getProperty(frameEl, 'rotation')) || 0,
+    };
+    gsap.set(trackEl, { x: lockX });
+    gsap.set(frameEl, { x: 0, y: 0, scale: 1, rotation: 0 });
+    const rect = frameEl.getBoundingClientRect();
+    const sectionRect = section!.getBoundingClientRect();
+    gsap.set(trackEl, { x: prevTrackX });
+    gsap.set(frameEl, prevFrame);
+
     // Rotation is around the frame's own center, so the bounding box's
-    // center still lands on the frame's true visual center - safe to keep
-    // reading this from rect.
-    expandTranslateY = window.innerHeight / 2 - (rect.top + rect.height / 2);
+    // center still lands on the frame's true visual center.
+    const dx = vw / 2 - (rect.left - sectionRect.left + rect.width / 2);
+    const dy = vh / 2 - (rect.top - sectionRect.top + rect.height / 2);
+    // The frame's x/y transform lives inside the tilted .fr-strip-wrap, so a
+    // screen-space delta has to be rotated back into that local space.
+    const theta = (stripRotationDeg * Math.PI) / 180;
+    expandTranslateX = dx * Math.cos(theta) + dy * Math.sin(theta);
+    expandTranslateY = -dx * Math.sin(theta) + dy * Math.cos(theta);
   }
   measure();
 
@@ -414,6 +451,7 @@ export function initFilmRollIntro() {
       const te = expandEase(clamp01((p - EXPAND_START) / (1 - DEVELOP_END)));
       gsap.set(heroFrame, {
         scale: 1 + (scaleCover - 1) * te,
+        x: expandTranslateX * te,
         y: expandTranslateY * te,
         // Counter-rotate the hero frame against the strip's own tilt as it
         // expands, so by te=1 (full-bleed) it's dead straight instead of
@@ -423,10 +461,14 @@ export function initFilmRollIntro() {
         borderColor: te > 0.02 ? 'transparent' : 'var(--line)',
       });
       gsap.set(heroFnum, { opacity: 1 - te });
-      // The strip's clipping boundaries are only frame-row-tall - without
-      // this, the expanding hero frame would get clipped the moment it grows
-      // past that height instead of filling the viewport.
-      gsap.set([section, stripViewport], { overflow: te > 0 ? 'visible' : 'hidden' });
+      // The strip's clipping box is only frame-row-tall - without this, the
+      // expanding hero frame would get clipped the moment it grows past that
+      // height instead of filling the viewport. Only the strip is opened up:
+      // the section keeps its own overflow: hidden. The frame is a square
+      // scaled to viewport width, so it's taller than the viewport and
+      // would otherwise hang past the section's bottom edge and paint over
+      // Hero (and its headings) once the pin releases.
+      gsap.set(stripViewport, { overflow: te > 0 ? 'visible' : 'hidden' });
     },
   });
 }
@@ -840,8 +882,11 @@ export function initNewsletterSignup() {
       localStorage.setItem(NEWSLETTER_SUBSCRIBED_KEY, 'true');
       errorEl?.setAttribute('hidden', '');
       showThanks(false);
+      // Tells the analytics tracker (a no-op unless the visitor consented).
+      document.dispatchEvent(new CustomEvent('hv:track', { detail: { type: 'form', form: 'newsletter-form', action: 'ok' } }));
     } catch {
       errorEl?.removeAttribute('hidden');
+      document.dispatchEvent(new CustomEvent('hv:track', { detail: { type: 'form', form: 'newsletter-form', action: 'err' } }));
     }
   });
 }

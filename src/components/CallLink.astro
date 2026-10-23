@@ -1,0 +1,33 @@
+---
+// Link to the post-audit scheduling page (data/booking.ts). Renders nothing
+// until CALL_BOOKING_URL is set, so it can be dropped into any section now and
+// switches on everywhere when the URL is filled in.
+import { CALL_BOOKING_URL, CALL_BOOKING_LABEL } from '../data/booking';
+
+export interface Props {
+  /** Optional sentence before the link, e.g. "Already had your audit?" */
+  lead?: string;
+  class?: string;
+}
+const { lead, class: className } = Astro.props;
+---
+
+{CALL_BOOKING_URL && (
+  <p class:list={['call-link', className]}>
+    {lead && <span class="call-lead">{lead} </span>}
+    <a href={CALL_BOOKING_URL} target="_blank" rel="noopener noreferrer">
+      {CALL_BOOKING_LABEL} <span aria-hidden="true">→</span>
+      <span class="call-newtab">(opens in a new tab)</span>
+    </a>
+  </p>
+)}
+
+<style>
+  .call-link{ font-size: 14px; line-height: 1.6; color: var(--paper-dim); margin: 0; }
+  .call-link a{ color: var(--brass); text-decoration: none; }
+  .call-link a:hover{ text-decoration: underline; }
+  .call-newtab{
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+  }
+</style>

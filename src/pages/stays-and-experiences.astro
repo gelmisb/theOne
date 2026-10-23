@@ -23,15 +23,16 @@ const outcomes = [
 ---
 
 <Layout
-  title="Holiday Let & Glamping Photography — Horizon Vantage"
-  description="On-site photography and websites for holiday lets, glamping and B&Bs in Co. Wicklow — real photos, built into a site that helps guests book direct."
+  title="Holiday Let & Glamping Photography - Horizon Vantage"
+  description="On-site photography and websites for holiday lets, glamping and B&Bs in Co. Wicklow - real photos, built into a site that helps guests book direct."
 >
   <Header transition:persist />
+  <main id="main-content">
 
   <PageHero
-    frameNum="024"
+    frameNum="001"
     frameLabel="Stays & Experiences"
-    title="Honest photography and websites for Wicklow stays and experiences."
+    title="Photography and websites for holiday lets, glamping and B&Bs in Wicklow."
     subtitle="Holiday lets, glamping, B&Bs, guesthouses, activity providers and small venues. Show guests the real place before they arrive."
     variant="grid"
   />
@@ -39,7 +40,7 @@ const outcomes = [
   <section id="stays-outcomes">
     <div class="wrap">
       <div class="section-head" data-reveal data-reveal-group="stays-outcomes-head">
-        <div class="frame-tag"><span class="num">FRAME 025</span> What You Get</div>
+        <div class="frame-tag"><span class="num">FRAME 002</span> What You Get</div>
         <h2 class="section-h" data-split-reveal>Guests book on trust. Give them a reason to.</h2>
       </div>
       <div class="outcomes-grid">
@@ -58,16 +59,17 @@ const outcomes = [
   <section id="stays-package">
     <div class="wrap">
       <div class="section-head" data-reveal data-reveal-group="stays-package-head">
-        <div class="frame-tag"><span class="num">FRAME 026</span> Recommended</div>
+        <div class="frame-tag"><span class="num">FRAME 003</span> Recommended</div>
         <h2 class="section-h" data-split-reveal>The Booking-Ready Launch.</h2>
       </div>
       <div class="package-card glass" data-reveal data-reveal-group="stays-package-head">
         <div class="price">{flagship.price}</div>
+        {flagship.typical && <div class="typical">{flagship.typical}</div>}
         <div class="price-note">{flagship.priceNote}</div>
         <ul class="includes">
           {flagship.includes.map((line) => <li>{line}</li>)}
         </ul>
-        <a href="/contact" class="btn btn-primary">Get a Free Listing Audit</a>
+        <a href="/contact/" class="btn btn-primary">Get a Free Listing Audit</a>
       </div>
       <p class="package-alt">
         Just need the site, or the Google profile sorted? See the full <a href="/#offer">range of packages</a>.
@@ -77,8 +79,9 @@ const outcomes = [
 
   <Sprockets dark />
 
-  <FAQ frameNum="027" only={['ai', 'audit', 'area']} />
+  <FAQ frameNum="004" only={['ai', 'audit', 'area']} />
 
+  </main>
   <Footer />
 </Layout>
 
@@ -102,11 +105,12 @@ const outcomes = [
     text-align: left;
   }
   .package-card .price{ font-family: var(--font-mono), monospace; font-size: 26px; color: var(--brass); margin-bottom: 4px; }
+  .package-card .typical{ font-size: 15px; color: var(--paper); margin-bottom: 6px; }
   .package-card .price-note{ font-size: 13px; color: var(--paper-dim); opacity: 0.75; margin-bottom: 24px; }
   .package-card .includes{ font-size: 15px; line-height: 1.6; color: var(--paper-dim); margin: 0 0 30px; padding: 0; list-style: none; }
   .package-card .includes li{ padding-left: 18px; position: relative; margin-bottom: 10px; }
   .package-card .includes li::before{ content: "→"; position: absolute; left: 0; color: var(--brass); }
   .package-alt{ text-align: center; font-size: 14px; color: var(--paper-dim); margin: 24px 0 0; }
-  .package-alt a{ color: var(--brass); text-decoration: none; }
-  .package-alt a:hover{ text-decoration: underline; }
+  .package-alt a{ color: var(--brass); text-decoration: underline; text-underline-offset: 3px; }
+  .package-alt a:hover{ color: var(--brass-light); }
 </style>

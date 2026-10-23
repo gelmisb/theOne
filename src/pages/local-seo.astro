@@ -33,23 +33,24 @@ const rows = [
 ];
 
 const steps = [
-  { n: '01', t: 'Claim & verify', d: "Confirm the listing is claimed, verified, and set to the correct business category — the single most common thing local listings get wrong." },
+  { n: '01', t: 'Claim & verify', d: "Confirm the listing is claimed, verified, and set to the correct business category - the single most common thing local listings get wrong." },
   { n: '02', t: 'Fix NAP consistency', d: "Name, address, and phone number matched exactly across your website, Google listing, and any other directories you're on. Mismatches quietly hurt ranking." },
-  { n: '03', t: 'Load it with real photos', d: "Listings with real, recent, on-site photos consistently out-perform ones leaning on a logo and a stock banner — this is where the photography work does double duty." },
-  { n: '04', t: 'Build a review habit', d: "An NFC tap-to-review card makes asking a happy customer for a review a five-second, no-typing action instead of an awkward request." },
+  { n: '03', t: 'Load it with real photos', d: "Listings with real, recent, on-site photos consistently out-perform ones leaning on a logo and a stock banner - this is where the photography work does double duty." },
+  { n: '04', t: 'Build a review habit', d: "An NFC tap-to-review card makes it a five-second, no-typing job for any customer to leave an honest review." },
 ];
 ---
 
 <Layout
-  title="Local SEO & Google Business Profile Setup — Wicklow — Horizon Vantage"
-  description="Google Business Profile setup and local SEO for small businesses in Wicklow — category, service area, photos, and review systems done properly, not left to default settings."
+  title="Local SEO & Google Profile Setup, Wicklow - Horizon Vantage"
+  description="Google Business Profile setup and local SEO for Wicklow cafés, shops, salons, stays and producers: category, photos and reviews done properly."
 >
   <Header transition:persist />
+  <main id="main-content">
 
-  <!-- Frames 014 (hero) + 015 (What Gets Fixed) merged into one two-column
-       intro, same treatment as photography.astro's Frame 008/009 merge -
-       see that file's comment for the reasoning and the shared
-       About.astro-derived visual pattern. -->
+  <!-- The hero and What Gets Fixed frames are merged into one two-column
+       intro, same treatment as photography.astro's merge - see that file's
+       comment for the reasoning and the shared About.astro-derived visual
+       pattern. Frame numbers count from 001 in reading order. -->
   <section class="seo-intro">
     <div class="wrap">
       <div class="ph-merge">
@@ -65,10 +66,10 @@ const steps = [
               fetchpriority="high"
             />
           )}
-          <span class="cap mono">LOCAL SEO — FRAME 012</span>
+          <span class="cap mono">LOCAL SEO - FRAME 001</span>
         </div>
         <div class="ph-copy">
-          <div class="frame-tag" data-reveal data-reveal-group="seo-merge"><span class="num">FRAME 012</span> Local SEO</div>
+          <div class="frame-tag" data-reveal data-reveal-group="seo-merge"><span class="num">FRAME 001</span> Local SEO</div>
           <h1 class="ph-h" data-reveal data-reveal-group="seo-merge">Your Google listing is doing more selling than your homepage.</h1>
           <p class="ph-lead" data-reveal data-reveal-group="seo-merge">
             Most local searches never make it past the map pack. A finished, verified, correctly
@@ -76,7 +77,7 @@ const steps = [
           </p>
 
           <div class="ph-included" data-reveal data-reveal-group="seo-merge">
-            <h2 class="ph-included-h" data-split-reveal>Worked into every Tier 2 and 3 package, not treated as an afterthought.</h2>
+            <h2 class="ph-included-h" data-split-reveal>Built into every Booking-Ready Launch, not treated as an afterthought.</h2>
             <div class="gbp-grid">
               {rows.map((r) => (
                 <div class="gbp-tile">
@@ -97,7 +98,7 @@ const steps = [
   <section id="local-seo-process">
     <div class="wrap">
       <div class="section-head" data-reveal data-reveal-group="seo-steps-head">
-        <div class="frame-tag"><span class="num">FRAME 013</span> The Process</div>
+        <div class="frame-tag"><span class="num">FRAME 002</span> The Process</div>
         <h2 class="section-h" data-split-reveal>Four things, done properly instead of left on default settings.</h2>
       </div>
       <div class="seo-steps">
@@ -109,10 +110,11 @@ const steps = [
           </div>
         ))}
       </div>
-      <a href="/contact" class="btn btn-primary" data-reveal data-reveal-group="seo-steps-head">Get Your Listing Fixed</a>
+      <a href="/contact/" class="btn btn-primary" data-reveal data-reveal-group="seo-steps-head">Get Your Listing Fixed</a>
     </div>
   </section>
 
+  </main>
   <Footer />
 </Layout>
 

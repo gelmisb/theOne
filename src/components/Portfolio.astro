@@ -1,9 +1,21 @@
 ---
 import { Image, getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import { frameNumber } from '../data/homeFrames';
 
+// The "!" patterns keep the files in EXCLUDED_FILES (below) from being imported
+// AT ALL. Filtering them out later is not enough: Astro publishes the original of
+// every image that gets imported, whether or not it's rendered - the watermarked
+// and personal shots were sitting in the public build (17MB for one of them)
+// despite never appearing on a page. Keep these two lists in step.
 const photoModules = import.meta.glob<{ default: ImageMetadata }>(
-  '/src/assets/photos/portfolio/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}',
+  [
+    '/src/assets/photos/portfolio/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}',
+    '!/src/assets/photos/portfolio/IMG_8621.jpg',
+    '!/src/assets/photos/portfolio/IMG_8760.jpg',
+    '!/src/assets/photos/portfolio/IMG_4392.jpg',
+    '!/src/assets/photos/portfolio/gelmis-bartulis-XIfXPCAzR0Q-unsplash.jpg',
+  ],
   { eager: true }
 );
 
@@ -53,7 +65,10 @@ const photos = await Promise.all(
       const filename = rawName.replace(/\.[^.]+$/, '');
       const caption =
         CAPTION_OVERRIDES[rawName] ?? filename.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-      const full = await getImage({ src: mod.default, width: 1600 });
+      // quality 72, not the default: at 1600px the detailed shots (the Milan
+      // arcade, the training-floor scene) came out at 4MB+ each, loaded when
+      // someone opens a photo - on a phone, over mobile data. Visually the same.
+      const full = await getImage({ src: mod.default, width: 1600, quality: 72 });
       return { src: mod.default, caption, fullSrc: full.src, fullWidth: full.attributes.width, fullHeight: full.attributes.height };
     })
 );
@@ -83,7 +98,7 @@ const hasVideos = videos.length > 0;
 <section id="portfolio">
   <div class="wrap">
     <div class="section-head" data-reveal data-reveal-group="portfolio-head">
-      <div class="frame-tag"><span class="num">FRAME 003</span> Portfolio</div>
+      <div class="frame-tag"><span class="num">FRAME {frameNumber('portfolio')}</span> Portfolio</div>
       {hasPhotos ? (
         <h2 class="section-h">Shot on location, <i>not in a studio.</i></h2>
       ) : (
@@ -113,6 +128,8 @@ const hasVideos = videos.length > 0;
                   src={p.src}
                   alt={p.caption}
                   class="photo"
+                  width={700}
+                  height={Math.round((700 * p.fullHeight) / p.fullWidth)}
                   widths={[300, 500, 700]}
                   sizes="(max-width: 560px) 50vw, (max-width: 900px) 33vw, 20vw"
                   loading="lazy"
@@ -138,16 +155,17 @@ const hasVideos = videos.length > 0;
       <div class="cs-note">
         {hasPhotos ? (
           <p>
-            <strong>More founder shoots booking now</strong> for cafés, salons, gyms and
-            tradespeople along the commuter belt.
+            <strong>More founder shoots booking now</strong> for cafés, bakeries, barbershops,
+            pet shops, stays and tradespeople along the commuter belt.
           </p>
         ) : (
           <p>
-            <strong>Founder shoots booking now</strong> for cafés, salons, gyms and tradespeople along
-            the commuter belt. First galleries land here as soon as they're delivered.
+            <strong>Founder shoots booking now</strong> for cafés, bakeries, barbershops, pet shops,
+            stays and tradespeople along the commuter belt. First galleries land here as soon as
+            they're delivered.
           </p>
         )}
-        <a href="/contact" class="btn btn-ghost">Get an early slot</a>
+        <a href="/contact/" class="btn btn-ghost">Get an early slot</a>
       </div>
     </div>
 
