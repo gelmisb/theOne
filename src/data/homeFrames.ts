@@ -26,6 +26,7 @@ export const homeFrames: HomeFrame[] = [
   { id: 'offer-intro', label: 'The Gap' },
   { id: 'offer', label: 'The Offer' },
   { id: 'portfolio', label: 'Portfolio' },
+  { id: 'clients', label: 'Brands' },
   { id: 'process', label: 'How It Works' },
   { id: 'about', label: 'About' },
   { id: 'seo', label: 'Local SEO' },

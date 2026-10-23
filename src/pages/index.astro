@@ -8,6 +8,7 @@ import Sprockets from '../components/Sprockets.astro';
 import Gap from '../components/Gap.astro';
 import Offer from '../components/Offer.astro';
 import Portfolio from '../components/Portfolio.astro';
+import Clients from '../components/Clients.astro';
 import Process from '../components/Process.astro';
 import About from '../components/About.astro';
 import Seo from '../components/Seo.astro';
@@ -21,6 +22,7 @@ import Footer from '../components/Footer.astro';
 <Layout>
   <a href="#hero" class="skip-link">Skip intro</a>
   <Header transition:persist />
+  <main id="main-content">
   <FilmRollIntro />
   <ScrollNav />
   <Hero />
@@ -35,6 +37,8 @@ import Footer from '../components/Footer.astro';
   <Sprockets />
   <Portfolio />
   <Sprockets dark />
+  <Clients />
+  <Sprockets />
   <Process />
   <Sprockets />
   <About />
@@ -43,6 +47,7 @@ import Footer from '../components/Footer.astro';
   <Sprockets />
   <FAQ />
   <NewsletterSignup />
+  </main>
   <Footer />
 </Layout>
 

@@ -6,6 +6,8 @@ import Sprockets from '../components/Sprockets.astro';
 import Footer from '../components/Footer.astro';
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import { clients } from '../data/clients';
+import irishExoticPetsShot from '../assets/photos/web-projects/irish-exotic-pets.jpg';
 
 // Real project entries go here once work is ready to show - same
 // scaffold-then-fill pattern as Portfolio.astro's `videos` array. Each
@@ -17,7 +19,17 @@ type Project = {
   href?: string;
   screenshot?: ImageMetadata;
 };
-const projects: Project[] = [];
+// The link comes from data/clients.ts so the URL lives in one place.
+const irishExoticPets = clients.find((c) => c.id === 'irish-exotic-pets');
+const projects: Project[] = [
+  {
+    title: 'Irish Exotic Pets',
+    description:
+      'A website for an Irish-run exotic animal husbandry, education and welfare platform - care sheets, an about page and monitor parties.',
+    href: irishExoticPets?.link.href,
+    screenshot: irishExoticPetsShot,
+  },
+];
 const hasProjects = projects.length > 0;
 
 // Same hand-drawn minimal line-icon approach as local-seo.astro (24x24,
@@ -55,6 +67,7 @@ const reasons = [
   description="Website builds for local businesses in Wicklow, designed around real on-site photography instead of a template."
 >
   <Header transition:persist />
+  <main id="main-content">
 
   <PageHero
     frameNum="001"
@@ -152,6 +165,7 @@ const reasons = [
       </div>
 
       {hasProjects ? (
+        <>
         <div class="wp-grid">
           {projects.map((p) => (
             <div class="wp-card glass">
@@ -166,6 +180,15 @@ const reasons = [
             </div>
           ))}
         </div>
+        <div class="wp-empty glass" data-reveal data-reveal-group="wp-head">
+          <p>
+            <strong>Founder builds booking now</strong> alongside photography and video shoots - a
+            website designed around real on-site imagery from day one, not stock photos dropped
+            into a template afterward.
+          </p>
+          <a href="/contact/" class="btn btn-ghost">Start a Project</a>
+        </div>
+        </>
       ) : (
         <>
           <div class="wp-skeleton-grid" aria-hidden="true">
@@ -189,6 +212,7 @@ const reasons = [
     </div>
   </section>
 
+  </main>
   <Footer />
 </Layout>
 
@@ -326,7 +350,11 @@ const reasons = [
   @media (max-width: 900px){ .wp-grid{ grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 640px){ .wp-grid{ grid-template-columns: 1fr; } }
   .wp-card{ border-radius: var(--radius-glass); overflow: hidden; }
-  .wp-shot{ width: 100%; aspect-ratio: 16/10; object-fit: cover; display: block; }
+  /* height: auto is what lets aspect-ratio work - Astro's <Image> writes the file's
+     real height into the tag, and that attribute would otherwise win and stretch
+     the card to the screenshot's full height. object-position: top shows the top
+     of the page (logo, nav, headline), which is the recognisable part. */
+  .wp-shot{ width: 100%; height: auto; aspect-ratio: 16/10; object-fit: cover; object-position: top center; display: block; }
   .wp-body{ padding: 20px; }
   .wp-body h3{ font-family: var(--font-display), serif; font-weight: 400; font-size: 19px; margin: 0 0 8px; }
   .wp-body p{ font-size: 14px; line-height: 1.55; color: var(--paper-dim); margin: 0 0 12px; }

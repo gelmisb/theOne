@@ -1,0 +1,79 @@
+---
+import { frameNumber } from '../data/homeFrames';
+import { clients, statusLabel } from '../data/clients';
+
+// The brands behind the work, from data/clients.ts. Each card links out to the
+// business itself (its website, or Google Maps if it has none), so the proof is
+// checkable rather than just claimed. Placed right after the Portfolio, whose
+// photos these are the businesses behind.
+---
+
+<section id="clients">
+  <div class="wrap">
+    <div class="section-head" data-reveal data-reveal-group="clients-head">
+      <div class="frame-tag"><span class="num">FRAME {frameNumber('clients')}</span> Brands</div>
+      <h2 class="section-h" data-split-reveal>Brands we've worked with.</h2>
+      <p class="section-sub">Past projects and work in progress. Each one links to the business itself.</p>
+    </div>
+    <div class="client-grid">
+      {clients.map((c) => (
+        <article class="client-card glass" data-reveal data-reveal-group="client-cards">
+          <span class:list={['client-status', 'mono', c.status]}>{statusLabel[c.status]}</span>
+          <h3>{c.name}</h3>
+          {c.location && <p class="client-loc mono">{c.location}</p>}
+          {c.work.length > 0 && (
+            <ul class="client-work">
+              {c.work.map((w) => <li>{w}</li>)}
+            </ul>
+          )}
+          <div class="client-links">
+            <a class="client-link" href={c.link.href} target="_blank" rel="noopener noreferrer">
+              {c.link.label} <span aria-hidden="true">↗</span>
+              <span class="newtab">(opens in a new tab)</span>
+            </a>
+            {c.caseStudy && <a class="client-link alt" href={c.caseStudy}>See how it was built →</a>}
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .client-grid{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 860px){ .client-grid{ grid-template-columns: 1fr; } }
+  .client-card{
+    display: flex; flex-direction: column;
+    padding: 34px 30px;
+    border-radius: var(--radius-glass);
+  }
+  .client-status{
+    align-self: flex-start;
+    margin-bottom: 18px; padding: 5px 11px;
+    border: 1px solid var(--line-strong); border-radius: 999px;
+    font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--paper-dim);
+  }
+  .client-status.in-progress{ color: var(--safelight); border-color: rgba(232,151,90,0.45); }
+  .client-status.completed{ color: var(--brass); border-color: rgba(230,196,104,0.4); }
+  .client-card h3{
+    font-family: var(--font-display), serif; font-weight: 400; font-size: 26px; line-height: 1.15;
+    color: var(--paper); margin: 0 0 8px;
+  }
+  .client-loc{ font-size: 11.5px; letter-spacing: 0.04em; color: var(--paper-dim); margin: 0 0 16px; }
+  .client-work{ list-style: none; margin: 0 0 22px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .client-work li{ font-size: 15px; line-height: 1.5; color: var(--paper-dim); padding-left: 18px; position: relative; }
+  .client-work li::before{ content: "→"; position: absolute; left: 0; color: var(--brass); }
+  .client-links{ margin-top: auto; padding-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+  .client-link{
+    width: fit-content;
+    font-family: var(--font-mono), monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--brass); text-decoration: none;
+  }
+  .client-link:hover{ text-decoration: underline; text-underline-offset: 3px; }
+  .client-link.alt{ color: var(--paper-dim); }
+  .client-link.alt:hover{ color: var(--paper); }
+  .newtab{
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+  }
+</style>
