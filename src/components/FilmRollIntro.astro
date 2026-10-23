@@ -14,36 +14,89 @@ import logoWatermark from '../assets/photos/logo/logo_transparent.png';
 
 // Real photos only (brief section 4) - explicitly enumerated rather than a
 // bare wildcard so newly-dropped files (e.g. AI-generated portfolio
-// placeholders, or the two gb-Captured-watermarked shoots still pending a
-// watermark crop) don't silently join the roll. 8 real photos as of the
-// critique-driven photo refresh (/impeccable critique intro P2: 3 photos
-// cycling across 24 frames read as an obvious repeating loop) - each now
-// repeats roughly 3x across the strip instead of 8x (the hero photo
-// appears a little more often since HERO_FRAME_INDEX below overrides
-// whatever the i % realPhotos.length cycle would have placed there).
-const rollPhotoEntries = Object.entries(
-  import.meta.glob<{ default: ImageMetadata }>(
-    '/src/assets/photos/portfolio/{Barbershops,consumables,product advertisement,IMG_0839,IMG_0863,IMG_1643,IMG_3033,IMG_8758,motorcycle-rider}.jpg',
-    { eager: true }
-  )
+// placeholders, or the watermarked / personal shoots Portfolio.astro keeps
+// in EXCLUDED_FILES) don't silently join the roll. import.meta.glob needs a
+// literal pattern, so this list and ROLL_ORDER below name the same files
+// (plus the hero, below) - add a photo to both, by exact filename including
+// its extension. Every file here is already public in Portfolio.astro.
+const rollPhotoModules = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/photos/portfolio/{IMG_1643.jpg,training-floor.jpg,furry-buts-goods.webp.webp,product advertisement.jpg,Barbershops.jpg,village-pet-shop-front.webp.webp,IMG_0863.jpg,IMG_4721.jpg,furry-buts-buddy-care.webp.webp,IMG_0839.jpg,IMG_1436.JPG,motorcycle-rider.jpg,consumables.jpg}',
+  { eager: true }
 );
-const realPhotos = rollPhotoEntries.map(([, m]) => m.default);
+
+// The hero photo is Layout.astro's persist-bg, resolved with the same glob so
+// the two can never point at different files (see the Phase 3 note below).
+// It isn't in the portfolio folder, so it joins the roll under its own name.
+const persistBgModules = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/photos/persist-bg.{jpg,jpeg,png,webp}',
+  { eager: true }
+);
+const persistBgPhoto = Object.values(persistBgModules)[0]?.default;
+const HERO_PHOTO_NAME = 'persist-bg';
+
+// Display order, cyclic. The strip used to cycle an 8-photo glob (alphabetical
+// by path) across 24 frames, so the same photo came round every 8 frames and
+// a few of them showed up three times - an obvious loop.
+//
+// Only frames ~9-22 of the 24 are ever scrolled into view: the track is
+// flex-centred on frame ~11.5, the roll only travels toward the hero frame
+// (index 19), and 0-8 sit off-screen left the whole time. That's 14 visible
+// slots, so ROLL_ORDER holds exactly 14 photos - each one appears once where a
+// visitor can see it, and repeats (14 frames / 7000px apart) land only in the
+// hidden frames. A longer list would not show more: the extra photos would
+// fall in the hidden frames. Benched for that reason, and still in the
+// Portfolio grid: IMG_3033.jpg, counter-service.jpg and the two
+// gelmis-bartulis-*-unsplash.jpg shots (lifestyle / personal-portrait work,
+// furthest from PRODUCT.md's "real photos of your business" pitch). To bring
+// one back, swap it for another entry here and in the glob above.
+//
+// The order is hand-picked for rhythm - dark/bright and people/product/place
+// alternate, look-alikes (the gin glasses, the pet-shop shots) are kept apart.
+// The hero photo's slot decides where the cycle starts; see `frames` below.
+// Keep it last: that puts the first-paint frames (~010-013) on the
+// barbershop / pet-shop front / café / Costa shots.
+const ROLL_ORDER = [
+  'IMG_1643.jpg',
+  'training-floor.jpg',
+  'furry-buts-goods.webp.webp',
+  'product advertisement.jpg',
+  'Barbershops.jpg',
+  'village-pet-shop-front.webp.webp',
+  'IMG_0863.jpg',
+  'IMG_4721.jpg',
+  'furry-buts-buddy-care.webp.webp',
+  'IMG_0839.jpg',
+  'IMG_1436.JPG',
+  'motorcycle-rider.jpg',
+  'consumables.jpg',
+  HERO_PHOTO_NAME,
+];
+const photoByName = new Map<string, ImageMetadata>(
+  Object.entries(rollPhotoModules).map(([path, m]) => [path.split('/').pop()!, m.default])
+);
+if (persistBgPhoto) photoByName.set(HERO_PHOTO_NAME, persistBgPhoto);
+// A name with no file behind it (renamed, deleted, swapped out) used to just
+// shrink the pool silently - say so at build time instead.
+for (const name of ROLL_ORDER) {
+  if (!photoByName.has(name)) console.warn(`[FilmRollIntro] "${name}" is in ROLL_ORDER but no matching photo was found - skipped.`);
+}
+const realPhotos = ROLL_ORDER.map((name) => photoByName.get(name)).filter((p): p is ImageMetadata => !!p);
 
 // Phase 3: the hero frame must be the same photo as Layout.astro's
 // persist-bg - Beat 4 expands this frame until it fills the viewport and
 // hands off into Hero, which is sitting on that same fixed background the
 // whole time. If the hero frame showed a different photo, the handoff
 // would visibly swap images instead of reading as one continuous reveal.
+// That used to rely on two files (motorcycle-rider.jpg and persist-bg.jpg)
+// being byte-identical copies; swapping one without the other broke the
+// handoff, so the hero now reads persist-bg.jpg itself.
 //
-// motorcycle-rider.jpg, not IMG_0839 - second critique pass flagged the
-// gym-coaching candid (dim, off-angle, the coach the visible subject) as
-// compositionally weak for the one full-bleed "look what I can shoot"
-// moment. motorcycle-rider is direct-to-camera, sharp, and a selective-
-// color edit that reads as confident, considered photography - a founder
-// pick, not a code-driven one. IMG_0839 stays in the general roll rotation
-// (fine at strip size), just isn't the hero/full-bleed photo anymore.
-const heroPhotoEntry = rollPhotoEntries.find(([path]) => path.includes('motorcycle-rider'));
-const heroPhoto = heroPhotoEntry ? heroPhotoEntry[1].default : realPhotos[0];
+// The statue, not IMG_0839 or the palm-leaf portrait (motorcycle-rider.jpg,
+// which stays in the roll as an ordinary frame) - founder pick for the one
+// full-bleed moment. IMG_0839's gym-coaching candid was flagged by the
+// second critique pass as dim and off-angle for it.
+const heroPhoto = photoByName.get(HERO_PHOTO_NAME) ?? realPhotos[0];
+const heroPos = Math.max(0, realPhotos.indexOf(heroPhoto));
 
 // Phase 2: more frames than Phase 1 used, and the hero frame sits well off
 // the strip's natural (flex-centred) resting position so the scroll-driven
@@ -56,8 +109,12 @@ const HERO_FRAME_INDEX = 19; // leaves runway before it to roll through, and a f
 // frames 0-3 eager - the offscreen ones - and left the visible ones lazy.
 const FIRST_VISIBLE = 9;
 const LAST_VISIBLE = 16;
+// Offset the cycle so the hero photo lands exactly on HERO_FRAME_INDEX and the
+// rest follow ROLL_ORDER around it - no special-casing the hero frame, and its
+// neighbours are always the same two photos.
+const n = realPhotos.length;
 const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
-  photo: i === HERO_FRAME_INDEX ? heroPhoto : realPhotos[i % realPhotos.length],
+  photo: n ? realPhotos[(((i - HERO_FRAME_INDEX + heroPos) % n) + n) % n] : undefined,
   num: String(i + 1).padStart(3, '0'),
   isHero: i === HERO_FRAME_INDEX,
 }));
