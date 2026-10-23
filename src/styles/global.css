@@ -129,7 +129,7 @@ section{ padding: 110px 0; position: relative; }
 /* Word-by-word heading reveal - spans created at runtime by splitIntoWordSpans() */
 .split-word{ display: inline-block; will-change: transform, opacity; }
 
-.section-head{ max-width: 680px; margin-bottom: 60px; }
+.section-head{ margin-bottom: 60px; }
 /* h1.section-h exists for pages whose only heading is a section heading
    (Contact) - every page needs exactly one h1, and it should look like its
    siblings, not browser-default. */
@@ -176,7 +176,10 @@ h2.section-h i, h1.section-h i{ font-style: italic; color: var(--brass); }
 .btn:focus-visible{ outline: 2px solid var(--brass); outline-offset: 3px; }
 .btn-primary{ background: var(--brass); color: var(--bg); }
 .btn-primary:hover{ transform: translateY(-2px); background: var(--brass-light); }
-.btn-ghost{ border-color: var(--line-strong); color: var(--paper); }
+/* background: transparent matters for <button class="btn btn-ghost"> - a link is
+   transparent already, but a button gets the browser's light default fill and
+   this class's light text vanishes into it. */
+.btn-ghost{ background: transparent; border-color: var(--line-strong); color: var(--paper); }
 .btn-ghost:hover{ border-color: var(--brass); color: var(--brass); transform: translateY(-2px); }
 
 /* GSAP reveal base state - JS adds .gsap-ready and animates via ScrollTrigger */

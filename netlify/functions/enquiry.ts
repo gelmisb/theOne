@@ -43,23 +43,31 @@ export const handler: Handler = async (event) => {
   // Honeypot: pretend success for bots.
   if (p['bot-field']) return { statusCode: 200, body: JSON.stringify({ ok: true }) };
 
-  const clean = (k: string) => String(p[k] ?? '').trim().slice(0, 5000);
-  const name = clean('name');
-  const email = clean('email');
+  // Tight per-field limits, not one blanket 5000. The visitor's name is printed
+  // into a confirmation email sent to whatever address they typed, so this
+  // endpoint is otherwise a way to make this domain email arbitrary text to
+  // arbitrary people.
+  const clean = (k: string, max = 300) => String(p[k] ?? '').trim().slice(0, max);
+  const name = clean('name', 100).replace(/\s+/g, ' ');
+  const email = clean('email', 254);
   if (!name || !EMAIL_RE.test(email)) {
     return { statusCode: 400, body: JSON.stringify({ error: 'Name and a valid email are required.' }) };
+  }
+  // A real name has no link in it; one that does is spam being relayed via the confirmation email.
+  if (/https?:|www\.|\.(com|net|org|ru|xyz)\b/i.test(name)) {
+    return { statusCode: 400, body: JSON.stringify({ error: 'Please enter your name.' }) };
   }
 
   const rows: [string, string][] = [
     ['Name', name],
-    ['Business', clean('business')],
+    ['Business', clean('business', 120)],
     ['Email', email],
-    ['Business type', clean('business_type')],
-    ['Town or area', clean('town')],
-    ['Website / listing', clean('listing_url')],
-    ['Budget in mind', clean('budget')],
-    ['Saw our pricing', clean('saw_pricing')],
-    ['Message', clean('message')],
+    ['Business type', clean('business_type', 60)],
+    ['Town or area', clean('town', 80)],
+    ['Website / listing', clean('listing_url', 300)],
+    ['Budget in mind', clean('budget', 40)],
+    ['Saw our pricing', clean('saw_pricing', 20)],
+    ['Message', clean('message', 3000)],
   ];
   const sender = { name: 'Horizon Vantage', email: BREVO_SENDER_EMAIL };
 
@@ -67,7 +75,7 @@ export const handler: Handler = async (event) => {
     sender,
     to: [{ email: NOTIFY_EMAIL }],
     replyTo: { email, name },
-    subject: `New enquiry: ${clean('business') || name}`,
+    subject: `New enquiry: ${clean('business', 120) || name}`,
     htmlContent: `<div style="font-family:sans-serif;max-width:560px;color:#1a1a1a">
       <h2>New website enquiry</h2>
       ${rows
