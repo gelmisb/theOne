@@ -1,0 +1,178 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Footer from '../components/Footer.astro';
+
+// Plain-language privacy notice for the analytics the cookie banner offers
+// (src/scripts/analytics.ts, netlify/functions/collect.ts) plus the two forms.
+// It has to stay true to what that code actually does - if you change what is
+// collected, how long raw records live (RAW_RETENTION_DAYS in
+// src/lib/analytics/core.ts) or who processes it, change this page too.
+// Not legal advice: have it reviewed before relying on it. Same layout and
+// copy convention as terms.astro.
+type Section = { heading: string; paragraphs?: string[]; list?: string[] };
+
+const effectiveDate = '23 October 2026';
+
+const sections: Section[] = [
+  {
+    heading: 'Who is responsible',
+    paragraphs: [
+      'Horizon Vantage (a sole trader business registered with the Companies Registration Office in Ireland, number <strong>SR9692490</strong>) is the controller of the personal data described here. Contact: <a href="mailto:info@horizonvantage.ie">info@horizonvantage.ie</a>.',
+    ],
+  },
+  {
+    heading: 'The short version',
+    paragraphs: [
+      'If you click <strong>Accept analytics</strong> in the cookie banner, we count what happens on this site - which pages are viewed, which links are clicked, how far people scroll - so we can see what is useful and fix what is not. If you click <strong>Essential only</strong>, none of that happens: nothing is recorded and no identifier is created. You can change your mind at any time with <strong>Cookie settings</strong> in the footer.',
+    ],
+  },
+  {
+    heading: 'What we record if you accept',
+    list: [
+      'The pages you view, and the page you came from (the referring website, plus any <strong>utm_</strong> campaign tags in the link)',
+      'How long a page is open and visible, and the deepest point you scroll to',
+      'Which links and buttons you click (the link text and where it goes), and which sections of a page you reach',
+      'That a form was started, submitted or failed - <strong>never what you typed into it</strong>',
+      'Page-speed measurements (Core Web Vitals) for your visit',
+      'Your country (looked up by our host from your connection when the request arrives; we keep only the two-letter country code), your browser, operating system and device type (mobile, tablet or desktop), your screen width in broad bands, and your browser language',
+      'A random visitor ID and session ID created in your browser (stored in localStorage and sessionStorage, not as cookies) so that your visits and the pages in one visit can be linked together',
+    ],
+  },
+  {
+    heading: 'What we do not do',
+    list: [
+      'We do not store your IP address. Our hosting provider necessarily handles it to deliver the site, but it is not saved in our analytics data.',
+      'We do not store your name, email address or anything you type into a form as part of analytics.',
+      'We do not use advertising networks or third-party trackers, we do not follow you to other websites, and we never sell or share this data.',
+      'We do not track you if your browser sends <strong>Global Privacy Control</strong> or <strong>Do Not Track</strong>, even if you click Accept.',
+    ],
+  },
+  {
+    heading: 'Why, and our legal basis',
+    paragraphs: [
+      'The purpose is to understand how the site is used and to improve it. The legal basis is your <strong>consent</strong> (Article 6(1)(a) GDPR), which is also what the ePrivacy rules require before anything is stored on your device for this purpose. You can withdraw consent at any time; withdrawing deletes the visitor and session IDs from your browser and stops all recording. Declining or withdrawing never affects how the site works for you.',
+    ],
+  },
+  {
+    heading: 'Where it is kept, and for how long',
+    list: [
+      'Analytics records are stored in our own account with our hosting provider, <strong>Netlify</strong>, and are visible only to us through a password-protected page.',
+      'Individual records (which carry the random IDs) are deleted after <strong>30 days</strong>.',
+      'We keep daily totals - counts of visits, pages, clicks and so on, with no IDs and nothing that identifies a person - after that.',
+    ],
+  },
+  {
+    heading: 'Storage the site needs regardless',
+    paragraphs: ['Two small items are always on because the site cannot do what you asked without them, and are not used for tracking:'],
+    list: [
+      '<strong>hv-consent-v2</strong> - remembers your cookie choice',
+      '<strong>hv-newsletter-subscribed</strong> - remembers that this browser already signed up, so the form is not shown again',
+    ],
+  },
+  {
+    heading: 'Our contact form and newsletter',
+    paragraphs: [
+      'If you send an enquiry or join the mailing list, we use what you submit to reply to you and, for the newsletter, to send updates. The enquiry form stores a copy through <strong>Netlify Forms</strong> and sends email through <strong>Brevo</strong>; newsletter sign-ups are held in Brevo. You can ask us to delete your details at any time.',
+    ],
+  },
+  {
+    heading: 'Your rights',
+    paragraphs: [
+      'You can ask us for a copy of your personal data, to correct it, to delete it, to restrict or object to how we use it, and to receive it in a portable format. Email <a href="mailto:info@horizonvantage.ie">info@horizonvantage.ie</a>. Because analytics records carry only random IDs, we can only find yours if you tell us the visitor ID shown in your browser storage (<strong>hv-vid</strong>). You also have the right to complain to the Data Protection Commission in Ireland: <a href="https://www.dataprotection.ie">dataprotection.ie</a>.',
+    ],
+  },
+  {
+    heading: 'Changes',
+    paragraphs: ['If what we collect changes, we will update this page and ask for your consent again where the law requires it.'],
+  },
+];
+---
+
+<Layout
+  title="Privacy & Cookies - Horizon Vantage"
+  description="What Horizon Vantage records if you accept analytics, what it never does, how long it keeps it, and how to change your mind."
+>
+  <header class="legal-header">
+    <div class="wrap">
+      <a class="brand" href="/"><em>Horizon</em> Vantage</a>
+      <a class="back-link" href="/">← Back to site</a>
+    </div>
+  </header>
+
+  <main class="legal-doc" id="main-content">
+    <div class="wrap">
+      <div class="frame-tag"><span class="num">LEGAL</span> Privacy &amp; Cookies</div>
+      <h1>Privacy &amp; Cookies</h1>
+      <p class="effective-date mono">Effective date: {effectiveDate}</p>
+
+      {sections.map((section) => (
+        <div class="legal-section">
+          <h2>{section.heading}</h2>
+          {section.paragraphs?.map((p) => <p set:html={p} />)}
+          {section.list && (
+            <ul>
+              {section.list.map((item) => <li set:html={item} />)}
+            </ul>
+          )}
+        </div>
+      ))}
+
+      <div class="legal-section">
+        <p>
+          <button type="button" class="btn btn-ghost" data-open-consent>Change my cookie choice</button>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .legal-header{
+    padding: 24px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .legal-header .wrap{
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+  .legal-header .brand{
+    font-family: var(--font-display), serif; font-size: 20px; text-decoration: none; color: var(--paper);
+  }
+  .legal-header .brand em{ color: var(--brass); font-style: italic; }
+  .back-link{
+    font-family: var(--font-mono), monospace; font-size: 13px; letter-spacing: 0.04em;
+    color: var(--paper-dim); text-decoration: none; transition: color 0.2s ease;
+  }
+  .back-link:hover{ color: var(--brass); }
+
+  .legal-doc{ padding: 70px 0 110px; }
+  .legal-doc h1{
+    font-family: var(--font-display), serif; font-weight: 400;
+    font-size: clamp(32px, 5vw, 56px);
+    line-height: 1.08;
+    margin: 0 0 10px;
+  }
+  .effective-date{
+    color: var(--paper-dim); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase;
+    margin: 0 0 50px;
+  }
+  .legal-section{ max-width: 720px; margin-bottom: 34px; }
+  .legal-section h2{
+    font-family: var(--font-display), serif; font-weight: 400;
+    font-size: 22px; color: var(--brass);
+    margin: 0 0 12px;
+  }
+  .legal-section p{
+    color: var(--paper-dim); font-size: 15px; line-height: 1.7; margin: 0 0 12px;
+  }
+  .legal-section p a{ color: var(--brass); }
+  .legal-section ul{
+    margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .legal-section li{
+    color: var(--paper-dim); font-size: 15px; line-height: 1.7;
+  }
+  .legal-section li a, .legal-section li strong{ color: var(--paper); }
+  .legal-section p strong{ color: var(--paper); }
+</style>

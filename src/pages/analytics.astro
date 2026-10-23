@@ -1,0 +1,357 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Private owner dashboard. Not linked from anywhere, noindex (meta here, plus
+// an X-Robots-Tag header in public/_headers), left out of the sitemap
+// (astro.config.mjs) and exempt from the visitor tracker (scripts/analytics.ts
+// skips /analytics*). The HTML is only a shell: all the data comes from
+// /api/stats, which answers nothing without the ANALYTICS_TOKEN secret.
+// Logic lives in scripts/dashboard.ts, charts in scripts/charts.ts.
+---
+
+<Layout
+  title="Analytics - Horizon Vantage"
+  description="Private site analytics."
+  noindex
+>
+  <main class="dash" id="main-content" data-dash>
+    <div class="wrap">
+      <header class="dash-head">
+        <div>
+          <div class="frame-tag"><span class="num">PRIVATE</span> Site analytics</div>
+          <h1>How the site is doing.</h1>
+          <p class="dash-status" id="dash-status" aria-live="polite"></p>
+        </div>
+      </header>
+
+      <!-- Locked state: nothing below renders until the stats function accepts the token. -->
+      <div class="gate glass" id="dash-gate" hidden>
+        <h2>Enter your access token</h2>
+        <p>
+          This is the <code>ANALYTICS_TOKEN</code> set in Netlify. It is kept for this browser tab only.
+        </p>
+        <form id="gate-form" autocomplete="off">
+          <label for="gate-token" class="sr-only">Access token</label>
+          <input id="gate-token" type="password" required placeholder="Access token" autocomplete="off" />
+          <button type="submit" class="btn btn-primary">Unlock</button>
+        </form>
+        <p class="gate-error" id="gate-error" role="alert" hidden></p>
+        <button type="button" class="btn btn-ghost gate-demo" id="gate-demo" hidden>Preview with sample data (dev only)</button>
+      </div>
+
+      <div id="dash-app" hidden>
+        <div class="demo-banner" id="demo-banner" role="status" hidden>
+          SAMPLE DATA - these numbers are invented to show what each chart will look like. None of it is real visitors.
+        </div>
+
+        <div class="controls">
+          <div class="control-group" role="group" aria-label="Date range">
+            <button type="button" class="chip" data-range="7">7 days</button>
+            <button type="button" class="chip" data-range="30">30 days</button>
+            <button type="button" class="chip" data-range="90">90 days</button>
+          </div>
+          <div class="control-group">
+            <button type="button" class="chip" id="refresh">Refresh</button>
+            <button type="button" class="chip" id="toggle-demo" aria-pressed="false">Sample data</button>
+            <button type="button" class="chip" id="export-csv">Export daily CSV</button>
+            <button type="button" class="chip" id="sign-out">Lock</button>
+          </div>
+          <label class="ignore">
+            <input type="checkbox" id="ignore-me" />
+            <span>Don't count my own visits in this browser</span>
+          </label>
+        </div>
+
+        <div class="kpis" id="kpis"></div>
+
+        <div class="grid">
+          <div class="panel span-12">
+            <h2>Traffic over time</h2>
+            <div class="chips" id="traffic-chips"></div>
+            <div id="chart-traffic"></div>
+          </div>
+
+          <div class="panel span-4">
+            <h2>Where visits come from</h2>
+            <p class="hint">By session, grouped into channels.</p>
+            <div id="chart-channels"></div>
+          </div>
+          <div class="panel span-4">
+            <h2>Referring sites</h2>
+            <p class="hint">Websites that sent people here.</p>
+            <div id="list-referrers"></div>
+          </div>
+          <div class="panel span-4">
+            <h2>Campaigns</h2>
+            <p class="hint">Links tagged with utm_ parameters.</p>
+            <div id="table-campaigns"></div>
+          </div>
+
+          <div class="panel span-8">
+            <h2>Pages</h2>
+            <p class="hint">Entries are how many visits started on that page. Time is tab-visible time; scroll is the average deepest point.</p>
+            <div id="table-pages"></div>
+          </div>
+          <div class="panel span-4">
+            <h2>Where visits start</h2>
+            <p class="hint">Entry pages.</p>
+            <div id="list-entries"></div>
+          </div>
+
+          <div class="panel span-4">
+            <h2>What gets clicked</h2>
+            <p class="hint">Links opened and buttons pressed, by type.</p>
+            <div id="list-click-kinds"></div>
+          </div>
+          <div class="panel span-8">
+            <h2>Most-clicked links and buttons</h2>
+            <p class="hint">Phone, email, social, photo and video opens included.</p>
+            <div id="table-clicks"></div>
+          </div>
+
+          <div class="panel span-6">
+            <div class="panel-head">
+              <h2>How far people get down a page</h2>
+              <label class="sr-only" for="sec-path">Page</label>
+              <select id="sec-path" class="select"></select>
+            </div>
+            <p class="hint">Share of visits that scrolled each section into view.</p>
+            <div id="funnel-sections"></div>
+          </div>
+          <div class="panel span-6">
+            <h2>Turning visits into enquiries</h2>
+            <p class="hint" id="enquiry-note"></p>
+            <div id="funnel-enquiry"></div>
+            <h3>Newsletter</h3>
+            <div id="funnel-newsletter"></div>
+          </div>
+
+          <div class="panel span-4">
+            <h2>Countries</h2>
+            <p class="hint">By session.</p>
+            <div id="list-countries"></div>
+          </div>
+          <div class="panel span-4">
+            <h2>Devices</h2>
+            <div id="chart-devices"></div>
+            <h3>Screen width</h3>
+            <div id="list-viewports"></div>
+          </div>
+          <div class="panel span-4">
+            <h2>Browsers</h2>
+            <div id="list-browsers"></div>
+            <h3>Operating systems</h3>
+            <div id="list-oses"></div>
+            <h3>Languages</h3>
+            <div id="list-languages"></div>
+          </div>
+
+          <div class="panel span-12">
+            <h2>When people visit</h2>
+            <p class="hint">Pageviews by weekday and hour, Dublin time.</p>
+            <div id="chart-heatmap"></div>
+          </div>
+
+          <div class="panel span-12">
+            <h2>Page speed (Core Web Vitals)</h2>
+            <p class="hint">What visitors actually experienced, from the first page of each visit. Google's "good" thresholds: LCP under 2.5 s, CLS under 0.1, INP under 200 ms.</p>
+            <div class="vitals" id="vitals"></div>
+          </div>
+
+          <div class="panel span-12" id="panel-custom" hidden>
+            <h2>Custom events</h2>
+            <div id="table-custom"></div>
+          </div>
+        </div>
+
+        <details class="guide">
+          <summary>What every number means, and what else could be captured</summary>
+          <div class="guide-body">
+            <h3>Definitions</h3>
+            <ul>
+              <li><strong>Visitor</strong> - one browser that accepted analytics, counted once per day. Someone who returns on another day counts again.</li>
+              <li><strong>Session</strong> - one visit; a new one starts after 30 minutes idle or a new tab.</li>
+              <li><strong>Pageview</strong> - a page opened, including in-site navigation that doesn't reload.</li>
+              <li><strong>Bounce</strong> - a visit that viewed one page, clicked nothing, started no form and left within 10 seconds.</li>
+              <li><strong>Time on page</strong> - how long the tab was visible on that page (not whether the person was reading).</li>
+              <li><strong>Scroll</strong> - the deepest point reached, as a share of the page height.</li>
+              <li><strong>Channel</strong> - Direct (no referrer), Organic Search, Social, Email, Paid and Campaign (tagged links), or Referral (any other site).</li>
+              <li><strong>Enquiry</strong> - the contact form submitted successfully, as reported by the form itself.</li>
+            </ul>
+            <h3>Only counts people who accepted</h3>
+            <p>Visitors who chose "Essential only", or whose browser sends Do Not Track or Global Privacy Control, are not recorded at all, so every figure here is a floor, not the true total.</p>
+            <h3>Not captured yet, but possible</h3>
+            <ul>
+              <li>Click heatmaps on the page itself, and "rage clicks" (repeated clicks on something that isn't responding)</li>
+              <li>Site search terms (the site has no search box today)</li>
+              <li>Which package or add-on a visitor opened before enquiring</li>
+              <li>How long a visitor takes from first visit to enquiry, across days</li>
+              <li>Broken-link reports (visits to the 404 page, and where they came from)</li>
+              <li>JavaScript errors visitors hit</li>
+              <li>Downloads and video watch time, once video is added to the portfolio</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import '../scripts/dashboard';
+</script>
+
+<style is:global>
+  .dash{
+    --c1: #E6C468; --c2: #4FA8DE; --c3: #E8975A; --c4: #7CD3B0; --c5: #B79CE8; --c6: #E57F9E;
+    --good: #6FCF97; --warn: #E6C468; --bad: #E57373;
+    position: relative; min-height: 100vh;
+    background: var(--bg);
+    padding: 56px 0 110px;
+  }
+  .dash .sr-only{
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+  }
+  .dash-head h1{
+    font-family: var(--font-display), serif; font-weight: 400;
+    font-size: clamp(30px, 4.5vw, 48px); line-height: 1.1; margin: 0 0 8px;
+  }
+  .dash-status{ margin: 0 0 28px; font-size: 13px; color: var(--paper-dim); min-height: 1.4em; }
+
+  /* ----- gate */
+  .gate{ max-width: 480px; padding: 32px; border-radius: var(--radius-glass); }
+  .gate h2{ font-family: var(--font-display), serif; font-weight: 400; font-size: 24px; margin: 0 0 8px; }
+  .gate p{ color: var(--paper-dim); font-size: 14px; line-height: 1.6; margin: 0 0 18px; }
+  .gate code{ font-family: var(--font-mono), monospace; color: var(--brass); font-size: 13px; }
+  .gate form{ display: flex; gap: 10px; flex-wrap: wrap; }
+  .gate input{
+    flex: 1 1 220px; min-width: 0; padding: 13px 14px;
+    background: var(--panel); color: var(--paper); border: 1px solid var(--line-strong); border-radius: var(--radius);
+    font: inherit;
+  }
+  .gate input:focus-visible{ outline: 2px solid var(--brass); outline-offset: 2px; }
+  .gate-error{ margin: 14px 0 0 !important; color: var(--bad) !important; }
+  .gate-demo{ margin-top: 18px; }
+
+  /* ----- controls */
+  .demo-banner{
+    margin: 0 0 20px; padding: 12px 16px; border: 1px dashed var(--brass); color: var(--brass);
+    font-family: var(--font-mono), monospace; font-size: 12px; letter-spacing: 0.04em; border-radius: var(--radius);
+  }
+  .controls{ display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; margin-bottom: 26px; }
+  .control-group{ display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip{
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 14px; border: 1px solid var(--line-strong); border-radius: 999px;
+    background: transparent; color: var(--paper-dim); cursor: pointer;
+    font-family: var(--font-mono), monospace; font-size: 12px; letter-spacing: 0.03em;
+    transition: color .2s ease, border-color .2s ease, background .2s ease;
+  }
+  .chip:hover{ color: var(--paper); border-color: var(--paper-dim); }
+  .chip[aria-pressed="true"]{ color: var(--bg); background: var(--brass); border-color: var(--brass); }
+  /* The series toggles carry a colour swatch, so "on" is an outline, not a brass fill that would swallow it. */
+  .chips .chip[aria-pressed="true"]{ color: var(--paper); background: rgba(234,242,248,0.08); border-color: var(--paper-dim); }
+  .chip:focus-visible, .select:focus-visible{ outline: 2px solid var(--brass); outline-offset: 2px; }
+  .ignore{ display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--paper-dim); cursor: pointer; }
+  .ignore input{ accent-color: var(--brass); }
+
+  /* ----- kpis */
+  /* 8 tiles: four across, then two, so the grid never ends on an empty cell. */
+  .kpis{ display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; background: var(--line); border: 1px solid var(--line); margin-bottom: 20px; }
+  @media (max-width: 900px){ .kpis{ grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .kpi{ background: var(--bg); padding: 22px 22px 20px; }
+  .kpi-label{ font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--paper-dim); margin-bottom: 8px; }
+  .kpi-value{ font-family: var(--font-display), serif; font-size: 36px; line-height: 1; color: var(--paper); margin-bottom: 8px; }
+  .kpi-sub{ font-size: 12px; line-height: 1.4; color: var(--paper-dim); min-height: 1.4em; }
+
+  /* ----- panels */
+  .grid{ display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 20px; }
+  .panel{ grid-column: span 12; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; min-width: 0; }
+  .panel[hidden]{ display: none; }
+  @media (min-width: 960px){
+    .span-4{ grid-column: span 4; } .span-6{ grid-column: span 6; } .span-8{ grid-column: span 8; }
+  }
+  .panel h2{ font-family: var(--font-display), serif; font-weight: 400; font-size: 21px; color: var(--paper); margin: 0 0 6px; }
+  .panel h3{ font-family: var(--font-mono), monospace; font-weight: 400; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--brass); margin: 24px 0 10px; }
+  .panel .hint{ font-size: 12px; line-height: 1.5; color: var(--paper-dim); margin: 0 0 16px; }
+  .panel-head{ display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .select{
+    padding: 7px 10px; background: var(--bg); color: var(--paper); border: 1px solid var(--line-strong); border-radius: var(--radius);
+    font: inherit; font-size: 12px; max-width: 100%;
+  }
+  .chips{ display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 14px; }
+  .dash-empty{ margin: 8px 0; font-size: 13px; line-height: 1.55; color: var(--paper-dim); }
+
+  /* ----- charts */
+  .chart-host{ position: relative; }
+  .chart-svg{ display: block; width: 100%; height: auto; overflow: visible; }
+  .chart-grid{ stroke: var(--line); stroke-width: 1; }
+  .chart-tick{ fill: var(--paper-dim); font-family: var(--font-mono), monospace; font-size: 11px; }
+  .chart-line{ fill: none; stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+  .chart-area{ opacity: 0.12; }
+  .chart-guide{ stroke: var(--paper-dim); stroke-width: 1; stroke-dasharray: 3 3; }
+  .chart-dot{ stroke: var(--panel); stroke-width: 2; }
+  .chart-tip{
+    position: absolute; top: 8px; z-index: 2; pointer-events: none; min-width: 130px;
+    padding: 10px 12px; background: var(--bg); border: 1px solid var(--line-strong); border-radius: var(--radius);
+    font-size: 12px; line-height: 1.5; color: var(--paper);
+  }
+  .chart-tip-row{ display: flex; align-items: center; gap: 8px; color: var(--paper-dim); }
+  .chart-swatch{ display: inline-block; width: 10px; height: 10px; border-radius: 2px; flex: none; }
+
+  .bars, .funnel{ list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+  .bar-head{ display: flex; justify-content: space-between; gap: 12px; font-size: 13px; margin-bottom: 6px; }
+  .bar-label{ color: var(--paper); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .bar-value{ font-family: var(--font-mono), monospace; font-size: 12px; color: var(--paper-dim); flex: none; }
+  .bar-track{ height: 6px; background: rgba(234,242,248,0.07); border-radius: 3px; overflow: hidden; }
+  .bar-fill{ height: 100%; background: var(--c1); border-radius: 3px; }
+  .bar-sub{ margin-top: 5px; font-size: 11px; color: var(--paper-dim); }
+
+  .donut{ display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  .donut-svg{ width: 150px; height: 150px; flex: none; transform: rotate(0deg); }
+  .donut-ring{ fill: none; stroke: rgba(234,242,248,0.07); stroke-width: 5; }
+  .donut-arc{ fill: none; stroke-width: 5; }
+  .donut-center{ fill: var(--paper); font-family: var(--font-display), serif; font-size: 7px; }
+  .donut-sub{ fill: var(--paper-dim); font-family: var(--font-mono), monospace; font-size: 2.6px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .donut-legend{ list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 13px; flex: 1 1 140px; min-width: 0; }
+  .donut-legend li{ display: flex; align-items: center; gap: 8px; }
+  .donut-name{ color: var(--paper); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .donut-val{ font-family: var(--font-mono), monospace; font-size: 11px; color: var(--paper-dim); flex: none; }
+
+  .heat{ display: grid; grid-template-columns: 36px repeat(24, minmax(0, 1fr)); gap: 3px; align-items: center; }
+  .heat-hour{ font-family: var(--font-mono), monospace; font-size: 10px; color: var(--paper-dim); text-align: center; }
+  .heat-day{ font-family: var(--font-mono), monospace; font-size: 11px; color: var(--paper-dim); }
+  .heat-cell{ display: block; aspect-ratio: 1; border-radius: 3px; min-height: 12px; }
+
+  .vitals{ display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 28px; }
+  .vital-head{ font-size: 14px; color: var(--paper); margin-bottom: 4px; }
+  .vital-avg{ font-family: var(--font-mono), monospace; font-size: 12px; color: var(--paper-dim); margin-bottom: 12px; }
+  .stack{ display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: rgba(234,242,248,0.07); }
+  .stack-seg{ height: 100%; }
+  .stack-legend{ list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--paper-dim); }
+  .stack-legend li{ display: flex; align-items: center; gap: 6px; }
+
+  .table-scroll{ overflow-x: auto; }
+  .dash-table{ width: 100%; border-collapse: collapse; font-size: 13px; }
+  .dash-table th{ text-align: left; font-family: var(--font-mono), monospace; font-weight: 400; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--paper-dim); padding: 0 12px 10px 0; border-bottom: 1px solid var(--line-strong); white-space: nowrap; }
+  .dash-table td{ padding: 10px 12px 10px 0; border-bottom: 1px solid var(--line); color: var(--paper); vertical-align: top; overflow-wrap: anywhere; }
+  .dash-table .num{ text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; padding-right: 0; padding-left: 12px; }
+  .dash-table td.num{ font-family: var(--font-mono), monospace; font-size: 12px; color: var(--paper-dim); }
+
+  /* ----- guide */
+  .guide{ margin-top: 28px; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 24px; background: var(--panel); }
+  .guide summary{ cursor: pointer; font-family: var(--font-mono), monospace; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--brass); }
+  .guide-body{ margin-top: 16px; max-width: 760px; }
+  .guide-body h3{ font-family: var(--font-mono), monospace; font-weight: 400; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--paper); margin: 22px 0 8px; }
+  .guide-body p, .guide-body li{ font-size: 14px; line-height: 1.65; color: var(--paper-dim); }
+  .guide-body ul{ margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+  .guide-body strong{ color: var(--paper); font-weight: 500; }
+
+  @media (max-width: 640px){
+    .dash{ padding-top: 40px; }
+    .panel{ padding: 18px; }
+    .kpi{ padding: 16px; }
+    .kpi-value{ font-size: 30px; }
+    .heat{ grid-template-columns: 28px repeat(24, minmax(0, 1fr)); gap: 2px; }
+  }
+</style>

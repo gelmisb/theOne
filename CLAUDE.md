@@ -20,6 +20,9 @@ between the two, so treat this as the handoff.
   Sprockets)
 - `src/scripts/animations.ts` - all GSAP/ScrollTrigger logic, one exported
   `init*()` function per effect, called from `index.astro`'s inline script
+- `src/lib/analytics/`, `src/scripts/{analytics,consent,dashboard,charts}.ts`,
+  `netlify/functions/{collect,stats}.ts`, `src/pages/{analytics,privacy}.astro` -
+  the analytics system; see "Analytics" below
 - `src/scripts/lenis.ts` - Lenis smooth-scroll setup, exports `getLenis()`
   so other modules can route programmatic scrolls through it
 - `src/layouts/Layout.astro` - holds the persistent fixed background
@@ -75,6 +78,42 @@ pinned intro, persist-bg fade, hero parallax, per-section fade/scale in
 feel, but it's also why scroll performance matters - Lenis was added
 specifically because this many concurrent scrub animations reading raw,
 un-smoothed scroll position felt choppy.
+
+## Analytics (first-party, consent-gated)
+
+Built 2026-10-23: a cookie-free tracker, two Netlify functions and a private
+dashboard at `/analytics/`. The founder chose "own collector" over a hosted tool
+and "full tracking behind consent" over anonymous-only. Rules that matter:
+
+- **Nothing is tracked until the visitor clicks Accept.** `src/scripts/consent.ts`
+  holds the choice under `hv-consent-v2`; the old `hv-cookie-consent` key meant
+  "essential only" and must never be read as consent. Global Privacy Control /
+  Do Not Track and the dashboard's "ignore my visits" flag (`hv-ignore`) beat
+  consent. `/analytics*` is never tracked.
+- **Flow:** `src/scripts/analytics.ts` (called from Layout's `astro:page-load`
+  handler) -> `POST /api/collect` (`netlify/functions/collect.ts`) -> one raw
+  JSON blob per batch in the `analytics` Netlify Blobs store -> `stats.ts`
+  folds each past Dublin day into a cached daily rollup (no visitor IDs in it)
+  and serves `/api/stats`, locked behind the `ANALYTICS_TOKEN` env var. All
+  logic is in `src/lib/analytics/` (`core.ts` sanitising + rollup, `report.ts`
+  merge, `server.ts` handlers written against a store interface, `demo.ts`
+  sample data). The functions are thin wrappers - test logic there.
+- **`ANALYTICS_TOKEN` must be set in Netlify** (Site configuration >
+  Environment variables; `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`)
+  or `/api/stats` answers 503. There is no Netlify CLI here, so the functions
+  can't run locally: `astro dev` has no `/api/*`, and the dashboard's
+  `?demo=1` (dev only) shows sample data instead.
+- **Raw records are purged after `RAW_RETENTION_DAYS` (30)**, once their
+  rollup exists. `/privacy/` states that number and the full list of what is
+  collected - change the page whenever the tracker or retention changes.
+- **Treat every event as hostile.** Strings are sanitised and every counter map
+  is capped (`MAP_CAP`) in `core.ts`; the dashboard writes labels with
+  `textContent` only (`scripts/charts.ts`). Keep it that way.
+- **A "day" is a Europe/Dublin day** everywhere (`dublinDay`).
+- **Dashboard panels are `<div>`s, not `<section>`s on purpose:**
+  `initSectionTransitions` scales and fades every `<section>` on the page.
+- `npm install <pkg>` prunes `@astrojs/check` and `typescript` (installed but
+  not in package.json) - restore with `npm install --no-save @astrojs/check typescript`.
 
 ## Known open items
 

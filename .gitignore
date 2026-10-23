@@ -14,3 +14,4 @@ tools/raw-footage/
 .mcp.json
 .playwright-mcp/
 .impeccable/live/
+.env.local

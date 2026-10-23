@@ -39,5 +39,6 @@ const stripHtmlComments = {
 // https://astro.build/config
 export default defineConfig({
   site: 'https://horizonvantage.ie',
-  integrations: [sitemap(), stripHtmlComments],
+  // /analytics/ is a private owner dashboard: noindex, and kept out of the sitemap too.
+  integrations: [sitemap({ filter: (page) => !page.includes('/analytics') }), stripHtmlComments],
 });

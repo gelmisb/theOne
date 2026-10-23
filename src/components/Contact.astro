@@ -1,3 +1,7 @@
+---
+import CallLink from './CallLink.astro';
+---
+
 <!-- Now the sole content of its own page (src/pages/contact.astro) rather
      than a homepage section - moved there so every "Get a Free Listing Audit" /
      "Get Your Listing Fixed" CTA across the standalone pages lands
@@ -50,11 +54,15 @@
         <div>
           <label for="business-type">Business type</label>
           <select id="business-type" name="business_type">
+            <option value="">Select one</option>
+            <option>Café, restaurant or bakery</option>
+            <option>Barbershop, salon or gym</option>
+            <option>Shop or retailer</option>
+            <option>Food and drink producer</option>
             <option>Holiday let</option>
             <option>Glamping</option>
             <option>B&amp;B or guesthouse</option>
             <option>Activity provider</option>
-            <option>Food and drink producer</option>
             <option>Other</option>
           </select>
         </div>
@@ -109,6 +117,8 @@
       </p>
       <p class="form-note" id="form-hint">Usually replies within one business day.</p>
     </form>
+    <CallLink class="contact-call" lead="Already had your audit?" />
+
   </div>
 </section>
 
@@ -165,8 +175,11 @@
       error?.setAttribute('hidden', '');
       hint?.setAttribute('hidden', '');
       submitBtn?.setAttribute('style', 'display:none;');
+      // Tells the analytics tracker (a no-op unless the visitor consented).
+      document.dispatchEvent(new CustomEvent('hv:track', { detail: { type: 'form', form: 'enquiry-form', action: 'ok' } }));
     } catch {
       error?.removeAttribute('hidden');
+      document.dispatchEvent(new CustomEvent('hv:track', { detail: { type: 'form', form: 'enquiry-form', action: 'err' } }));
     }
   });
 </script>
@@ -198,6 +211,7 @@
     border-radius: var(--radius-glass);
   }
   @media (max-width: 640px){ .cta-form{ padding: 24px 20px; } }
+  .cta-section :global(.contact-call){ max-width: 560px; margin: 24px auto 0; text-align: center; }
   .cta-form .row2{ display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   @media (max-width: 560px){ .cta-form .row2{ grid-template-columns: 1fr; } }
   .cta-form label{

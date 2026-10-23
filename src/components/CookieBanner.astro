@@ -1,44 +1,74 @@
 ---
-// Honest, minimal consent notice - this site currently sets no cookies
-// beyond what's strictly necessary to run (no analytics, no ad trackers),
-// so there's nothing real to offer an Accept/Reject choice between. If
-// analytics or ad pixels are added later, gate their init calls behind
-// `localStorage.getItem('hv-cookie-consent') === 'accepted'` and swap this
-// for a real two-choice banner at that point.
+// A real two-choice consent banner, replacing the old notice-only one (which
+// said "no analytics" - no longer true once the visitor opts in).
 //
-// hv-newsletter-subscribed (initNewsletterSignup, animations.ts) joins
-// hv-cookie-consent (this banner's own flag) in the same "strictly
-// necessary, functional only" category - it just remembers that this
-// browser already signed up, so the form isn't shown again, and isn't used
-// for tracking or profiling. Mentioned explicitly below rather than left
-// implicit under "essential cookies", since it's real, user-visible storage
-// and the whole point of this banner is not saying less than what's true.
+// - Both buttons share one style on purpose: declining must be exactly as easy
+//   and as visible as accepting.
+// - Nothing is tracked until "Accept analytics" is clicked; see
+//   scripts/analytics.ts for what is recorded and /privacy/ for the wording.
+// - The choice lives in localStorage under `hv-consent-v2` (scripts/consent.ts).
+//   The old `hv-cookie-consent` flag is deleted, never read as consent: that
+//   click only ever meant "essential cookies only".
+// - Essential storage is always on and unaffected: this choice itself, and
+//   hv-newsletter-subscribed (initNewsletterSignup, animations.ts), which only
+//   remembers that this browser already signed up.
+// - Re-opened from the footer's "Cookie settings" via the hv:open-consent event.
 ---
 
-<div class="cookie-banner glass" id="cookie-banner" hidden>
+<div class="cookie-banner glass" id="cookie-banner" role="region" aria-label="Cookie choices" hidden>
   <div class="cookie-banner-inner wrap">
     <p class="cookie-banner-text">
-      This site runs on essential cookies only - to remember this choice, and whether you've
-      signed up for updates. No trackers, no ads, no analytics.
+      Can we count visits? With your OK we record which pages and links get used, how far you scroll and where
+      visitors come from, so we can see what's useful. It stays in our own Netlify account, is never sold or
+      shared, and there are no ads or third-party trackers. Essential storage (this choice, newsletter sign-up)
+      is always on.{' '}
+      <a href="/privacy/">How it works</a>
     </p>
-    <button type="button" class="btn btn-primary cookie-banner-accept" id="cookie-banner-accept">Got it</button>
+    <div class="cookie-banner-actions">
+      <button type="button" class="btn btn-ghost" data-consent="granted">Accept analytics</button>
+      <button type="button" class="btn btn-ghost" data-consent="denied">Essential only</button>
+    </div>
   </div>
 </div>
 
 <script>
-  const CONSENT_KEY = 'hv-cookie-consent';
-  const banner = document.getElementById('cookie-banner');
-  const acceptBtn = document.getElementById('cookie-banner-accept');
+  import { clearLegacyConsent, getConsent, setConsent } from '../scripts/consent';
 
-  if (banner && !localStorage.getItem(CONSENT_KEY)) {
-    banner.removeAttribute('hidden');
-    requestAnimationFrame(() => banner.classList.add('is-visible'));
+  // The banner element is re-rendered with every page (Astro swaps the body),
+  // so look it up each time instead of holding a reference.
+  const banner = () => document.getElementById('cookie-banner');
+
+  function show() {
+    const el = banner();
+    if (!el) return;
+    el.removeAttribute('hidden');
+    requestAnimationFrame(() => el.classList.add('is-visible'));
   }
 
-  acceptBtn?.addEventListener('click', () => {
-    localStorage.setItem(CONSENT_KEY, 'accepted');
-    banner?.classList.remove('is-visible');
-    banner?.addEventListener('transitionend', () => banner.setAttribute('hidden', ''), { once: true });
+  function hide() {
+    const el = banner();
+    if (!el) return;
+    el.classList.remove('is-visible');
+    el.addEventListener('transitionend', () => el.setAttribute('hidden', ''), { once: true });
+  }
+
+  const sync = () => {
+    if (getConsent() === null) show();
+  };
+
+  clearLegacyConsent();
+  sync();
+  document.addEventListener('astro:page-load', sync);
+  document.addEventListener('hv:open-consent', show);
+  document.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement | null;
+    const choice = t?.closest<HTMLElement>('[data-consent]')?.dataset.consent;
+    if (choice === 'granted' || choice === 'denied') {
+      setConsent(choice);
+      hide();
+    } else if (t?.closest('[data-open-consent]')) {
+      show();
+    }
   });
 </script>
 
@@ -49,6 +79,9 @@
     padding: 18px 0;
     padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
     border-left: none; border-right: none; border-bottom: none;
+    /* Near-opaque: the shared .glass fill let the footer's bottom links show through
+       the consent text and buttons whenever the banner sat over them. */
+    background: rgba(10, 14, 19, 0.96);
     transform: translateY(100%);
     transition: transform 0.4s ease;
   }
@@ -58,10 +91,13 @@
     flex-wrap: wrap;
   }
   .cookie-banner-text{
-    margin: 0; font-size: 13px; line-height: 1.5; color: var(--paper-dim); max-width: 640px;
+    margin: 0; font-size: 13px; line-height: 1.5; color: var(--paper-dim); max-width: 700px;
   }
-  .cookie-banner-accept{ flex-shrink: 0; padding: 12px 22px; }
+  .cookie-banner-text a{ color: var(--brass); text-decoration: underline; text-underline-offset: 2px; }
+  .cookie-banner-actions{ display: flex; gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
+  .cookie-banner-actions .btn{ padding: 12px 22px; }
   @media (max-width: 560px){
     .cookie-banner-inner{ flex-direction: column; align-items: stretch; text-align: center; }
+    .cookie-banner-actions{ justify-content: center; }
   }
 </style>

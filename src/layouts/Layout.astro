@@ -16,7 +16,7 @@ interface Props {
 
 const {
   title = 'Horizon Vantage | Photo, Video & Websites in Wicklow',
-  description = 'Honest, on-site photography and video for Wicklow stays and food producers, built into a fast website that helps guests book direct.',
+  description = 'Honest on-site photography and video for cafés, shops, salons, stays and food producers, built into a fast website that helps customers book direct.',
   noindex = false,
 } = Astro.props;
 
@@ -99,6 +99,7 @@ const persistImage = Object.values(persistImages)[0]?.default;
         <div class="persist-bg-scrim"></div>
       </div>
     )}
+    {Astro.url.pathname !== '/' && <a href="#main-content" class="skip-link">Skip to content</a>}
     <slot />
     <div class="grain" aria-hidden="true" transition:persist></div>
     <div class="vignette" aria-hidden="true" transition:persist></div>
@@ -154,6 +155,9 @@ const persistImage = Object.values(persistImages)[0]?.default;
     initSectionTransitions,
   } from '../scripts/animations';
   import { initSmoothScroll } from '../scripts/lenis';
+  // First-party analytics - inert until the visitor accepts it in the cookie
+  // banner. Binds its own listeners once; this call just marks a page view.
+  import { initAnalytics } from '../scripts/analytics';
 
   document.addEventListener('astro:before-swap', teardownForTransition);
   document.addEventListener('astro:page-load', () => {
@@ -175,6 +179,7 @@ const persistImage = Object.values(persistImages)[0]?.default;
     initScrollNav();
     initHeadingSplitReveal();
     initSectionTransitions();
+    initAnalytics();
   });
 </script>
 

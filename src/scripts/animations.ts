@@ -882,8 +882,11 @@ export function initNewsletterSignup() {
       localStorage.setItem(NEWSLETTER_SUBSCRIBED_KEY, 'true');
       errorEl?.setAttribute('hidden', '');
       showThanks(false);
+      // Tells the analytics tracker (a no-op unless the visitor consented).
+      document.dispatchEvent(new CustomEvent('hv:track', { detail: { type: 'form', form: 'newsletter-form', action: 'ok' } }));
     } catch {
       errorEl?.removeAttribute('hidden');
+      document.dispatchEvent(new CustomEvent('hv:track', { detail: { type: 'form', form: 'newsletter-form', action: 'err' } }));
     }
   });
 }
