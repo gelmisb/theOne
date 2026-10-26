@@ -1,4 +1,5 @@
 import type { Handler } from '@netlify/functions';
+import { buildConfirmationEmail } from '../lib/confirmationEmail';
 
 // Contact form (Contact.astro) email delivery. Netlify Forms only stores
 // submissions - it sends no email until a notification is configured in the
@@ -91,16 +92,17 @@ export const handler: Handler = async (event) => {
 
   // Visitor confirmation is best-effort - the enquiry already reached us.
   try {
+    const confirmation = buildConfirmationEmail(
+      name,
+      rows.filter(([k]) => k !== 'Name' && k !== 'Email').map(([label, value]) => ({ label, value }))
+    );
     const r = await sendEmail({
       sender,
       to: [{ email, name }],
       replyTo: { email: NOTIFY_EMAIL },
       subject: 'Thanks for your enquiry - Horizon Vantage',
-      htmlContent: `<div style="font-family:sans-serif;max-width:480px;color:#1a1a1a">
-        <h1 style="font-size:22px;font-weight:600">Thanks, ${esc(name)} - your enquiry is in.</h1>
-        <p style="font-size:15px;line-height:1.6">We'll reply within one business day. If you'd like to add anything in the meantime, just reply to this email.</p>
-        <p style="font-size:15px;line-height:1.6">- Horizon Vantage</p>
-      </div>`,
+      htmlContent: confirmation.html,
+      textContent: confirmation.text,
     });
     if (!r.ok) console.error('enquiry: confirmation email failed', r.status, await r.text());
   } catch (err) {
