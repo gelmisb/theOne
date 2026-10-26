@@ -14,6 +14,8 @@ const photoModules = import.meta.glob<{ default: ImageMetadata }>(
     '!/src/assets/photos/portfolio/IMG_8621.jpg',
     '!/src/assets/photos/portfolio/IMG_8760.jpg',
     '!/src/assets/photos/portfolio/IMG_4392.jpg',
+    '!/src/assets/photos/portfolio/counter-service.jpg',
+    '!/src/assets/photos/portfolio/training-floor.jpg',
     '!/src/assets/photos/portfolio/gelmis-bartulis-XIfXPCAzR0Q-unsplash.jpg',
   ],
   { eager: true }
@@ -33,6 +35,8 @@ const EXCLUDED_FILES = new Set([
   'IMG_8621.jpg', // gb Captured watermark, pending crop
   'IMG_8760.jpg', // gb Captured watermark, pending crop
   'gelmis-bartulis-XIfXPCAzR0Q-unsplash.jpg', // personal portrait shoot, not local-business client work
+  'counter-service.jpg', // AI-generated placeholder - never shown as real work (PRODUCT.md)
+  'training-floor.jpg', // AI-generated placeholder - never shown as real work (PRODUCT.md)
   'IMG_4392.jpg', // visible "Gelmis Bartulis Photography" signature watermark bottom-right, pending crop - same issue as IMG_8621/IMG_8760 above
 ]);
 
@@ -48,6 +52,11 @@ const CAPTION_OVERRIDES: Record<string, string> = {
   'IMG_3033.jpg': 'Motorcycle Feature',
   'IMG_8758.jpg': 'Car Feature',
   'IMG_5093.jpg': 'Local Produce',
+  'IMG_1436.JPG': 'Milan Galleria',
+  'IMG_4721.jpg': 'Costa Corner',
+  'furry-buts-buddy-care.webp.webp': 'Furry Butts - Buddy Care',
+  'furry-buts-goods.webp.webp': 'Furry Butts - Goods',
+  'village-pet-shop-front.webp.webp': 'Village Pet Shop Front',
   'gelmis-bartulis-aFjxblNID7Y-unsplash.jpg': 'Portrait Session',
   'gelmis-bartulis-UaFUhxyGNFY-unsplash.jpg': 'Touring Motorcycle',
 };
@@ -56,35 +65,35 @@ const CAPTION_OVERRIDES: Record<string, string> = {
 // real pixel dimensions up front to size its viewer without a jump once the
 // image loads) - capped at 1600px wide rather than serving the original
 // multi-megapixel camera file into a modal nobody's zooming past that.
+// Founder's own shots rather than client work - tagged on the tile so the
+// section's "client shoots" claim stays true. Add a filename here for any
+// other personal/non-client photo.
+const PERSONAL_FILES = new Set([
+  'IMG_1436.JPG',
+  'gelmis-bartulis-aFjxblNID7Y-unsplash.jpg',
+  'gelmis-bartulis-UaFUhxyGNFY-unsplash.jpg',
+]);
+
 const photos = await Promise.all(
   Object.entries(photoModules)
     .filter(([path]) => !EXCLUDED_FILES.has(path.split('/').pop()!))
     .sort(([a], [b]) => a.localeCompare(b))
     .map(async ([path, mod]) => {
       const rawName = path.split('/').pop()!;
-      const filename = rawName.replace(/\.[^.]+$/, '');
+      const filename = rawName.replace(/(\.[a-z0-9]+)+$/i, '');
       const caption =
         CAPTION_OVERRIDES[rawName] ?? filename.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
       // quality 72, not the default: at 1600px the detailed shots (the Milan
       // arcade, the training-floor scene) came out at 4MB+ each, loaded when
       // someone opens a photo - on a phone, over mobile data. Visually the same.
       const full = await getImage({ src: mod.default, width: 1600, quality: 72 });
-      return { src: mod.default, caption, fullSrc: full.src, fullWidth: full.attributes.width, fullHeight: full.attributes.height };
+      return { src: mod.default, caption, personal: PERSONAL_FILES.has(rawName), fullSrc: full.src, fullWidth: full.attributes.width, fullHeight: full.attributes.height };
     })
 );
 
 const hasPhotos = photos.length > 0;
 const frameCount = 10;
 const frames = Array.from({ length: frameCount }, (_, i) => String(i + 1).padStart(3, '0'));
-
-// Pads the grid out to a full row at the widest (5-column) breakpoint
-// instead of ending mid-row - "More Soon" tiles rather than an abrupt gap,
-// same idea as Web Projects' empty-state skeleton cards. Narrower
-// breakpoints (3-col, 2-col) won't line up as evenly against this same
-// count, but that's the existing, already-accepted trade-off the swatch-
-// frame empty state below has always had - not something this introduces.
-const PLACEHOLDER_COLS = 5;
-const placeholderCount = hasPhotos ? (PLACEHOLDER_COLS - (photos.length % PLACEHOLDER_COLS)) % PLACEHOLDER_COLS : 0;
 
 // On-site video clips. Add entries here the same way photos live in
 // src/assets/photos/portfolio - poster is optional (falls back to a plain
@@ -106,7 +115,7 @@ const hasVideos = videos.length > 0;
       )}
       <p class="section-sub">
         {hasPhotos
-          ? 'A selection of founder shoots for real local businesses, shown here with their permission.'
+          ? 'A selection of founder shoots for local businesses, shown with their permission, alongside a few personal pieces marked as such.'
           : "This studio is relaunching, not starting cold - the founder shoots below are being booked now, with real local businesses, shown here with their permission as soon as galleries are delivered."}
       </p>
     </div>
@@ -134,7 +143,7 @@ const hasVideos = videos.length > 0;
                   sizes="(max-width: 560px) 50vw, (max-width: 900px) 33vw, 20vw"
                   loading="lazy"
                 />
-                <span class="caption mono">{p.caption}</span>
+                <span class="caption mono">{p.caption}{p.personal && ' - personal work'}</span>
               </a>
             ))
           : frames.map((n, i) => (
@@ -144,13 +153,6 @@ const hasVideos = videos.length > 0;
                 <span class="x">-</span>
               </div>
             ))}
-        {hasPhotos && Array.from({ length: placeholderCount }).map((_, i) => (
-          <div class="frame frame-placeholder" style={`--hue-shift:${(i * 13) % 40}deg`}>
-            <span class="fnum">{String(photos.length + i + 1).padStart(3, '0')}</span>
-            <div class="swatch"></div>
-            <span class="placeholder-label mono">More Soon</span>
-          </div>
-        ))}
       </div>
       <div class="cs-note">
         {hasPhotos ? (
