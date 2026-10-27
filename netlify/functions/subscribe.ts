@@ -1,4 +1,5 @@
 import type { Handler } from '@netlify/functions';
+import { buildWelcomeEmail } from '../lib/welcomeEmail';
 
 // Brevo (formerly Sendinblue) - founder's pick for the newsletter signup
 // (NewsletterSignup.astro), chosen over hand-building transactional email
@@ -76,28 +77,20 @@ export const handler: Handler = async (event) => {
   // here - e.g. the sender identity not verified in Brevo yet - shouldn't
   // turn a real success into an error message for the visitor.
   try {
-    await fetch('https://api.brevo.com/v3/smtp/email', {
+    const welcome = buildWelcomeEmail();
+    const welcomeRes = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'api-key': BREVO_API_KEY },
       body: JSON.stringify({
         sender: { name: 'Horizon Vantage', email: BREVO_SENDER_EMAIL },
         to: [{ email }],
+        replyTo: { email: 'info@horizonvantage.ie' },
         subject: "You're on the list - Horizon Vantage",
-        htmlContent: `
-          <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #1a1a1a;">
-            <h1 style="font-size: 22px; font-weight: 600;">Thanks for signing up.</h1>
-            <p style="font-size: 15px; line-height: 1.6;">
-              You'll hear from Horizon Vantage occasionally with new work, offers, and updates -
-              never spam, and you can unsubscribe any time from the link in any email we send.
-            </p>
-            <p style="font-size: 15px; line-height: 1.6;">
-              In the meantime, if you're thinking about a shoot or a website, just reply to this
-              email - it reaches the founder directly.
-            </p>
-          </div>
-        `,
+        htmlContent: welcome.html,
+        textContent: welcome.text,
       }),
     });
+    if (!welcomeRes.ok) console.error('Brevo welcome email failed:', welcomeRes.status, await welcomeRes.text());
   } catch (err) {
     console.error('Brevo welcome email failed (contact was still subscribed):', err);
   }
