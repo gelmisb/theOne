@@ -20,7 +20,7 @@ import logoWatermark from '../assets/photos/logo/logo_transparent.png';
 // (plus the hero, below) - add a photo to both, by exact filename including
 // its extension. Every file here is already public in Portfolio.astro.
 const rollPhotoModules = import.meta.glob<{ default: ImageMetadata }>(
-  '/src/assets/photos/portfolio/{IMG_1643.jpg,training-floor.jpg,furry-buts-goods.webp.webp,product advertisement.jpg,Barbershops.jpg,village-pet-shop-front.webp.webp,IMG_0863.jpg,IMG_4721.jpg,furry-buts-buddy-care.webp.webp,IMG_0839.jpg,IMG_1436.JPG,motorcycle-rider.jpg,consumables.jpg}',
+  '/src/assets/photos/portfolio/{IMG_1643.jpg,IMG_3033.jpg,furry-buts-goods.webp.webp,product advertisement.jpg,Barbershops.jpg,village-pet-shop-front.webp.webp,IMG_0863.jpg,IMG_4721.jpg,furry-buts-buddy-care.webp.webp,IMG_0839.jpg,IMG_1436.JPG,motorcycle-rider.jpg,consumables.jpg}',
   { eager: true }
 );
 
@@ -45,7 +45,7 @@ const HERO_PHOTO_NAME = 'persist-bg';
 // visitor can see it, and repeats (14 frames / 7000px apart) land only in the
 // hidden frames. A longer list would not show more: the extra photos would
 // fall in the hidden frames. Benched for that reason, and still in the
-// Portfolio grid: IMG_3033.jpg, counter-service.jpg and the two
+// Portfolio grid: the two
 // gelmis-bartulis-*-unsplash.jpg shots (lifestyle / personal-portrait work,
 // furthest from PRODUCT.md's "real photos of your business" pitch). To bring
 // one back, swap it for another entry here and in the glob above.
@@ -57,7 +57,7 @@ const HERO_PHOTO_NAME = 'persist-bg';
 // barbershop / pet-shop front / café / Costa shots.
 const ROLL_ORDER = [
   'IMG_1643.jpg',
-  'training-floor.jpg',
+  'IMG_3033.jpg',
   'furry-buts-goods.webp.webp',
   'product advertisement.jpg',
   'Barbershops.jpg',
