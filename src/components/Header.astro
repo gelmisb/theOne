@@ -149,6 +149,18 @@ import logoMark from '../assets/photos/logo/logo_transparent.png';
       -webkit-backdrop-filter: blur(20px) saturate(1.4);
       padding: 110px 28px 40px;
     }
+    /* The open panel is a full-screen layer inside .nav-shell's stacking
+       context, painted above its siblings - which covered the brand and the
+       burger/close button, leaving no way to close the menu. Lift both above
+       the panel. Also drop .nav-shell's backdrop-filter while open: a
+       filtered ancestor becomes the containing block for position:fixed
+       descendants, which would shrink the "full-screen" panel to the header
+       bar once the page has scrolled. */
+    header:global(.nav-open) .brand,
+    header:global(.nav-open) .nav-toggle{ position: relative; z-index: 41; }
+    header:global(.nav-open) .nav-shell{
+      backdrop-filter: none; -webkit-backdrop-filter: none;
+    }
     header:global(.nav-open) .navlinks a:not(.nav-cta){
       display: block;
       padding: 18px 0;
