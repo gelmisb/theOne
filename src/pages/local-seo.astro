@@ -7,7 +7,7 @@ import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
 const heroImages = import.meta.glob<{ default: ImageMetadata }>(
-  '/src/assets/photos/portfolio/counter-service.jpg',
+  '/src/assets/photos/portfolio/village-pet-shop-front.webp.webp',
   { eager: true }
 );
 const heroImage = Object.values(heroImages)[0]?.default;
@@ -35,7 +35,7 @@ const rows = [
 const steps = [
   { n: '01', t: 'Claim & verify', d: "Confirm the listing is claimed, verified, and set to the correct business category - the single most common thing local listings get wrong." },
   { n: '02', t: 'Fix NAP consistency', d: "Name, address, and phone number matched exactly across your website, Google listing, and any other directories you're on. Mismatches quietly hurt ranking." },
-  { n: '03', t: 'Load it with real photos', d: "Listings with real, recent, on-site photos consistently out-perform ones leaning on a logo and a stock banner - this is where the photography work does double duty." },
+  { n: '03', t: 'Load it with real photos', d: "Google's own guidance is to add real, recent photos of your business - they help people decide before they visit, and this is where the photography work does double duty." },
   { n: '04', t: 'Build a review habit', d: "An NFC tap-to-review card makes it a five-second, no-typing job for any customer to leave an honest review." },
 ];
 ---

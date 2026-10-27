@@ -1,11 +1,10 @@
 ---
 import '../styles/global.css';
-import { Image, getImage } from 'astro:assets';
+import { Image } from 'astro:assets';
 import { ClientRouter } from 'astro:transitions';
 import type { ImageMetadata } from 'astro';
 import CookieBanner from '../components/CookieBanner.astro';
 import LocalBusinessSchema from '../components/LocalBusinessSchema.astro';
-import logoDark from '../assets/photos/logo/logo_dark.png';
 
 interface Props {
   title?: string;
@@ -22,20 +21,11 @@ const {
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
-// The full dark-background logo lockup (mark + wordmark + tagline) as the
-// social share preview - replaces the old portal-intro artwork now that a
-// real branded asset exists. fit: 'contain' (not the default 'cover') -
-// the source is a square 2000x2000 canvas with the mark stacked above the
-// wordmark and tagline; a plain cover-crop into 1200x630 sliced off the
-// tagline and most of the wordmark. background matches the source's own
-// near-black canvas so the letterbox bars this adds on either side are
-// invisible rather than a visible seam.
-// format: 'jpg' explicitly - astro:assets defaults to webp, which most
-// social platforms handle fine today but is still an unnecessary risk for
-// a link-preview image specifically (the one place a crawler that mishandles
-// webp costs an actual bad first impression, not just a slower page).
-const ogImageAsset = await getImage({ src: logoDark, width: 1200, height: 630, fit: 'contain', background: '#000000', format: 'jpg' });
-const ogImageURL = new URL(ogImageAsset.src, Astro.site);
+// Social share preview: a purpose-made 1200x630 JPG (real client photo +
+// wordmark) in /public, so link previews on LinkedIn/Facebook show work, not
+// a logo card. JPG on purpose - the one place a crawler that mishandles
+// webp costs a bad first impression.
+const ogImageURL = new URL('/og-image.jpg', Astro.site);
 
 // Persistent journey background: revealed through Intro's portal, stays
 // fixed behind Hero, then fades out on scroll as Gap comes into view (see
