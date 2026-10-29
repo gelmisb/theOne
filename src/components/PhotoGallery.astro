@@ -1,0 +1,128 @@
+---
+import { Image, getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { galleryGroups, PHOTO_CAPTIONS } from '../data/gallery';
+
+// The Photography page's gallery: groups and order come from data/gallery.ts.
+//
+// The glob lists exact filenames on purpose. Astro publishes the original of
+// every image it imports, shown or not, so a wildcard here would ship anything
+// dropped into the folder - including the watermarked and personal shots that
+// are excluded from the site. Keep this list in step with the files in
+// data/gallery.ts (a mismatch is reported at build time below).
+const modules = import.meta.glob<{ default: ImageMetadata }>(
+  [
+    '/src/assets/photos/portfolio/{Barbershops.jpg,IMG_0839.jpg,IMG_0863.jpg,IMG_1643.jpg,IMG_3033.jpg,IMG_4721.jpg,consumables.jpg,gelmis-bartulis-aFjxblNID7Y-unsplash.jpg,motorcycle-rider.jpg,product advertisement.jpg,furry-butts-gift-bag.jpg,furry-butts-grooming-shelf.jpg,furry-butts-popcorn.jpg,furry-butts-snake.jpg,furry-butts-window-mural.jpg}',
+    '/src/assets/photos/portfolio/furry-butts/{furry-butts-dog-food.jpg,furry-butts-dog-treat.jpg,furry-butts-gift-bag-wide.jpg,furry-butts-pet-portraits.jpg,furry-butts-supplements.jpg,furry-butts-treat-jars.jpg}',
+  ],
+  { eager: true }
+);
+const byName = new Map(Object.entries(modules).map(([path, m]) => [path.split('/').pop()!, m.default]));
+
+let counter = 0;
+const groups = await Promise.all(
+  galleryGroups.map(async (g) => {
+    const photos = await Promise.all(
+      g.files.map(async (file) => {
+        const src = byName.get(file);
+        if (!src) {
+          console.warn(`[PhotoGallery] "${file}" is listed in data/gallery.ts but not in the glob above - skipped.`);
+          return null;
+        }
+        const caption = PHOTO_CAPTIONS[file] ?? file.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ');
+        // 1600px at quality 72 for the lightbox: sharp enough to enjoy, light enough for mobile data.
+        const full = await getImage({ src, width: 1600, quality: 72 });
+        return { src, caption, fullSrc: full.src, fullWidth: full.attributes.width as number, fullHeight: full.attributes.height as number };
+      })
+    );
+    return { ...g, photos: photos.filter((p): p is NonNullable<typeof p> => p !== null) };
+  })
+);
+---
+
+<!-- data-photo-gallery: initPortfolioLightbox (animations.ts) turns every
+     a.pswp-item inside into one PhotoSwipe gallery, so the lightbox swipes
+     across groups. -->
+<div class="pg" data-photo-gallery>
+  {groups.map((g) => (
+    <div class="pg-group" data-reveal data-reveal-group={`pg-${g.id}`}>
+      <div class="pg-head">
+        <h3>{g.title}</h3>
+        {g.note && <p>{g.note}</p>}
+      </div>
+      <div class="pg-grid">
+        {g.photos.map((p) => {
+          counter++;
+          return (
+            <a
+              href={p.fullSrc}
+              data-pswp-width={p.fullWidth}
+              data-pswp-height={p.fullHeight}
+              class="pg-tile pswp-item"
+              target="_blank"
+              rel="noopener"
+            >
+              <Image
+                src={p.src}
+                alt={p.caption}
+                class="pg-img"
+                width={700}
+                height={Math.round((700 * p.fullHeight) / p.fullWidth)}
+                widths={[300, 500, 700]}
+                sizes="(max-width: 560px) 50vw, (max-width: 900px) 33vw, 25vw"
+                loading="lazy"
+              />
+              <span class="pg-num mono" aria-hidden="true">{String(counter).padStart(3, '0')}</span>
+              <span class="pg-cap mono" aria-hidden="true">{p.caption}</span>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  ))}
+</div>
+
+<style>
+  .pg{ display: flex; flex-direction: column; gap: 56px; }
+  .pg-head{ margin-bottom: 18px; }
+  .pg-head h3{
+    font-family: var(--font-display), serif; font-weight: 400;
+    font-size: clamp(22px, 2.6vw, 28px); line-height: 1.2; color: var(--paper); margin: 0 0 6px;
+  }
+  .pg-head p{ margin: 0; font-size: 14px; line-height: 1.55; color: var(--paper-dim); max-width: 560px; }
+
+  /* Masonry via CSS columns: every photo keeps its own proportions, so a wide
+     shot isn't cropped to a portrait tile. Reading order runs down each column. */
+  .pg-grid{ columns: 4; column-gap: 10px; }
+  @media (max-width: 900px){ .pg-grid{ columns: 3; } }
+  @media (max-width: 560px){ .pg-grid{ columns: 2; column-gap: 8px; } }
+
+  .pg-tile{
+    position: relative; display: block;
+    margin: 0 0 10px; break-inside: avoid;
+    border: 1px solid var(--line); overflow: hidden;
+    background: var(--panel);
+    cursor: zoom-in; text-decoration: none; color: inherit;
+  }
+  @media (max-width: 560px){ .pg-tile{ margin-bottom: 8px; } }
+  .pg-tile :global(.pg-img){
+    display: block; width: 100%; height: auto;
+    transition: transform .5s ease;
+  }
+  .pg-tile:hover :global(.pg-img),
+  .pg-tile:focus-visible :global(.pg-img){ transform: scale(1.04); }
+  .pg-tile:focus-visible{ outline: 2px solid var(--brass); outline-offset: -2px; }
+
+  .pg-num{
+    position: absolute; top: 8px; left: 10px; z-index: 2;
+    font-size: 10px; color: #fff; opacity: .7; text-shadow: 0 1px 3px rgba(0,0,0,.8);
+  }
+  /* Captions stay visible (not hover-only): on a phone there is no hover, and
+     the point of this gallery is to show what each photo is. */
+  .pg-cap{
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+    padding: 22px 10px 8px;
+    font-size: 10.5px; letter-spacing: 0.03em; color: #fff;
+    background: linear-gradient(0deg, rgba(10,14,19,0.85), transparent);
+  }
+</style>

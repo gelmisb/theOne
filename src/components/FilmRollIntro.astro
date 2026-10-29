@@ -18,9 +18,14 @@ import logoWatermark from '../assets/photos/logo/logo_transparent.png';
 // in EXCLUDED_FILES) don't silently join the roll. import.meta.glob needs a
 // literal pattern, so this list and ROLL_ORDER below name the same files
 // (plus the hero, below) - add a photo to both, by exact filename including
-// its extension. Every file here is already public in Portfolio.astro.
+// its extension. Every file here is already public (the Portfolio or the Photography page).
 const rollPhotoModules = import.meta.glob<{ default: ImageMetadata }>(
-  '/src/assets/photos/portfolio/{IMG_1643.jpg,IMG_3033.jpg,furry-buts-goods.webp.webp,product advertisement.jpg,Barbershops.jpg,village-pet-shop-front.webp.webp,IMG_0863.jpg,IMG_4721.jpg,furry-buts-buddy-care.webp.webp,IMG_0839.jpg,IMG_1436.JPG,motorcycle-rider.jpg,consumables.jpg}',
+  [
+    '/src/assets/photos/portfolio/{IMG_1643.jpg,IMG_3033.jpg,Barbershops.jpg,IMG_4721.jpg,IMG_0863.jpg,IMG_0839.jpg,motorcycle-rider.jpg,consumables.jpg,furry-butts-gift-bag.jpg,furry-butts-snake.jpg,furry-butts-window-mural.jpg}',
+    // Furry Butts shots kept out of the homepage Portfolio, which only reads the
+    // top level of the portfolio folder.
+    '/src/assets/photos/portfolio/furry-butts/{furry-butts-dog-treat.jpg,furry-butts-treat-jars.jpg}',
+  ],
   { eager: true }
 );
 
@@ -44,29 +49,32 @@ const HERO_PHOTO_NAME = 'persist-bg';
 // slots, so ROLL_ORDER holds exactly 14 photos - each one appears once where a
 // visitor can see it, and repeats (14 frames / 7000px apart) land only in the
 // hidden frames. A longer list would not show more: the extra photos would
-// fall in the hidden frames. Benched for that reason, and still in the
-// Portfolio grid: the two
-// gelmis-bartulis-*-unsplash.jpg shots (lifestyle / personal-portrait work,
-// furthest from PRODUCT.md's "real photos of your business" pitch). To bring
+// fall in the hidden frames. So adding photos means swapping some out. Benched
+// from the strip, all still in the Portfolio grid and/or on the Photography
+// page: the Milan arcade and the Village Pet Shop front (off-pitch / similar to
+// the new Furry Butts frames), the older Furry Butts bags and shampoo shelf (the
+// new event shots replace them), the second gin glass, and the lifestyle
+// portraits (counter-service was removed as AI-generated; the two gelmis-bartulis
+// shots stay in the Portfolio). To bring
 // one back, swap it for another entry here and in the glob above.
 //
 // The order is hand-picked for rhythm - dark/bright and people/product/place
-// alternate, look-alikes (the gin glasses, the pet-shop shots) are kept apart.
-// The hero photo's slot decides where the cycle starts; see `frames` below.
-// Keep it last: that puts the first-paint frames (~010-013) on the
-// barbershop / pet-shop front / café / Costa shots.
+// alternate, look-alikes (Furry Butts shots, portraits) are kept apart. The
+// hero photo's slot decides where the cycle starts; see `frames` below. Keep it
+// last: that puts the first-paint frames (~010-013) on the barbershop / dog /
+// Costa storefront / treat-jar shots.
 const ROLL_ORDER = [
   'IMG_1643.jpg',
+  'furry-butts-gift-bag.jpg',
   'IMG_3033.jpg',
-  'furry-buts-goods.webp.webp',
-  'product advertisement.jpg',
+  'furry-butts-snake.jpg',
   'Barbershops.jpg',
-  'village-pet-shop-front.webp.webp',
-  'IMG_0863.jpg',
+  'furry-butts-dog-treat.jpg',
   'IMG_4721.jpg',
-  'furry-buts-buddy-care.webp.webp',
+  'furry-butts-treat-jars.jpg',
+  'IMG_0863.jpg',
+  'furry-butts-window-mural.jpg',
   'IMG_0839.jpg',
-  'IMG_1436.JPG',
   'motorcycle-rider.jpg',
   'consumables.jpg',
   HERO_PHOTO_NAME,
@@ -93,7 +101,7 @@ const realPhotos = ROLL_ORDER.map((name) => photoByName.get(name)).filter((p): p
 //
 // The statue, not IMG_0839 or the palm-leaf portrait (motorcycle-rider.jpg,
 // which stays in the roll as an ordinary frame) - founder pick for the one
-// full-bleed moment. IMG_0839's gym-coaching candid was flagged by the
+// full-bleed moment. IMG_0839's candid was flagged by the
 // second critique pass as dim and off-angle for it.
 const heroPhoto = photoByName.get(HERO_PHOTO_NAME) ?? realPhotos[0];
 const heroPos = Math.max(0, realPhotos.indexOf(heroPhoto));

@@ -2,6 +2,7 @@
 import { Image, getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import { frameNumber } from '../data/homeFrames';
+import { PHOTO_CAPTIONS } from '../data/gallery';
 
 // The "!" patterns keep the files in EXCLUDED_FILES (below) from being imported
 // AT ALL. Filtering them out later is not enough: Astro publishes the original of
@@ -36,26 +37,12 @@ const EXCLUDED_FILES = new Set([
   'IMG_4392.jpg', // visible "Gelmis Bartulis Photography" signature watermark bottom-right, pending crop - same issue as IMG_8621/IMG_8760 above
 ]);
 
-// Auto-derived captions from filenames read fine for hand-named files
-// (Barbershops.jpg -> "Barbershops") but not for camera-roll or stock-export
-// names (IMG_0839.jpg -> "IMG 0839", gelmis-bartulis-aFjxblNID7Y-unsplash.jpg
-// -> "Gelmis Bartulis AFjxblNID7Y Unsplash") - override those specifically
-// rather than reworking the derivation for every possible filename shape.
-const CAPTION_OVERRIDES: Record<string, string> = {
-  'IMG_0839.jpg': 'Gym Coaching Session',
-  'IMG_0863.jpg': 'Café Culture',
-  'IMG_1643.jpg': 'Strength Training',
-  'IMG_3033.jpg': 'Motorcycle Feature',
-  'IMG_8758.jpg': 'Car Feature',
-  'IMG_5093.jpg': 'Local Produce',
-  'IMG_1436.JPG': 'Milan Galleria',
-  'IMG_4721.jpg': 'Costa Corner',
-  'furry-buts-buddy-care.webp.webp': 'Furry Butts - Buddy Care',
-  'furry-buts-goods.webp.webp': 'Furry Butts - Goods',
-  'village-pet-shop-front.webp.webp': 'Village Pet Shop Front',
-  'gelmis-bartulis-aFjxblNID7Y-unsplash.jpg': 'Portrait Session',
-  'gelmis-bartulis-UaFUhxyGNFY-unsplash.jpg': 'Touring Motorcycle',
-};
+// Captions live in data/gallery.ts (shared with the Photography page's gallery,
+// so the two never disagree). A name derived from the filename is only the
+// fallback - it reads badly for camera-roll or double-extension names
+// (IMG_0839.jpg -> "IMG 0839", x.webp.webp -> "X.webp"), and the old hand-kept
+// overrides went stale when photos were swapped under an unchanged filename.
+const CAPTION_OVERRIDES = PHOTO_CAPTIONS;
 
 // Full-resolution version of each photo for the lightbox (PhotoSwipe needs
 // real pixel dimensions up front to size its viewer without a jump once the

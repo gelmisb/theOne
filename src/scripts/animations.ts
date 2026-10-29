@@ -801,12 +801,15 @@ let portfolioLightbox: PhotoSwipeLightbox | null = null;
  * modal markup to keep in sync here.
  */
 export function initPortfolioLightbox() {
-  const gallery = document.querySelector<HTMLElement>('#portfolio-gallery');
+  // The homepage Portfolio (#portfolio-gallery) and the Photography page's
+  // PhotoGallery ([data-photo-gallery]) share one lightbox setup.
+  const GALLERY_SELECTOR = '#portfolio-gallery, [data-photo-gallery]';
+  const gallery = document.querySelector<HTMLElement>(GALLERY_SELECTOR);
   if (!gallery) return;
 
   portfolioLightbox?.destroy();
   portfolioLightbox = new PhotoSwipeLightbox({
-    gallery: '#portfolio-gallery',
+    gallery: GALLERY_SELECTOR,
     children: 'a.pswp-item',
     pswpModule: () => import('photoswipe'),
   });

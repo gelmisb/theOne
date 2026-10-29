@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Sprockets from '../components/Sprockets.astro';
 import Footer from '../components/Footer.astro';
+import PhotoGallery from '../components/PhotoGallery.astro';
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
@@ -82,10 +83,26 @@ const included = [
 
   <Sprockets />
 
+  <section id="photography-work">
+    <div class="wrap">
+      <div class="section-head" data-reveal data-reveal-group="photo-work">
+        <div class="frame-tag"><span class="num">FRAME 002</span> Recent Work</div>
+        <h2 class="section-h" data-split-reveal>What we've shot <i>so far.</i></h2>
+        <p class="section-sub">
+          On-site work for local businesses - shops, cafés, trades and events. Tap any photo to
+          see it larger.
+        </p>
+      </div>
+      <PhotoGallery />
+    </div>
+  </section>
+
+  <Sprockets dark />
+
   <section id="photography-why">
     <div class="wrap">
       <div class="section-head" data-reveal data-reveal-group="photo-why">
-        <div class="frame-tag"><span class="num">FRAME 002</span> Why It Matters</div>
+        <div class="frame-tag"><span class="num">FRAME 003</span> Why It Matters</div>
         <h2 class="section-h" data-split-reveal>Stock photos are why your website looks like <i>everyone else's.</i></h2>
       </div>
       <p class="why-body" data-reveal data-reveal-group="photo-why">
