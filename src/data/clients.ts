@@ -58,8 +58,9 @@ export const clients: Client[] = [
     id: 'furry-butts',
     name: 'Furry Butts',
     location: 'Blessington, Co. Wicklow',
-    work: [],
-    status: 'in-progress',
-    link: { href: mapsSearch('Furry Butts, Blessington, Co. Wicklow'), label: 'Find on Google Maps' },
+    work: ['Website design and build', 'Event and shop photography'],
+    status: 'completed',
+    link: { href: 'https://furrybutts.com', label: 'Visit furrybutts.com' },
+    caseStudy: '/web-projects/',
   },
 ];

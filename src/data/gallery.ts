@@ -58,7 +58,7 @@ export const galleryGroups: GalleryGroup[] = [
   {
     id: 'furry-butts',
     title: 'Furry Butts, Blessington',
-    note: 'Event and shop photography for a local pet shop - in progress.',
+    note: 'Event and shop photography for a local pet shop.',
     files: [
       'furry-butts-window-mural.jpg',
       'furry-butts-dog-treat.jpg',
