@@ -19,8 +19,18 @@ type Project = {
   href?: string;
   screenshot?: ImageMetadata;
 };
-// The link comes from data/clients.ts so the URL lives in one place.
+// Screenshots are picked up by filename, so adding one is just dropping the
+// file into src/assets/photos/web-projects/ - no code change. Until then the
+// card shows without an image.
+const screenshots = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/photos/web-projects/furry-butts.{jpg,jpeg,png,webp}',
+  { eager: true }
+);
+const furryButtsShot = Object.values(screenshots)[0]?.default;
+
+// The links come from data/clients.ts so each URL lives in one place.
 const irishExoticPets = clients.find((c) => c.id === 'irish-exotic-pets');
+const furryButts = clients.find((c) => c.id === 'furry-butts');
 const projects: Project[] = [
   {
     title: 'Irish Exotic Pets',
@@ -28,6 +38,12 @@ const projects: Project[] = [
       'A website for an Irish-run exotic animal husbandry, education and welfare platform - care sheets, an about page and monitor parties.',
     href: irishExoticPets?.link.href,
     screenshot: irishExoticPetsShot,
+  },
+  {
+    title: 'Furry Butts',
+    description: 'A website for a pet shop in Blessington, Co. Wicklow.',
+    href: furryButts?.link.href,
+    screenshot: furryButtsShot,
   },
 ];
 const hasProjects = projects.length > 0;
@@ -168,7 +184,7 @@ const reasons = [
         <>
         <div class="wp-grid">
           {projects.map((p) => (
-            <div class="wp-card glass">
+            <div class:list={['wp-card', 'glass', { 'no-shot': !p.screenshot }]}>
               {p.screenshot && (
                 <Image src={p.screenshot} alt={p.title} class="wp-shot" widths={[400, 600, 800]} sizes="(max-width: 700px) 100vw, 33vw" loading="lazy" />
               )}
@@ -350,6 +366,8 @@ const reasons = [
   @media (max-width: 900px){ .wp-grid{ grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 640px){ .wp-grid{ grid-template-columns: 1fr; } }
   .wp-card{ border-radius: var(--radius-glass); overflow: hidden; }
+  /* A card with no screenshot yet shouldn't stretch to its neighbour's height. */
+  .wp-card.no-shot{ align-self: start; }
   /* height: auto is what lets aspect-ratio work - Astro's <Image> writes the file's
      real height into the tag, and that attribute would otherwise win and stretch
      the card to the screenshot's full height. object-position: top shows the top
