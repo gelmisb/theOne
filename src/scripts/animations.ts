@@ -719,7 +719,17 @@ export function initNavOnScroll() {
   // this page actually has a #hero to measure against) immediately
   // re-evaluates the real position from there, same as a fresh full load.
   header.classList.remove('scrolled');
-  if (!hero) return;
+  if (!hero) {
+    // Standalone pages have no #hero to measure against. Without this the
+    // header never got its frosted background there, so it stayed see-through
+    // over photos and text as the page scrolled underneath it.
+    ScrollTrigger.create({
+      start: 40,
+      end: 'max',
+      toggleClass: { targets: header, className: 'scrolled' },
+    });
+    return;
+  }
   ScrollTrigger.create({
     trigger: hero,
     start: 'top top',

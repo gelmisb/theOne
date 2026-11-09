@@ -5,19 +5,26 @@ import { ClientRouter } from 'astro:transitions';
 import type { ImageMetadata } from 'astro';
 import CookieBanner from '../components/CookieBanner.astro';
 import LocalBusinessSchema from '../components/LocalBusinessSchema.astro';
+import { breadcrumbSchema } from '../data/seo';
 
 interface Props {
   title?: string;
   description?: string;
   /** Keeps a page out of search results (the 404). Everything else is indexable. */
   noindex?: boolean;
+  /** Extra JSON-LD nodes for this page (e.g. a Service). A BreadcrumbList is added automatically. */
+  schema?: object[];
 }
 
 const {
-  title = 'Horizon Vantage | Photo, Video & Websites in Wicklow',
-  description = 'Honest on-site photography and video for cafés, shops, salons, stays and food producers, built into a fast website that helps customers book direct.',
+  title = 'Horizon Vantage | Photographer, Videographer & Web Designer in Wicklow',
+  description = 'Wicklow photographer, videographer and web designer for local businesses. Real on-site photos and video, a fast website and a tidy Google profile - one specialist, start to finish.',
   noindex = false,
+  schema = [],
 } = Astro.props;
+
+const crumb = breadcrumbSchema(Astro.url.pathname);
+const pageSchema = [...schema, ...(crumb ? [crumb] : [])];
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
@@ -71,6 +78,7 @@ const persistImage = Object.values(persistImages)[0]?.default;
     <meta name="twitter:image" content={ogImageURL} />
 
     <LocalBusinessSchema image={ogImageURL.toString()} />
+    {pageSchema.length > 0 && <script type="application/ld+json" set:html={JSON.stringify(pageSchema)} is:inline />}
 
     <!-- SPA-style client-side navigation (astro:transitions) instead of a
          full page reload per link click - a hard reload was the actual

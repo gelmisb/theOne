@@ -7,6 +7,7 @@ import Footer from '../components/Footer.astro';
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import { clients } from '../data/clients';
+import { serviceSchema } from '../data/seo';
 import irishExoticPetsShot from '../assets/photos/web-projects/irish-exotic-pets.jpg';
 
 // Real project entries go here once work is ready to show - same
@@ -79,8 +80,14 @@ const reasons = [
 ---
 
 <Layout
-  title="Web Design Work - Horizon Vantage"
-  description="Website builds for local businesses in Wicklow, designed around real on-site photography instead of a template."
+  title="Website Design & Development in Wicklow | Horizon Vantage"
+  description="Wicklow web designer and developer: fast, custom-built websites for local businesses, designed around real on-site photography instead of a template."
+  schema={[serviceSchema({
+    name: 'Website design and development',
+    serviceType: 'Web design',
+    description: 'Fast, custom-built websites for local businesses, designed around real on-site photography and launched alongside a Google Business Profile.',
+    path: '/web-projects/',
+  })]}
 >
   <Header transition:persist />
   <main id="main-content">
