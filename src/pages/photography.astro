@@ -4,6 +4,7 @@ import Header from '../components/Header.astro';
 import Sprockets from '../components/Sprockets.astro';
 import Footer from '../components/Footer.astro';
 import PhotoGallery from '../components/PhotoGallery.astro';
+import { serviceSchema } from '../data/seo';
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
@@ -22,8 +23,14 @@ const included = [
 ---
 
 <Layout
-  title="Business Photography in Wicklow - Horizon Vantage"
-  description="On-site photography for Wicklow cafés, shops, salons, stays and food producers - shot at your business, edited and delivered in 5 days."
+  title="Business Photographer in Wicklow | Horizon Vantage"
+  description="Wicklow business photographer: on-site photography for cafés, shops, salons, stays and food producers. 25-40 edited photos from a half-day shoot, delivered in 5 days."
+  schema={[serviceSchema({
+    name: 'Business photography',
+    serviceType: 'Commercial photography',
+    description: 'On-site photography at your business for your website, social channels and Google Business Profile: a half-day shoot, 25-40 edited photos, delivered in 5 days.',
+    path: '/photography/',
+  })]}
 >
   <Header transition:persist />
   <main id="main-content">

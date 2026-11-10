@@ -83,6 +83,11 @@ import logoMark from '../assets/photos/logo/logo_transparent.png';
     .nav{ padding: 18px 20px; }
     header:global(.scrolled) .nav-shell{ margin: 8px 12px 0; }
   }
+  /* On phones the bar sits over busy photos, so it gets a denser tint than the
+     desktop glass (0.55 let text show through). */
+  @media (max-width: 1010px){
+    header:global(.scrolled) .nav-shell{ background: rgba(14,19,26,0.88); }
+  }
   .brand{
     display: flex; align-items: center; gap: 10px;
     font-family: var(--font-display), serif;

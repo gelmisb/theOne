@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Sprockets from '../components/Sprockets.astro';
 import Footer from '../components/Footer.astro';
+import { serviceSchema } from '../data/seo';
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
@@ -41,8 +42,14 @@ const steps = [
 ---
 
 <Layout
-  title="Local SEO & Google Profile Setup, Wicklow - Horizon Vantage"
-  description="Google Business Profile setup and local SEO for Wicklow cafés, shops, salons, stays and producers: category, photos and reviews done properly."
+  title="Local SEO & Google Business Profile Setup, Wicklow | Horizon Vantage"
+  description="Wicklow local SEO: Google Business Profile setup and optimisation for cafés, shops, salons, stays and producers - category, photos and reviews done properly."
+  schema={[serviceSchema({
+    name: 'Local SEO and Google Business Profile setup',
+    serviceType: 'Local search engine optimisation',
+    description: 'Google Business Profile setup and clean-up, category and service-area checks, consistent name, address and phone details, and a review habit.',
+    path: '/local-seo/',
+  })]}
 >
   <Header transition:persist />
   <main id="main-content">
