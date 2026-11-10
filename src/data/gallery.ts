@@ -44,6 +44,7 @@ export const PHOTO_CAPTIONS: Record<string, string> = {
   'furry-butts-popcorn.jpg': 'Popcorn at the Event',
   'furry-butts-supplements.jpg': 'Pet Wellness Shelf',
   'furry-butts-dog-food.jpg': 'Dog Food Bags',
+  'furry-butts-shampoo-display.jpg': 'Buddy Care Shampoo Display',
 };
 
 export interface GalleryGroup {
@@ -71,6 +72,7 @@ export const galleryGroups: GalleryGroup[] = [
       'furry-butts-supplements.jpg',
       'furry-butts-gift-bag-wide.jpg',
       'furry-butts-dog-food.jpg',
+      'furry-butts-shampoo-display.jpg',
     ],
   },
   {
