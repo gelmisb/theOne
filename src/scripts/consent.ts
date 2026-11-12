@@ -6,8 +6,13 @@
 // agreement to "essential cookies only", not to analytics, so it must never be
 // read as consent now. The legacy key is just deleted.
 
-export const CONSENT_KEY = 'hv-consent-v2';
-const LEGACY_KEY = 'hv-cookie-consent';
+export const CONSENT_KEY = 'hv-consent-v3';
+// Older keys, deleted and never read as consent. `hv-cookie-consent` was the notice-only banner.
+// `hv-consent-v2` was a real choice, but made before Google's ad tag was added to
+// the site: consent has to match what it was asked for, so everyone is asked once
+// more (v3) under the current wording. Bump the version again whenever the banner's
+// purposes change - and change the same key in the inline snippet in Layout.astro.
+const LEGACY_KEYS = ['hv-cookie-consent', 'hv-consent-v2'];
 /** Set by the dashboard's "don't count my visits" switch; the tracker stands down while it is '1'. */
 export const IGNORE_KEY = 'hv-ignore';
 
@@ -25,7 +30,7 @@ export function getConsent(): Consent | null {
 export function setConsent(choice: Consent): void {
   try {
     localStorage.setItem(CONSENT_KEY, choice);
-    localStorage.removeItem(LEGACY_KEY);
+    for (const k of LEGACY_KEYS) localStorage.removeItem(k);
   } catch {
     // Storage blocked: the choice just won't persist, and nothing is tracked.
   }
@@ -35,7 +40,7 @@ export function setConsent(choice: Consent): void {
 /** Drop the notice-only flag from the old banner. */
 export function clearLegacyConsent(): void {
   try {
-    localStorage.removeItem(LEGACY_KEY);
+    for (const k of LEGACY_KEYS) localStorage.removeItem(k);
   } catch {
     // ignore
   }

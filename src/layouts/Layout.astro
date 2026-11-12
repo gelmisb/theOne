@@ -7,6 +7,7 @@ import CookieBanner from '../components/CookieBanner.astro';
 import NewsletterPopup from '../components/NewsletterPopup.astro';
 import LocalBusinessSchema from '../components/LocalBusinessSchema.astro';
 import { breadcrumbSchema } from '../data/seo';
+import { business } from '../data/business';
 
 interface Props {
   title?: string;
@@ -28,6 +29,29 @@ const crumb = breadcrumbSchema(Astro.url.pathname);
 const pageSchema = [...schema, ...(crumb ? [crumb] : [])];
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+
+// The inline half of the Google Ads tag (see the comment in <head>). Written as a
+// string so the account ID appears literally - gtag('config', 'AW-...') - as in
+// Google's own snippet, which is what its checker looks for.
+const adsSnippet = `
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+  (function () {
+    try {
+      if (location.pathname.indexOf('/analytics') === 0 || localStorage.getItem('hv-ignore') === '1') return;
+    } catch (e) {}
+    var ok = false;
+    try {
+      ok = localStorage.getItem('hv-consent-v3') === 'granted' && navigator.globalPrivacyControl !== true && navigator.doNotTrack !== '1';
+    } catch (e) {}
+    var v = ok ? 'granted' : 'denied';
+    gtag('consent', 'default', { ad_storage: v, ad_user_data: v, ad_personalization: v, analytics_storage: v });
+    gtag('set', 'ads_data_redaction', true);
+    gtag('js', new Date());
+    gtag('config', '${business.googleAds.id}');
+    window.hvGtagOn = true;
+  })();
+`;
 
 // Social share preview: a purpose-made 1200x630 JPG (real client photo +
 // wordmark) in /public, so link previews on LinkedIn/Facebook show work, not
@@ -89,6 +113,20 @@ const persistImage = Object.values(persistImages)[0]?.default;
          vignette) visibly re-painting from scratch. ClientRouter fetches
          the next page in the background and cross-fades the swap via the
          browser's View Transitions API instead. -->
+    <!-- Google Ads tag, in the page source on every page exactly as Google's
+         install instructions say (Google's checker reads the HTML, and a tag added
+         later by JavaScript is reported as "not set up"). The library <script> only
+         loads gtag.js; nothing is sent until the inline script below calls
+         gtag('config'). That inline script runs once per full page load (Astro keeps
+         identical head scripts across page transitions) and sets Consent Mode
+         defaults BEFORE config: everything 'denied' (no cookies, no ad
+         personalisation) unless the visitor already accepted and their browser isn't
+         sending Global Privacy Control / Do Not Track. Later changes (Accept,
+         withdraw) and the enquiry conversion are handled in scripts/googleAds.ts.
+         Skipped on /analytics and for the owner's ignore flag (hv-ignore). Keep the
+         storage keys in step with scripts/consent.ts. -->
+    <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${business.googleAds.id}`}></script>
+    <script is:inline set:html={adsSnippet}></script>
     <ClientRouter />
   </head>
   <body>
