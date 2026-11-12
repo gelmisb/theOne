@@ -90,7 +90,8 @@ and "full tracking behind consent" over anonymous-only. Rules that matter:
   GPC/DNT; withdrawing sends an update and deletes the `_gcl_*` cookies. It is skipped only on `/analytics*`
   and for `hv-ignore`. The banner and `/privacy/` ("Google Ads measurement") say this - keep them in step.
 - **Our own detailed analytics track nothing until the visitor clicks Accept.** `src/scripts/consent.ts`
-  holds the choice under `hv-consent-v2`; the old `hv-cookie-consent` key meant
+  holds the choice under `hv-consent-v3` (bumped from v2 when Google's ad tag was added, so everyone is
+  asked again - bump it whenever the banner's purposes change, and in Layout's inline tag snippet too); the old `hv-cookie-consent` key meant
   "essential only" and must never be read as consent. Global Privacy Control /
   Do Not Track and the dashboard's "ignore my visits" flag (`hv-ignore`) beat
   consent. `/analytics*` is never tracked.
