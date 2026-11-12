@@ -4,6 +4,7 @@ import { Image } from 'astro:assets';
 import { ClientRouter } from 'astro:transitions';
 import type { ImageMetadata } from 'astro';
 import CookieBanner from '../components/CookieBanner.astro';
+import NewsletterPopup from '../components/NewsletterPopup.astro';
 import LocalBusinessSchema from '../components/LocalBusinessSchema.astro';
 import { breadcrumbSchema } from '../data/seo';
 
@@ -102,6 +103,7 @@ const persistImage = Object.values(persistImages)[0]?.default;
     <div class="grain" aria-hidden="true" transition:persist></div>
     <div class="vignette" aria-hidden="true" transition:persist></div>
     <CookieBanner />
+    <NewsletterPopup />
   </body>
 </html>
 
@@ -147,6 +149,8 @@ const persistImage = Object.values(persistImages)[0]?.default;
     initWebMockTilt,
     initPortfolioLightbox,
     initNewsletterSignup,
+    initSeasonalOffer,
+    initContactPrefill,
     initVideoLightbox,
     initScrollNav,
     initHeadingSplitReveal,
@@ -173,6 +177,8 @@ const persistImage = Object.values(persistImages)[0]?.default;
     initWebMockTilt();
     initPortfolioLightbox();
     initNewsletterSignup();
+    initSeasonalOffer();
+    initContactPrefill();
     initVideoLightbox();
     initScrollNav();
     initHeadingSplitReveal();

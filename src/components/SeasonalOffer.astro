@@ -1,0 +1,93 @@
+---
+// Homepage section for the limited-time Christmas "Seasonal Refresh" (numbers,
+// dates and the discount come from data/offers.ts, so nothing is hard-coded here).
+// Renders nothing once the offer's end date has passed; initSeasonalOffer
+// (animations.ts) also removes it in a browser that stays open past that day.
+//
+// No example images yet: which Christmas photos to show is still to be decided,
+// and no seasonal shots exist in the portfolio. Add them here when they do - and
+// only real ones (PRODUCT.md: never stock or AI-generated).
+import { frameNumber } from '../data/homeFrames';
+import { isOfferActive, offerEndLabel, salePrice, seasonalOffer } from '../data/offers';
+import Sprockets from './Sprockets.astro';
+
+const active = isOfferActive();
+const href = `/contact/?offer=${seasonalOffer.id}`;
+---
+
+{active && (
+  <section id="seasonal-offer" data-seasonal-offer data-offer-ends={seasonalOffer.endsOn ?? ''}>
+    <div class="wrap">
+      <div class="section-head" data-reveal data-reveal-group="seasonal-head">
+        <div class="frame-tag"><span class="num">FRAME {frameNumber('seasonal-offer')}</span> Seasonal Offer</div>
+        <h2 class="section-h" data-split-reveal>{seasonalOffer.season} is coming. <i>Be photographed at your best.</i></h2>
+      </div>
+
+      <div class="so-card glass" data-reveal data-reveal-group="seasonal-card">
+        <div class="so-promo" role="note">
+          <span class="so-badge mono">{seasonalOffer.discountPercent}% off</span>
+          <span class="so-ends mono">{offerEndLabel()}</span>
+        </div>
+        <div class="so-body">
+          <div class="so-copy">
+            <h3>{seasonalOffer.name}: {seasonalOffer.season}</h3>
+            <p>
+              We come to your business and photograph your {seasonalOffer.season} decorations and atmosphere, so
+              your website, socials and Google profile look as good as your shop does this season. For cafés, shops,
+              salons, gyms and other local businesses.
+            </p>
+            <div class="so-actions">
+              <a href={href} class="btn btn-primary">Enquire about the {seasonalOffer.name}</a>
+              <a href="#offer" class="btn btn-ghost">See all packages</a>
+            </div>
+          </div>
+          <div class="so-price">
+            <div class="so-was mono">from €{seasonalOffer.basePrice}</div>
+            <div class="so-now">from €{salePrice}</div>
+            <div class="so-note">{seasonalOffer.discountPercent}% off for a limited time. Final quote after your free audit.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <Sprockets dark />
+)}
+
+<style>
+  .so-card{
+    position: relative;
+    border-radius: var(--radius-glass);
+    padding: 0;
+    overflow: hidden;
+    border-color: rgba(230,196,104,0.45);
+  }
+  .so-promo{
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 18px;
+    padding: 12px 28px;
+    background: rgba(230,196,104,0.14);
+    border-bottom: 1px solid rgba(230,196,104,0.3);
+  }
+  .so-badge{
+    background: var(--brass); color: var(--bg);
+    padding: 4px 12px; border-radius: 999px;
+    font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;
+  }
+  .so-ends{ font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brass); }
+  .so-body{ display: flex; flex-wrap: wrap; gap: 28px 48px; padding: 34px 28px 36px; align-items: center; }
+  .so-copy{ flex: 1 1 380px; min-width: 0; }
+  .so-copy h3{
+    font-family: var(--font-display), serif; font-weight: 400;
+    font-size: clamp(24px, 3vw, 32px); line-height: 1.15; color: var(--paper); margin: 0 0 14px;
+  }
+  .so-copy p{ font-size: 16px; line-height: 1.65; color: var(--paper-dim); margin: 0 0 26px; max-width: 560px; }
+  .so-actions{ display: flex; flex-wrap: wrap; gap: 14px; }
+  .so-price{ flex: 0 1 240px; text-align: center; }
+  .so-was{ font-size: 14px; color: var(--paper-dim); text-decoration: line-through; opacity: 0.8; }
+  .so-now{ font-family: var(--font-display), serif; font-size: 44px; line-height: 1.1; color: var(--brass); margin: 4px 0 8px; }
+  .so-note{ font-size: 13px; line-height: 1.5; color: var(--paper-dim); }
+  @media (max-width: 640px){
+    .so-promo{ padding: 12px 20px; }
+    .so-body{ padding: 26px 20px 28px; }
+    .so-price{ flex-basis: 100%; text-align: left; }
+  }
+</style>
