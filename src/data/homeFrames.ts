@@ -13,6 +13,8 @@
 //
 // Standalone pages (photography, stays-and-experiences, ...) number their own
 // sections from 001 in reading order, directly in their templates.
+import { isOfferActive } from './offers';
+
 export interface HomeFrame {
   /** The section's own element id - what the dot nav links and tracks. */
   id: string;
@@ -21,6 +23,9 @@ export interface HomeFrame {
 }
 
 export const homeFrames: HomeFrame[] = [
+  // Limited-time Christmas offer; drops out (and every number after it shifts)
+  // once its end date has passed. See data/offers.ts.
+  ...(isOfferActive() ? [{ id: 'seasonal-offer', label: 'Seasonal Offer' }] : []),
   { id: 'who-we-help', label: 'Who We Help' },
   { id: 'why-real-photos', label: 'Why Real Photos' },
   { id: 'offer-intro', label: 'The Gap' },

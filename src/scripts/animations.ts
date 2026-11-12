@@ -888,7 +888,7 @@ export function initNewsletterSignup() {
       const res = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, botField }),
+        body: JSON.stringify({ email, botField, consent: true }),
       });
       if (!res.ok) throw new Error(`Subscribe request failed: ${res.status}`);
 
@@ -902,6 +902,39 @@ export function initNewsletterSignup() {
       document.dispatchEvent(new CustomEvent('hv:track', { detail: { type: 'form', form: 'newsletter-form', action: 'err' } }));
     }
   });
+}
+
+/**
+ * Removes the Christmas offer section (and its dot in the side nav) from a tab
+ * that stays open past the offer's end date - the page is built statically, so
+ * without this an old tab, or a cached page, would keep advertising it. The
+ * end date is the last day (Irish time) the offer runs; it is empty while the
+ * date is still undecided, in which case nothing happens. See data/offers.ts.
+ */
+export function initSeasonalOffer() {
+  const section = document.querySelector<HTMLElement>('[data-seasonal-offer]');
+  const endsOn = section?.dataset.offerEnds;
+  if (!section || !endsOn) return;
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Dublin' }).format(new Date());
+  if (today <= endsOn) return;
+  const divider = section.nextElementSibling;
+  if (divider?.classList.contains('sprockets')) divider.remove();
+  document.querySelector('[data-scroll-nav-link][data-target="seasonal-offer"]')?.closest('li')?.remove();
+  section.remove();
+}
+
+/**
+ * Pre-fills the contact form's message when the page is opened from an offer
+ * button (/contact/?offer=seasonal-refresh), so the visitor doesn't have to
+ * retype what they were interested in. Never overwrites anything they typed.
+ */
+export function initContactPrefill() {
+  const msg = document.querySelector<HTMLTextAreaElement>('#enquiry-form #msg');
+  if (!msg || msg.value) return;
+  const offer = new URLSearchParams(location.search).get('offer');
+  if (offer === 'seasonal-refresh') {
+    msg.value = "I'm interested in the Seasonal Refresh (Christmas photography, 20% off).\n\n";
+  }
 }
 
 /**

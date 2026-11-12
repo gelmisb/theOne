@@ -1,0 +1,112 @@
+---
+// Sign-up pop-up shown a few seconds after a first visit (rules and timing in
+// scripts/newsletterPopup.ts). Posts to the same /api/subscribe function as the
+// homepage "Keep me updated" form, so every sign-up gets the welcome email with
+// the subscriber code (netlify/lib/welcomeEmail.ts).
+//
+// A floating card rather than a modal on purpose: it must not block the page,
+// least of all on a phone. Wrapped in transition:persist so it survives
+// client-side navigation instead of being re-created (and re-triggered) on every page.
+import { subscriberOffer } from '../data/offers';
+---
+
+<div transition:persist="newsletter-popup">
+  <aside
+    class="np glass"
+    id="newsletter-popup"
+    role="dialog"
+    aria-modal="false"
+    aria-labelledby="popup-title"
+    hidden
+  >
+    <button type="button" class="np-close" data-popup-close aria-label="Close sign-up">
+      <span aria-hidden="true">×</span>
+    </button>
+
+    <form class="np-form" id="newsletter-popup-form">
+      <p class="np-eyebrow mono">Stay in the loop</p>
+      <h2 class="np-title" id="popup-title">Get first notice of seasonal offers</h2>
+      <p class="np-sub">
+        Join the list and we'll email you a subscriber code for {subscriberOffer.benefit}.
+      </p>
+      <p style="display:none;">
+        <label>Leave this field blank: <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
+      </p>
+      <label for="popup-email" class="np-sr">Email address</label>
+      <input id="popup-email" name="email" type="email" required autocomplete="email" placeholder="you@business.ie" />
+      <label class="np-consent">
+        <input type="checkbox" name="consent" required />
+        <span>
+          I'd like to receive occasional news and offers from Horizon Vantage by email. I can unsubscribe at any time -
+          see the <a href="/privacy/">Privacy Policy</a>.
+        </span>
+      </label>
+      <button type="submit" class="btn btn-primary">Subscribe</button>
+      <p class="np-error" id="popup-error" role="alert" hidden>Something went wrong - please try again or email us directly.</p>
+    </form>
+
+    <div class="np-thanks" id="popup-thanks" hidden aria-live="polite">
+      <h2 class="np-title">Thanks - you're on the list.</h2>
+      <p class="np-sub">Check your inbox: your subscriber code and a little about what we do are on their way.</p>
+    </div>
+  </aside>
+</div>
+
+<script>
+  import { initNewsletterPopup } from '../scripts/newsletterPopup';
+  document.addEventListener('astro:page-load', initNewsletterPopup);
+</script>
+
+<style>
+  .np{
+    position: fixed; z-index: 45;
+    right: 20px; bottom: 20px;
+    width: min(380px, calc(100vw - 24px));
+    max-height: calc(100vh - 40px); overflow-y: auto;
+    padding: 24px 22px 22px;
+    border-radius: var(--radius-glass);
+    border-color: rgba(230,196,104,0.4);
+    box-shadow: 0 18px 48px rgba(0,0,0,0.45);
+    opacity: 0; transform: translateY(14px);
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  .np.is-visible{ opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce){ .np{ transition: none; transform: none; } }
+  /* Phone: a compact sheet along the bottom edge, leaving the page visible above it. */
+  @media (max-width: 640px){
+    .np{ right: 12px; left: 12px; bottom: 12px; width: auto; padding: 20px 18px 18px; }
+  }
+  /* Near-opaque: the frosted-glass default let the page behind show through the text. */
+  .np.glass{ background: rgba(12,17,23,0.97); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .np-close{
+    position: absolute; top: 6px; right: 6px;
+    width: 40px; height: 40px;
+    background: none; border: none; color: var(--paper-dim);
+    font-size: 26px; line-height: 1; cursor: pointer; border-radius: 50%;
+  }
+  .np-close:hover, .np-close:focus-visible{ color: var(--paper); }
+  .np-close:focus-visible{ outline: 2px solid var(--brass); outline-offset: 2px; }
+  .np-form{ display: flex; flex-direction: column; gap: 12px; }
+  .np-eyebrow{ margin: 0; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brass); padding-right: 36px; }
+  .np-title{
+    font-family: var(--font-display), serif; font-weight: 400;
+    font-size: 22px; line-height: 1.2; color: var(--paper); margin: 0; padding-right: 30px;
+  }
+  .np-sub{ font-size: 14px; line-height: 1.55; color: var(--paper-dim); margin: 0; }
+  .np input[type="email"]{
+    width: 100%; min-width: 0;
+    background: var(--bg); border: 1px solid var(--line-strong); color: var(--paper);
+    padding: 12px 14px; font-family: var(--font-body), sans-serif;
+    font-size: 16px; /* 16px stops iOS zooming the page on focus */
+    border-radius: var(--radius);
+  }
+  .np input[type="email"]:focus{ outline: none; border-color: var(--brass); }
+  .np-consent{ display: flex; gap: 10px; align-items: flex-start; font-size: 12px; line-height: 1.5; color: var(--paper-dim); text-transform: none; letter-spacing: 0; }
+  .np-consent input{ margin-top: 3px; flex-shrink: 0; accent-color: var(--brass); }
+  .np-consent a{ color: var(--brass); }
+  .np-form .btn{ align-self: stretch; text-align: center; }
+  .np-form .btn:disabled{ opacity: 0.6; cursor: default; }
+  .np-error{ margin: 0; font-size: 13px; color: var(--safelight); }
+  .np-thanks{ padding-right: 24px; }
+  .np-sr{ position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+</style>
