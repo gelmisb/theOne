@@ -13,4 +13,6 @@ export const business = {
   /** Google Business Profile - the same listing shown in Search and Maps. */
   googleProfile: 'https://share.google/URlyVh4JCicbSqVF6',
   founder: 'Gelmis Bartulis',
+  /** Google Ads account tag and the conversion label for "Submit lead form" (a sent enquiry). */
+  googleAds: { id: 'AW-18565783979', leadLabel: 'M7_gCMDvqrcdEKvD7ZRF' },
 } as const;
