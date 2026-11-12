@@ -62,6 +62,37 @@ import Layout from '../layouts/Layout.astro';
           </label>
         </div>
 
+        <!-- Everyone who visited, from the always-on counter (lib/analytics/hits.ts):
+             it needs no cookie choice, so these numbers include visitors who declined. -->
+        <div class="grid all-grid" id="all-block" hidden>
+          <div class="panel span-12">
+            <h2>Everyone who visited</h2>
+            <p class="hint">
+              Counted for every visitor, whatever they chose in the cookie banner - no cookies, no IDs. Visitors are an estimate
+              (about 3% either way) counted per day, so someone back on another day counts again. Browsers sending Do Not Track
+              or Global Privacy Control, bots and your own flagged visits are not counted.
+            </p>
+            <div class="kpis" id="kpis-all"></div>
+            <div id="chart-all"></div>
+          </div>
+          <div class="panel span-4">
+            <h2>Most-viewed pages</h2>
+            <p class="hint">Everyone, by pageview.</p>
+            <div id="list-all-pages"></div>
+          </div>
+          <div class="panel span-4">
+            <h2>Countries</h2>
+            <p class="hint">Everyone, by pageview.</p>
+            <div id="list-all-countries"></div>
+          </div>
+          <div class="panel span-4">
+            <h2>Devices</h2>
+            <p class="hint">Everyone, by pageview.</p>
+            <div id="chart-all-devices"></div>
+          </div>
+        </div>
+
+        <h2 class="dash-sub" id="detail-head" hidden>Detail from visitors who accepted analytics</h2>
         <div class="kpis" id="kpis"></div>
 
         <div class="grid">
@@ -257,6 +288,8 @@ import Layout from '../layouts/Layout.astro';
 
   /* ----- kpis */
   /* 8 tiles: four across, then two, so the grid never ends on an empty cell. */
+  .all-grid{ margin-bottom: 36px; }
+  .dash-sub{ font-family: var(--font-display), serif; font-weight: 400; font-size: 22px; color: var(--paper); margin: 8px 0 14px; }
   .kpis{ display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; background: var(--line); border: 1px solid var(--line); margin-bottom: 20px; }
   @media (max-width: 900px){ .kpis{ grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .kpi{ background: var(--bg); padding: 22px 22px 20px; }

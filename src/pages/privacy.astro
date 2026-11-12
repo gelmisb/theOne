@@ -23,7 +23,15 @@ const sections: Section[] = [
   {
     heading: 'The short version',
     paragraphs: [
-      'If you click <strong>Accept analytics and ads</strong> in the cookie banner, two things switch on. First, we count what happens on this site - which pages are viewed, which links are clicked, how far people scroll - so we can see what is useful and fix what is not. Second, we load <strong>Google\'s advertising tag</strong>, which lets us measure whether our Google ads lead to enquiries (see "Google Ads measurement" below). If you click <strong>Essential only</strong>, neither happens: nothing is recorded, Google\'s tag is not loaded and no identifier is created. You can change your mind at any time with <strong>Cookie settings</strong> in the footer.',
+      'If you click <strong>Accept analytics and ads</strong> in the cookie banner, two things switch on. First, we count what happens on this site - which pages are viewed, which links are clicked, how far people scroll - so we can see what is useful and fix what is not. Second, we load <strong>Google\'s advertising tag</strong>, which lets us measure whether our Google ads lead to enquiries (see "Google Ads measurement" below). If you click <strong>Essential only</strong>, neither happens: no detailed tracking, Google\'s tag is not loaded and no identifier is created. Whichever you choose, we also keep a simple anonymous count of visits, described in the next section. You can change your mind at any time with <strong>Cookie settings</strong> in the footer.',
+    ],
+  },
+  {
+    heading: 'Counting visits, whatever you choose',
+    paragraphs: [
+      'So that we know roughly how many people visit, each page you open sends one small request containing <strong>only the page address</strong>. This happens whether or not you accept cookies, because it sets no cookie, stores nothing on your device and creates no visitor ID.',
+      'Our server adds the visit to a daily count of pages, countries and device types (mobile, tablet or desktop). To estimate how many <em>different</em> people visited in a day, it makes a one-way scrambled version of your connection details using a key that changes every day, keeps only a tiny fragment of the result (about 15 bits - enough to estimate a total, far too little to recognise or single out anyone) and throws the rest away. Your IP address and browser details themselves are <strong>never stored</strong>, and because the key changes daily your visits on different days cannot be linked.',
+      'Individual counter records are deleted after <strong>30 days</strong>; we keep the daily totals. This count is not done if your browser sends <strong>Global Privacy Control</strong> or <strong>Do Not Track</strong>. The legal basis is our legitimate interest (Article 6(1)(f) GDPR) in knowing how many people use the site; because nothing is stored on your device, no consent is needed for it. You can object at any time by emailing <a href="mailto:info@horizonvantage.ie">info@horizonvantage.ie</a> or by turning on Global Privacy Control.',
     ],
   },
   {
@@ -64,7 +72,7 @@ const sections: Section[] = [
     heading: 'Where it is kept, and for how long',
     list: [
       'Analytics records are stored in our own account with our hosting provider, <strong>Netlify</strong>, and are visible only to us through a password-protected page.',
-      'Individual records (which carry the random IDs) are deleted after <strong>30 days</strong>.',
+      'Individual records (which carry the random IDs) are deleted after <strong>30 days</strong>. The same goes for the anonymous visit-count records described above.',
       'We keep daily totals - counts of visits, pages, clicks and so on, with no IDs and nothing that identifies a person - after that.',
     ],
   },

@@ -121,6 +121,7 @@ function init(): void {
     $<HTMLButtonElement>('toggle-demo').setAttribute('aria-pressed', String(r.meta.demo));
     document.querySelectorAll<HTMLButtonElement>('[data-range]').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.range) === days)));
 
+    renderAll(r);
     renderKpis(r);
     renderTraffic(r);
     renderSources(r);
@@ -131,6 +132,43 @@ function init(): void {
     renderWhen(r);
     renderVitals(r);
     renderCustom(r);
+  }
+
+  /** Everyone who visited, from the always-on counter - includes visitors who declined cookies. */
+  function renderAll(r: Report): void {
+    const a = r.all;
+    $('all-block').hidden = !a;
+    $('detail-head').hidden = !a;
+    if (!a) return;
+    const share = a.totals.visitors ? Math.min(1, r.totals.visitors / a.totals.visitors) : null;
+    const days = a.daily.length || 1;
+    const tiles: [string, string, string][] = [
+      ['Visitors', fmt.int(a.totals.visitors), `estimate · ${fmt.int(a.totals.visitors / days)} a day`],
+      ['Pageviews', fmt.int(a.totals.views), `${fmt.int(a.totals.views / days)} a day`],
+      ['Pages per visitor', a.totals.visitors ? (a.totals.views / a.totals.visitors).toFixed(1) : '-', 'pageviews per visitor-day'],
+      ['Accepted analytics', fmt.pct(share), `${fmt.int(r.totals.visitors)} of ${fmt.int(a.totals.visitors)} visitors`],
+    ];
+    const host = $('kpis-all');
+    clear(host);
+    for (const [label, value, sub] of tiles) {
+      const tile = h('div', 'kpi');
+      tile.append(h('div', 'kpi-label', label), h('div', 'kpi-value', value), h('div', 'kpi-sub', sub));
+      host.append(tile);
+    }
+    lineChart($('chart-all'), {
+      labels: a.daily.map((d) => d.date),
+      series: [
+        { name: 'Visitors', color: COLORS[0], values: a.daily.map((d) => d.visitors) },
+        { name: 'Pageviews', color: COLORS[1], values: a.daily.map((d) => d.views) },
+      ],
+      fmtLabel: fmt.day,
+    });
+    barList($('list-all-pages'), a.pages.map((p) => ({ label: p.name, value: p.n })), { empty: 'No visits counted yet.' });
+    barList($('list-all-countries'), a.countries.map((c) => ({ label: countryName(c.name), value: c.n })), { color: 'var(--c2)', empty: 'No visits counted yet.' });
+    donut($('chart-all-devices'), a.devices.map((d, i) => ({ label: d.name, value: d.n, color: COLORS[i % COLORS.length] })), {
+      center: fmt.int(a.devices.reduce((s, d) => s + d.n, 0)),
+      centerSub: 'pageviews',
+    });
   }
 
   function renderKpis(r: Report): void {
@@ -322,7 +360,10 @@ function init(): void {
   window.addEventListener('resize', () => {
     window.clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(() => {
-      if (report && !app.hidden) renderTraffic(report);
+      if (report && !app.hidden) {
+        renderAll(report);
+        renderTraffic(report);
+      }
     }, 150);
   });
 
@@ -338,7 +379,11 @@ function init(): void {
   });
   $('export-csv').addEventListener('click', () => {
     if (!report) return;
-    const rows = [['date', 'visitors', 'sessions', 'pageviews', 'clicks', 'enquiries'], ...report.daily.map((d) => [d.date, d.visitors, d.sessions, d.pageviews, d.clicks, d.enquiries])];
+    const everyone = new Map((report.all?.daily ?? []).map((d) => [d.date, d]));
+    const rows = [
+      ['date', 'all_visitors', 'all_pageviews', 'accepted_visitors', 'sessions', 'accepted_pageviews', 'clicks', 'enquiries'],
+      ...report.daily.map((d) => [d.date, everyone.get(d.date)?.visitors ?? '', everyone.get(d.date)?.views ?? '', d.visitors, d.sessions, d.pageviews, d.clicks, d.enquiries]),
+    ];
     const blob = new Blob([rows.map((row) => row.join(',')).join('\n')], { type: 'text/csv' });
     const a = h('a');
     a.href = URL.createObjectURL(blob);
