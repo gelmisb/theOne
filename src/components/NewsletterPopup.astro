@@ -23,7 +23,7 @@ import { subscriberOffer } from '../data/offers';
       <span aria-hidden="true">×</span>
     </button>
 
-    <form class="np-form" id="newsletter-popup-form">
+    <form class="np-form" id="newsletter-popup-form" data-astro-reload>
       <p class="np-eyebrow mono">Stay in the loop</p>
       <h2 class="np-title" id="popup-title">Get first notice of seasonal offers</h2>
       <p class="np-sub">
@@ -87,6 +87,9 @@ import { subscriberOffer } from '../data/offers';
   .np-close:hover, .np-close:focus-visible{ color: var(--paper); }
   .np-close:focus-visible{ outline: 2px solid var(--brass); outline-offset: 2px; }
   .np-form{ display: flex; flex-direction: column; gap: 12px; }
+  /* display:flex above would otherwise beat the hidden attribute and keep the
+     form on screen next to the thank-you message. */
+  .np [hidden]{ display: none !important; }
   .np-eyebrow{ margin: 0; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brass); padding-right: 36px; }
   .np-title{
     font-family: var(--font-display), serif; font-weight: 400;

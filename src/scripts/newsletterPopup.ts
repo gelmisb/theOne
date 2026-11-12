@@ -114,7 +114,8 @@ async function submit(form: HTMLFormElement) {
     form.setAttribute('hidden', '');
     document.getElementById('popup-thanks')?.removeAttribute('hidden');
     document.dispatchEvent(new CustomEvent('hv:track', { detail: { type: 'form', form: 'newsletter-popup', action: 'ok' } }));
-    window.setTimeout(() => hide(false), 9000);
+    // Long enough to read the confirmation, then out of the way.
+    window.setTimeout(() => hide(false), 3500);
   } catch {
     error?.removeAttribute('hidden');
     if (button) button.disabled = false;
@@ -133,9 +134,16 @@ export function initNewsletterPopup() {
       const el = popup();
       if (e.key === 'Escape' && el && !el.hasAttribute('hidden') && !document.querySelector('header.nav-open')) hide(true);
     });
-    document.addEventListener('submit', (e) => {
-      const form = e.target as HTMLFormElement;
-      if (form?.id !== 'newsletter-popup-form') return;
+  }
+  // The submit handler goes on the form itself, not on document. Astro's page
+  // transitions (ClientRouter) also listen for form submits on document and, if
+  // nothing has called preventDefault by the time the event reaches them,
+  // navigate to the form's GET URL (/?email=...). A listener on the form runs
+  // first, so the form never reaches that fallback.
+  const form = document.getElementById('newsletter-popup-form') as HTMLFormElement | null;
+  if (form && !form.dataset.bound) {
+    form.dataset.bound = 'true';
+    form.addEventListener('submit', (e) => {
       e.preventDefault();
       void submit(form);
     });
