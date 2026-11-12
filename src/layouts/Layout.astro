@@ -162,6 +162,8 @@ const persistImage = Object.values(persistImages)[0]?.default;
   import { initAnalytics } from '../scripts/analytics';
   // Google Ads tag - also inert until the visitor accepts in the cookie banner.
   import { initGoogleAds } from '../scripts/googleAds';
+  // Always-on visit counter: no cookie, no ID, path only - runs for everyone.
+  import { initHitCounter } from '../scripts/hitCounter';
 
   document.addEventListener('astro:before-swap', teardownForTransition);
   document.addEventListener('astro:page-load', () => {
@@ -187,6 +189,7 @@ const persistImage = Object.values(persistImages)[0]?.default;
     initSectionTransitions();
     initAnalytics();
     initGoogleAds();
+    initHitCounter();
   });
 </script>
 

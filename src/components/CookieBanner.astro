@@ -4,7 +4,9 @@
 //
 // - Both buttons share one style on purpose: declining must be exactly as easy
 //   and as visible as accepting.
-// - Nothing is tracked, and Google's ad tag is not loaded, until "Accept analytics
+// - The anonymous visit count (scripts/hitCounter.ts) runs whatever is chosen -
+//   it sets no cookie and stores nothing on the device. Nothing else is tracked, and
+//   Google's ad tag is not loaded, until "Accept analytics
 //   and ads" is clicked; see scripts/analytics.ts and scripts/googleAds.ts for what
 //   each does and /privacy/ for the wording.
 // - The choice lives in localStorage under `hv-consent-v2` (scripts/consent.ts).
@@ -19,8 +21,9 @@
 <div class="cookie-banner glass" id="cookie-banner" role="region" aria-label="Cookie choices" hidden>
   <div class="cookie-banner-inner wrap">
     <p class="cookie-banner-text">
-      Can we count visits? With your OK we record which pages and links get used, how far you scroll and where
-      visitors come from, so we can see what's useful. That stays in our own Netlify account and is never sold.
+      Whatever you choose, we keep a simple anonymous count of visits - no cookies, no IDs. With your OK we also
+      record which pages and links get used, how far you scroll and where visitors come from, so we can see what's
+      useful. That stays in our own Netlify account and is never sold.
       We'd also like to use Google's ad tag to measure whether our Google ads lead to enquiries: it sets cookies
       and shares information about your visit with Google. Essential storage (this choice, newsletter sign-up)
       is always on.{' '}

@@ -103,6 +103,18 @@ and "full tracking behind consent" over anonymous-only. Rules that matter:
   or `/api/stats` answers 503. There is no Netlify CLI here, so the functions
   can't run locally: `astro dev` has no `/api/*`, and the dashboard's
   `?demo=1` (dev only) shows sample data instead.
+- **Everyone is counted, anonymously, whatever they chose.** `scripts/hitCounter.ts`
+  sends the page path only (no cookie, no storage) to `POST /api/hit`
+  (`netlify/functions/hit.ts` -> `handleHit` in `lib/analytics/server.ts`). One
+  record per view: time, path, country, device class and a HyperLogLog observation
+  (`j`,`k`; see `lib/analytics/hits.ts`) of a keyed, daily-rotating hash of IP + UA
+  - the IP and hash are never stored. Unique visitors are *estimated* (~3%) and
+  summed per day. It stands down for DNT / Sec-GPC (header and client), bots, the
+  `hv-ignore` flag and `/analytics*`. The dashboard's "Everyone who visited" block
+  reads `report.all`. `/privacy/` ("Counting visits, whatever you choose") and the
+  banner describe it - change them with any change here. Don't add anything to this
+  path that stores an ID or touches device storage: that would put it back under
+  the consent rules.
 - **Raw records are purged after `RAW_RETENTION_DAYS` (30)**, once their
   rollup exists. `/privacy/` states that number and the full list of what is
   collected - change the page whenever the tracker or retention changes.
