@@ -160,6 +160,8 @@ const persistImage = Object.values(persistImages)[0]?.default;
   // First-party analytics - inert until the visitor accepts it in the cookie
   // banner. Binds its own listeners once; this call just marks a page view.
   import { initAnalytics } from '../scripts/analytics';
+  // Google Ads tag - also inert until the visitor accepts in the cookie banner.
+  import { initGoogleAds } from '../scripts/googleAds';
 
   document.addEventListener('astro:before-swap', teardownForTransition);
   document.addEventListener('astro:page-load', () => {
@@ -184,6 +186,7 @@ const persistImage = Object.values(persistImages)[0]?.default;
     initHeadingSplitReveal();
     initSectionTransitions();
     initAnalytics();
+    initGoogleAds();
   });
 </script>
 
