@@ -23,7 +23,7 @@ const sections: Section[] = [
   {
     heading: 'The short version',
     paragraphs: [
-      'If you click <strong>Accept analytics and ads</strong> in the cookie banner, two things switch on. First, we count what happens on this site - which pages are viewed, which links are clicked, how far people scroll - so we can see what is useful and fix what is not. Second, we load <strong>Google\'s advertising tag</strong>, which lets us measure whether our Google ads lead to enquiries (see "Google Ads measurement" below). If you click <strong>Essential only</strong>, neither happens: no detailed tracking, Google\'s tag is not loaded and no identifier is created. Whichever you choose, we also keep a simple anonymous count of visits, described in the next section. You can change your mind at any time with <strong>Cookie settings</strong> in the footer.',
+      'Whichever you choose in the cookie banner, two things always happen: we keep a simple anonymous count of visits (next section), and the site loads <strong>Google\'s advertising tag</strong> so we can measure whether our Google ads lead to enquiries (see "Google Ads measurement" below). Until you accept, Google\'s tag is told not to set cookies or use your data for ad personalisation. If you click <strong>Accept analytics and ads</strong>, we also count what happens on this site - which pages are viewed, which links are clicked, how far people scroll - so we can see what is useful and fix what is not, and Google\'s tag is allowed to set cookies and use your visit to measure and improve our ads. If you click <strong>Essential only</strong>, none of that detailed tracking happens and no visitor identifier is created. You can change your mind at any time with <strong>Cookie settings</strong> in the footer.',
     ],
   },
   {
@@ -51,21 +51,22 @@ const sections: Section[] = [
     list: [
       'We do not store your IP address. Our hosting provider necessarily handles it to deliver the site, but it is not saved in our analytics data.',
       'We do not store your name, email address or anything you type into a form as part of analytics.',
-      'We never sell this data. Apart from Google\'s advertising tag described below, which only loads if you accept, the site uses no advertising networks or third-party trackers.',
-      'We do not track you, and we do not load Google\'s tag, if your browser sends <strong>Global Privacy Control</strong> or <strong>Do Not Track</strong>, even if you click Accept.',
+      'We never sell this data. Apart from Google\'s advertising tag described below, the site uses no advertising networks or third-party trackers.',
+      'We do not track you, and we never allow Google\'s tag to set cookies or personalise ads, if your browser sends <strong>Global Privacy Control</strong> or <strong>Do Not Track</strong>, even if you click Accept.',
     ],
   },
   {
     heading: 'Google Ads measurement',
     paragraphs: [
-      'We use Google Ads to promote the business. If you click <strong>Accept analytics and ads</strong>, this site loads Google\'s advertising tag. It may set cookies on your device (their names start with <strong>_gcl</strong>) and sends Google information about your visit: the page you are on, your IP address, your browser and device details, and whether you went on to send us an enquiry. We use that only to measure whether our Google ads lead to enquiries and to improve those ads - we never see who you are from it, and we do not pass it to anyone else.',
-      'Google LLC is based in the United States, so this data may be processed outside the EU/EEA under the safeguards Google puts in place (such as standard contractual clauses). Google\'s own use of the data is described in its <a href="https://policies.google.com/privacy">Privacy Policy</a>. If you click <strong>Essential only</strong>, withdraw consent later, or your browser sends Global Privacy Control or Do Not Track, the tag is not loaded and the cookies it set on this site are removed.',
+      'We use Google Ads to promote the business. So that we can measure whether our Google ads lead to enquiries, every page of this site loads Google\'s advertising tag. It runs under Google\'s <strong>Consent Mode</strong>: until you click <strong>Accept analytics and ads</strong>, it is told not to set cookies, not to store anything on your device and not to use your data for ad personalisation. Even so, loading the tag means Google receives basic technical information about your visit - the page you are on, your IP address, and your browser and device details - and, if you send an enquiry, a note that an enquiry was sent (with no cookie and no details of what you wrote).',
+      'If you click <strong>Accept analytics and ads</strong>, the tag may also set cookies on your device (their names start with <strong>_gcl</strong>) and Google may use your visit to measure and improve our ads. We use this only to measure whether our Google ads lead to enquiries - we never see who you are from it, and we do not pass it to anyone else.',
+      'Google LLC is based in the United States, so this data may be processed outside the EU/EEA under the safeguards Google puts in place (such as standard contractual clauses). Google\'s own use of the data is described in its <a href="https://policies.google.com/privacy">Privacy Policy</a>. If you click <strong>Essential only</strong>, withdraw consent later, or your browser sends Global Privacy Control or Do Not Track, the tag stays in its restricted mode and any cookies it set on this site are removed.',
     ],
   },
   {
     heading: 'Why, and our legal basis',
     paragraphs: [
-      'The purposes are to understand how the site is used and to improve it, and to measure whether our Google ads lead to enquiries. The legal basis is your <strong>consent</strong> (Article 6(1)(a) GDPR), which is also what the ePrivacy rules require before anything is stored on your device for this purpose. You can withdraw consent at any time; withdrawing deletes the visitor and session IDs from your browser, removes the cookies Google\'s tag set, and stops all recording. Declining or withdrawing never affects how the site works for you.',
+      'The purposes are to understand how the site is used and to improve it, and to measure whether our Google ads lead to enquiries. For anything that stores information on your device or builds a profile - our detailed analytics and Google\'s cookies and ad personalisation - the legal basis is your <strong>consent</strong> (Article 6(1)(a) GDPR), which is also what the ePrivacy rules require. You can withdraw consent at any time; withdrawing deletes the visitor and session IDs from your browser, removes the cookies Google\'s tag set, and stops all recording. For the restricted, cookie-less loading of Google\'s tag that happens before you choose, our legitimate interest (Article 6(1)(f)) in measuring our advertising is the basis, and you can object at any time by emailing us or turning on Global Privacy Control. Declining or withdrawing never affects how the site works for you.',
     ],
   },
   {

@@ -85,7 +85,11 @@ Built 2026-10-23: a cookie-free tracker, two Netlify functions and a private
 dashboard at `/analytics/`. The founder chose "own collector" over a hosted tool
 and "full tracking behind consent" over anonymous-only. Rules that matter:
 
-- **Nothing is tracked until the visitor clicks Accept.** `src/scripts/consent.ts`
+- **Google's ad tag is always loaded** (`scripts/googleAds.ts`) under Google Consent Mode v2: all four signals
+  default to `denied` (no cookies, no ad personalisation) and flip to `granted` only on Accept, never with
+  GPC/DNT; withdrawing sends an update and deletes the `_gcl_*` cookies. It is skipped only on `/analytics*`
+  and for `hv-ignore`. The banner and `/privacy/` ("Google Ads measurement") say this - keep them in step.
+- **Our own detailed analytics track nothing until the visitor clicks Accept.** `src/scripts/consent.ts`
   holds the choice under `hv-consent-v2`; the old `hv-cookie-consent` key meant
   "essential only" and must never be read as consent. Global Privacy Control /
   Do Not Track and the dashboard's "ignore my visits" flag (`hv-ignore`) beat
