@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Sprockets from '../components/Sprockets.astro';
 import Footer from '../components/Footer.astro';
+import { serviceSchema } from '../data/seo';
 
 // No example reels yet - this page ships copy-only until real client
 // video work exists to show. Revisit once footage is available and add
@@ -16,8 +17,14 @@ const deliverables = [
 ---
 
 <Layout
-  title="Business Video in Wicklow - Horizon Vantage"
-  description="On-site video for Wicklow cafés, shops, salons, stays and food producers - short vertical clips and promo film, shot alongside your photography."
+  title="Business Videographer in Wicklow | Horizon Vantage"
+  description="Wicklow business videographer: short vertical clips and promo film for cafés, shops, salons, stays and food producers, shot on site alongside your photography."
+  schema={[serviceSchema({
+    name: 'Business videography',
+    serviceType: 'Video production',
+    description: 'On-site short-form clips and promotional film for local businesses, shot alongside photography and built for social media and Google Business Profile posts.',
+    path: '/videography/',
+  })]}
 >
   <Header transition:persist />
   <main id="main-content">

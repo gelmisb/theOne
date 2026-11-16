@@ -1,5 +1,16 @@
 # Horizon Vantage
-> On-site photography, video and fast websites for local businesses - cafés, bakeries, barbershops, pet shops and other shops, holiday lets, glamping, B&Bs, experiences and artisan food and drink producers - based in Co. Wicklow, working across Ireland. One local specialist, from shoot to search.
+> Horizon Vantage is a one-person photography, videography, web design and local SEO business based in Co. Wicklow, Ireland. It makes real on-site photos and video for local businesses - cafés, bakeries, barbershops, pet shops and other shops, holiday lets, glamping, B&Bs, activity providers and artisan food and drink producers - builds a fast custom website around them, and sets up the Google Business Profile so all three match. Founder: Gelmis Bartulis.
+
+## Quick facts
+- Business: Horizon Vantage (sole trader, registered with the Companies Registration Office, Ireland, number SR9692490)
+- Based in: Co. Wicklow, Ireland. Works across Wicklow, Kildare, Wexford and Dublin, and further afield across Ireland
+- Services: business photography, videography, website design and development, local SEO (Google Business Profile setup)
+- Photography: on-site, never AI-generated; a half-day shoot delivers 25-40 edited photos in about 5 days
+- Pricing (from, final quote after a free listing audit): Google Business Profile setup from €150; Season Refresh (new photos and video) from €450; website from €900; Booking-Ready Launch (shoot, video, 5-8 page website, Google profile) from €2,400; Care & Visibility from €120/month
+- Contact: info@horizonvantage.ie, +353 89 493 9050, https://horizonvantage.ie/contact/
+- Google Business Profile: https://share.google/URlyVh4JCicbSqVF6
+- Instagram: https://instagram.com/horizonvantage
+- Facebook: https://www.facebook.com/share/1DqPMeqiL3/
 
 ## Who it's for
 - [Cafés, bakeries & food producers](https://horizonvantage.ie/food-and-drink/): cafés, bakeries, farm shops, makers and artisan producers
@@ -7,13 +18,18 @@
 - [Stays & experiences](https://horizonvantage.ie/stays-and-experiences/): holiday lets, glamping, B&Bs, guesthouses, activity providers and small venues
 
 ## Services
-- [Photography](https://horizonvantage.ie/photography/): on-site photography, shot at your business, never AI-generated
-- [Videography](https://horizonvantage.ie/videography/): short vertical clips and promo film
+- [Photography](https://horizonvantage.ie/photography/): on-site business photography in Wicklow, shot at your business
+- [Videography](https://horizonvantage.ie/videography/): short vertical clips and promo film, shot alongside the photography
+- [Website design](https://horizonvantage.ie/web-projects/): fast, custom-built sites designed around real photography
 - [Local SEO](https://horizonvantage.ie/local-seo/): Google Business Profile setup and local search
-- [Websites](https://horizonvantage.ie/web-projects/): fast, custom-built sites designed around real photography
+
+## Recent work
+- Irish Exotic Pets (website design and build) - https://irishexoticpets.ie
+- Furry Butts, Blessington (website design and build, event and shop photography) - https://furrybutts.com
+- Frascati Car Wash, Blackrock (photography refresh)
 
 ## About
-- [About Horizon Vantage](https://horizonvantage.ie/about/)
+- [About Horizon Vantage](https://horizonvantage.ie/about/): 10+ years of software engineering and 5+ years of professional photography in one business
 - [Contact and free listing audit](https://horizonvantage.ie/contact/)
 - [Terms of Service](https://horizonvantage.ie/terms/)
 - [Privacy & Cookies](https://horizonvantage.ie/privacy/)

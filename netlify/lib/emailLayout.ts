@@ -41,6 +41,10 @@ export const button = (href: string, label: string, primary = true) =>
     primary ? `background:${BRASS};color:${BG};` : `border:1px solid ${BRASS};color:${BRASS};`
   }font-size:14px;font-weight:bold;text-decoration:none;padding:12px 24px;border-radius:999px;margin:0 4px 8px;">${label}</a>`;
 
+/** A highlighted box holding a code the reader can quote in an enquiry. */
+export const codeBox = (code: string) =>
+  `<div style="border:1px dashed ${BRASS};border-radius:12px;padding:16px 18px;text-align:center;margin:4px 0 14px;"><span style="font-family:'Courier New',monospace;font-size:26px;letter-spacing:3px;font-weight:bold;color:${BRASS};">${esc(code)}</span></div>`;
+
 export const contactBlock = () => `<tr><td style="padding:24px 32px 8px;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid ${LINE};"><tr><td style="padding-top:20px;font-size:14px;line-height:1.9;color:${DIM};">
       ${eyebrow('Get in touch', '0 0 6px')}

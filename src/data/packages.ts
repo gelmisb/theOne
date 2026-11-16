@@ -42,9 +42,13 @@ export interface PackageTier {
    * list on the add-on row. Suggestions only - the right pick is confirmed in
    * the audit. */
   suggestedTools?: { sector: string; tools: string }[];
+  /** A limited-time discount, shown as a badge with the old price struck through. */
+  promo?: { badge: string; wasPrice: string };
   core: boolean;
   visible: boolean;
 }
+
+import { isOfferActive, offerEndLabel, salePrice, seasonalOffer } from './offers';
 
 const AUDIT_NOTE = 'Final quote after your free audit.';
 
@@ -114,6 +118,22 @@ export const packages: PackageTier[] = [
     includes: ['Google Business Profile setup and clean-up', 'Category, service area and NAP consistency check'],
     core: false,
     visible: true,
+  },
+  // Limited-time Christmas offer, from the 2026-11-12 website updates brief. The
+  // base price is the Season Refresh "from €450" below (see data/offers.ts);
+  // hidden automatically once the offer's end date has passed.
+  {
+    id: 'seasonal-refresh',
+    group: 'addon',
+    label: 'LIMITED TIME',
+    name: `${seasonalOffer.name}: ${seasonalOffer.season}`,
+    price: `from €${salePrice}`,
+    priceNote: `${offerEndLabel()}. ${AUDIT_NOTE}`,
+    purpose: `We come to your business and photograph your ${seasonalOffer.season} decorations and atmosphere`,
+    includes: ['For cafés, shops, salons, gyms and other local businesses'],
+    promo: { badge: `${seasonalOffer.discountPercent}% off`, wasPrice: `from €${seasonalOffer.basePrice}` },
+    core: false,
+    visible: isOfferActive(),
   },
   {
     id: 'refresh',

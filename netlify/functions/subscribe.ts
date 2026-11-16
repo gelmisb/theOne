@@ -37,7 +37,7 @@ export const handler: Handler = async (event) => {
     };
   }
 
-  let payload: { email?: string; botField?: string };
+  let payload: { email?: string; botField?: string; consent?: boolean };
   try {
     payload = JSON.parse(event.body || '{}');
   } catch {
@@ -50,6 +50,13 @@ export const handler: Handler = async (event) => {
   // submission was rejected.
   if (payload.botField) {
     return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+  }
+
+  // The forms only submit with the consent box ticked and send consent: true.
+  // An explicit false is refused; a missing flag is tolerated so a page cached
+  // from before this field existed can still sign people up.
+  if (payload.consent === false) {
+    return { statusCode: 400, body: JSON.stringify({ error: 'Consent is required to subscribe.' }) };
   }
 
   const email = payload.email?.trim();

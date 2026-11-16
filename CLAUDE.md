@@ -85,8 +85,13 @@ Built 2026-10-23: a cookie-free tracker, two Netlify functions and a private
 dashboard at `/analytics/`. The founder chose "own collector" over a hosted tool
 and "full tracking behind consent" over anonymous-only. Rules that matter:
 
-- **Nothing is tracked until the visitor clicks Accept.** `src/scripts/consent.ts`
-  holds the choice under `hv-consent-v2`; the old `hv-cookie-consent` key meant
+- **Google's ad tag is always loaded** (`scripts/googleAds.ts`) under Google Consent Mode v2: all four signals
+  default to `denied` (no cookies, no ad personalisation) and flip to `granted` only on Accept, never with
+  GPC/DNT; withdrawing sends an update and deletes the `_gcl_*` cookies. It is skipped only on `/analytics*`
+  and for `hv-ignore`. The banner and `/privacy/` ("Google Ads measurement") say this - keep them in step.
+- **Our own detailed analytics track nothing until the visitor clicks Accept.** `src/scripts/consent.ts`
+  holds the choice under `hv-consent-v3` (bumped from v2 when Google's ad tag was added, so everyone is
+  asked again - bump it whenever the banner's purposes change, and in Layout's inline tag snippet too); the old `hv-cookie-consent` key meant
   "essential only" and must never be read as consent. Global Privacy Control /
   Do Not Track and the dashboard's "ignore my visits" flag (`hv-ignore`) beat
   consent. `/analytics*` is never tracked.
@@ -103,6 +108,18 @@ and "full tracking behind consent" over anonymous-only. Rules that matter:
   or `/api/stats` answers 503. There is no Netlify CLI here, so the functions
   can't run locally: `astro dev` has no `/api/*`, and the dashboard's
   `?demo=1` (dev only) shows sample data instead.
+- **Everyone is counted, anonymously, whatever they chose.** `scripts/hitCounter.ts`
+  sends the page path only (no cookie, no storage) to `POST /api/hit`
+  (`netlify/functions/hit.ts` -> `handleHit` in `lib/analytics/server.ts`). One
+  record per view: time, path, country, device class and a HyperLogLog observation
+  (`j`,`k`; see `lib/analytics/hits.ts`) of a keyed, daily-rotating hash of IP + UA
+  - the IP and hash are never stored. Unique visitors are *estimated* (~3%) and
+  summed per day. It stands down for DNT / Sec-GPC (header and client), bots, the
+  `hv-ignore` flag and `/analytics*`. The dashboard's "Everyone who visited" block
+  reads `report.all`. `/privacy/` ("Counting visits, whatever you choose") and the
+  banner describe it - change them with any change here. Don't add anything to this
+  path that stores an ID or touches device storage: that would put it back under
+  the consent rules.
 - **Raw records are purged after `RAW_RETENTION_DAYS` (30)**, once their
   rollup exists. `/privacy/` states that number and the full list of what is
   collected - change the page whenever the tracker or retention changes.

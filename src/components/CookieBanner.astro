@@ -4,9 +4,13 @@
 //
 // - Both buttons share one style on purpose: declining must be exactly as easy
 //   and as visible as accepting.
-// - Nothing is tracked until "Accept analytics" is clicked; see
-//   scripts/analytics.ts for what is recorded and /privacy/ for the wording.
-// - The choice lives in localStorage under `hv-consent-v2` (scripts/consent.ts).
+// - The anonymous visit count (scripts/hitCounter.ts) runs whatever is chosen -
+//   it sets no cookie and stores nothing on the device. Google's ad tag is always
+//   loaded too, but under Consent Mode it is denied cookies and ad personalisation
+//   until "Accept analytics and ads" is clicked (scripts/googleAds.ts). Our own
+//   detailed analytics (scripts/analytics.ts) stays off until then. /privacy/ has
+//   the wording.
+// - The choice lives in localStorage under `hv-consent-v3` (scripts/consent.ts).
 //   The old `hv-cookie-consent` flag is deleted, never read as consent: that
 //   click only ever meant "essential cookies only".
 // - Essential storage is always on and unaffected: this choice itself, and
@@ -18,14 +22,16 @@
 <div class="cookie-banner glass" id="cookie-banner" role="region" aria-label="Cookie choices" hidden>
   <div class="cookie-banner-inner wrap">
     <p class="cookie-banner-text">
-      Can we count visits? With your OK we record which pages and links get used, how far you scroll and where
-      visitors come from, so we can see what's useful. It stays in our own Netlify account, is never sold or
-      shared, and there are no ads or third-party trackers. Essential storage (this choice, newsletter sign-up)
-      is always on.{' '}
+      Whatever you choose, we keep a simple anonymous count of visits - no cookies, no IDs - and Google's ad tag is
+      loaded so we can measure our Google ads. Until you accept, that tag is told not to set cookies or use your
+      data for ad personalisation. With your OK we also record which pages and links get used, how far you scroll
+      and where visitors come from (kept in our own Netlify account, never sold), and Google's tag may set cookies
+      and use your visit to measure and improve our ads. Essential storage (this choice, newsletter sign-up) is
+      always on.{' '}
       <a href="/privacy/">How it works</a>
     </p>
     <div class="cookie-banner-actions">
-      <button type="button" class="btn btn-ghost" data-consent="granted">Accept analytics</button>
+      <button type="button" class="btn btn-ghost" data-consent="granted">Accept analytics and ads</button>
       <button type="button" class="btn btn-ghost" data-consent="denied">Essential only</button>
     </div>
   </div>

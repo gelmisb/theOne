@@ -5,6 +5,11 @@
 // `only` lets a landing page show a relevant subset (section 6, task 6)
 // instead of the full list - pass an array of `id`s to filter to.
 import { frameNumber } from '../data/homeFrames';
+import { packages } from '../data/packages';
+
+// Prices in the cost answer come from data/packages.ts so they can't drift from
+// the Offer section. `price` strings already read "from €X".
+const price = (id: string) => packages.find((p) => p.id === id)?.price ?? 'on request';
 
 export interface Props {
   only?: string[];
@@ -17,7 +22,11 @@ const { only, frameNum = frameNumber('faq') } = Astro.props;
 const allFaqs = [
   { id: 'ai', q: 'Do you use AI-generated images?', a: 'No. Every image is shot on site at your business. Customers choose on trust, so what they see should be what they get.' },
   { id: 'audit', q: 'What is a listing audit?', a: 'A short, free review of your current photos, Google profile and website or booking page, with three quick wins. No obligation.' },
-  { id: 'area', q: 'Where do you work?', a: 'Based in Co. Wicklow, working with businesses across Ireland.' },
+  { id: 'who', q: 'Who does business photography, video and websites in Wicklow?', a: 'Horizon Vantage is a one-person photography, videography, web design and local SEO business based in Co. Wicklow. One specialist handles the on-site shoot, the video, the website and the Google Business Profile, for local businesses across Wicklow, Kildare, Wexford, Dublin and the rest of Ireland.' },
+  { id: 'refresh', q: 'What is a digital refresh for a small business?', a: 'A digital refresh brings your online presence up to date in one go: new on-site photos and short video, a fast website built around them, and a tidied Google Business Profile so all three match. A Season Refresh of new photos and video starts ' + price('refresh') + '; the full Booking-Ready Launch, with a website and Google profile, starts ' + price('launch') + '.' },
+  { id: 'cost', q: 'How much do business photography, video and a website cost?', a: 'Google Business Profile setup starts ' + price('local-seo') + ', a Season Refresh of new photos and video starts ' + price('refresh') + ', a website starts ' + price('website') + ', and the full Booking-Ready Launch (shoot, video, website and Google profile) starts ' + price('launch') + '. You get a firm quote after a free listing audit.' },
+  { id: 'google', q: 'Can you help my business show up on Google?', a: 'Yes. We set up and tidy your Google Business Profile - category, photos, service area and details that match your website - and build a simple habit for collecting reviews. It is included in the Booking-Ready Launch or available on its own.' },
+  { id: 'area', q: 'Where do you work?', a: 'Based in Co. Wicklow, working with businesses across Wicklow, Kildare, Wexford and Dublin, and further afield across Ireland.' },
   { id: 'timeline', q: 'How long does a project take?', a: 'It depends on scope and season. We agree a timeline before we start.' },
   { id: 'grants', q: 'Are there grants for this?', a: 'Some supports exist, for example through your Local Enterprise Office, but eligibility varies and nothing is guaranteed. Ask your LEO, and we will share what we know.' },
 ];

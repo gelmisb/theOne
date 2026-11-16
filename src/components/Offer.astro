@@ -96,7 +96,7 @@ const goodToKnow = [
           {addons.map((t) => (
             <li class="addon-row" data-reveal data-reveal-group="offer-addons">
               <div class="addon-body">
-                <div class="tier-num mono">{t.label}</div>
+                <div class="tier-num mono">{t.label}{t.promo && <span class="promo-badge">{t.promo.badge}</span>}</div>
                 <h4>{t.name}</h4>
                 <p class="addon-desc">{[t.purpose, ...t.includes].join(' · ')}</p>
                 {t.suggestedTools && (
@@ -114,6 +114,7 @@ const goodToKnow = [
                 )}
               </div>
               <div class="addon-price">
+                {t.promo && <div class="was-price">{t.promo.wasPrice}</div>}
                 <div class="price">{t.price}</div>
                 {t.priceNote && <div class="price-note">{t.priceNote}</div>}
               </div>
@@ -151,6 +152,15 @@ const goodToKnow = [
 </section>
 
 <style>
+  .promo-badge{
+    display: inline-block; margin-left: 10px; padding: 2px 9px;
+    border: 1px solid var(--brass); border-radius: 999px;
+    color: var(--brass); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .was-price{
+    font-family: var(--font-mono), monospace; font-size: 13px;
+    color: var(--paper-dim); text-decoration: line-through; opacity: 0.8;
+  }
   /* Core packages. A flex-wrap row rather than a fixed column count: two
      packages split the row evenly, a third (see the note in
      data/packages.ts) joins them with no template change, and each wraps to

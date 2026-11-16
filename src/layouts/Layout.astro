@@ -4,22 +4,54 @@ import { Image } from 'astro:assets';
 import { ClientRouter } from 'astro:transitions';
 import type { ImageMetadata } from 'astro';
 import CookieBanner from '../components/CookieBanner.astro';
+import NewsletterPopup from '../components/NewsletterPopup.astro';
 import LocalBusinessSchema from '../components/LocalBusinessSchema.astro';
+import { breadcrumbSchema } from '../data/seo';
+import { business } from '../data/business';
 
 interface Props {
   title?: string;
   description?: string;
   /** Keeps a page out of search results (the 404). Everything else is indexable. */
   noindex?: boolean;
+  /** Extra JSON-LD nodes for this page (e.g. a Service). A BreadcrumbList is added automatically. */
+  schema?: object[];
 }
 
 const {
-  title = 'Horizon Vantage | Photo, Video & Websites in Wicklow',
-  description = 'Honest on-site photography and video for cafés, shops, salons, stays and food producers, built into a fast website that helps customers book direct.',
+  title = 'Horizon Vantage | Photographer, Videographer & Web Designer in Wicklow',
+  description = 'Wicklow photographer, videographer and web designer for local businesses. Real on-site photos and video, a fast website and a tidy Google profile - one specialist, start to finish.',
   noindex = false,
+  schema = [],
 } = Astro.props;
 
+const crumb = breadcrumbSchema(Astro.url.pathname);
+const pageSchema = [...schema, ...(crumb ? [crumb] : [])];
+
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+
+// The inline half of the Google Ads tag (see the comment in <head>). Written as a
+// string so the account ID appears literally - gtag('config', 'AW-...') - as in
+// Google's own snippet, which is what its checker looks for.
+const adsSnippet = `
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+  (function () {
+    try {
+      if (location.pathname.indexOf('/analytics') === 0 || localStorage.getItem('hv-ignore') === '1') return;
+    } catch (e) {}
+    var ok = false;
+    try {
+      ok = localStorage.getItem('hv-consent-v3') === 'granted' && navigator.globalPrivacyControl !== true && navigator.doNotTrack !== '1';
+    } catch (e) {}
+    var v = ok ? 'granted' : 'denied';
+    gtag('consent', 'default', { ad_storage: v, ad_user_data: v, ad_personalization: v, analytics_storage: v });
+    gtag('set', 'ads_data_redaction', true);
+    gtag('js', new Date());
+    gtag('config', '${business.googleAds.id}');
+    window.hvGtagOn = true;
+  })();
+`;
 
 // Social share preview: a purpose-made 1200x630 JPG (real client photo +
 // wordmark) in /public, so link previews on LinkedIn/Facebook show work, not
@@ -71,6 +103,7 @@ const persistImage = Object.values(persistImages)[0]?.default;
     <meta name="twitter:image" content={ogImageURL} />
 
     <LocalBusinessSchema image={ogImageURL.toString()} />
+    {pageSchema.length > 0 && <script type="application/ld+json" set:html={JSON.stringify(pageSchema)} is:inline />}
 
     <!-- SPA-style client-side navigation (astro:transitions) instead of a
          full page reload per link click - a hard reload was the actual
@@ -80,6 +113,20 @@ const persistImage = Object.values(persistImages)[0]?.default;
          vignette) visibly re-painting from scratch. ClientRouter fetches
          the next page in the background and cross-fades the swap via the
          browser's View Transitions API instead. -->
+    <!-- Google Ads tag, in the page source on every page exactly as Google's
+         install instructions say (Google's checker reads the HTML, and a tag added
+         later by JavaScript is reported as "not set up"). The library <script> only
+         loads gtag.js; nothing is sent until the inline script below calls
+         gtag('config'). That inline script runs once per full page load (Astro keeps
+         identical head scripts across page transitions) and sets Consent Mode
+         defaults BEFORE config: everything 'denied' (no cookies, no ad
+         personalisation) unless the visitor already accepted and their browser isn't
+         sending Global Privacy Control / Do Not Track. Later changes (Accept,
+         withdraw) and the enquiry conversion are handled in scripts/googleAds.ts.
+         Skipped on /analytics and for the owner's ignore flag (hv-ignore). Keep the
+         storage keys in step with scripts/consent.ts. -->
+    <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${business.googleAds.id}`}></script>
+    <script is:inline set:html={adsSnippet}></script>
     <ClientRouter />
   </head>
   <body>
@@ -94,6 +141,7 @@ const persistImage = Object.values(persistImages)[0]?.default;
     <div class="grain" aria-hidden="true" transition:persist></div>
     <div class="vignette" aria-hidden="true" transition:persist></div>
     <CookieBanner />
+    <NewsletterPopup />
   </body>
 </html>
 
@@ -139,6 +187,8 @@ const persistImage = Object.values(persistImages)[0]?.default;
     initWebMockTilt,
     initPortfolioLightbox,
     initNewsletterSignup,
+    initSeasonalOffer,
+    initContactPrefill,
     initVideoLightbox,
     initScrollNav,
     initHeadingSplitReveal,
@@ -148,6 +198,10 @@ const persistImage = Object.values(persistImages)[0]?.default;
   // First-party analytics - inert until the visitor accepts it in the cookie
   // banner. Binds its own listeners once; this call just marks a page view.
   import { initAnalytics } from '../scripts/analytics';
+  // Google Ads tag - also inert until the visitor accepts in the cookie banner.
+  import { initGoogleAds } from '../scripts/googleAds';
+  // Always-on visit counter: no cookie, no ID, path only - runs for everyone.
+  import { initHitCounter } from '../scripts/hitCounter';
 
   document.addEventListener('astro:before-swap', teardownForTransition);
   document.addEventListener('astro:page-load', () => {
@@ -165,11 +219,15 @@ const persistImage = Object.values(persistImages)[0]?.default;
     initWebMockTilt();
     initPortfolioLightbox();
     initNewsletterSignup();
+    initSeasonalOffer();
+    initContactPrefill();
     initVideoLightbox();
     initScrollNav();
     initHeadingSplitReveal();
     initSectionTransitions();
     initAnalytics();
+    initGoogleAds();
+    initHitCounter();
   });
 </script>
 

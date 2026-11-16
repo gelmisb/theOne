@@ -119,6 +119,42 @@ export interface Rollup {
   vitals: { lcp: VitalStat; cls: VitalStat; inp: VitalStat };
 }
 
+/** One page view from the always-on counter (hits.ts). Holds no visitor or
+ *  session ID: `j`/`k` are a HyperLogLog observation (bucket, rank) used only to
+ *  estimate how many different people visited. */
+export interface HitRecord {
+  ts: number;
+  p: string;
+  cc: string;
+  dev: string;
+  j: number;
+  k: number;
+}
+
+/** One Europe/Dublin day of always-on counter hits, aggregated. */
+export interface HitRollup {
+  v: 1;
+  date: string;
+  builtAt: number;
+  views: number;
+  /** Estimated distinct visitors that day (HyperLogLog, about 3% error). */
+  visitors: number;
+  pages: Record<string, number>;
+  countries: Record<string, number>;
+  devices: Record<string, number>;
+  hours: number[];
+}
+
+/** Everyone who visited, whatever their cookie choice (from the always-on counter). */
+export interface AllTraffic {
+  daily: { date: string; views: number; visitors: number }[];
+  /** `visitors` is summed per day, so a person returning on another day counts again. */
+  totals: { views: number; visitors: number };
+  pages: NameCount[];
+  countries: NameCount[];
+  devices: NameCount[];
+}
+
 export interface NameCount {
   name: string;
   n: number;
@@ -196,6 +232,8 @@ export interface Report {
   /** [weekday Mon=0..Sun=6][hour 0-23] pageviews. */
   heatmap: number[][];
   vitals: { lcp: VitalSummary; cls: VitalSummary; inp: VitalSummary };
+  /** The always-on counter's totals - everyone, not just visitors who accepted analytics. */
+  all?: AllTraffic;
 }
 
 /** The subset of a Netlify Blobs Store the server code uses, so tests can

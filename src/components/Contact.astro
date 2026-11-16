@@ -175,8 +175,10 @@ import CallLink from './CallLink.astro';
       error?.setAttribute('hidden', '');
       hint?.setAttribute('hidden', '');
       submitBtn?.setAttribute('style', 'display:none;');
-      // Tells the analytics tracker (a no-op unless the visitor consented).
+      // Tells the analytics tracker and the Google Ads conversion (both no-ops
+      // unless the visitor consented).
       document.dispatchEvent(new CustomEvent('hv:track', { detail: { type: 'form', form: 'enquiry-form', action: 'ok' } }));
+      document.dispatchEvent(new CustomEvent('hv:conversion', { detail: 'lead' }));
     } catch {
       error?.removeAttribute('hidden');
       document.dispatchEvent(new CustomEvent('hv:track', { detail: { type: 'form', form: 'enquiry-form', action: 'err' } }));

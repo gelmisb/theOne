@@ -177,5 +177,17 @@ export function generateDemoReport(days: number, now = Date.now()): Report {
   const dates = dayRange(end, days);
   const byDay = generateRecords(end, days);
   const rollups = dates.map((d) => buildRollup(d, byDay.get(d) ?? [], now));
-  return mergeRollups(rollups, dates, { demo: true, now });
+  const report = mergeRollups(rollups, dates, { demo: true, now });
+  // The always-on counter sees everyone, not just the ~half who accept analytics.
+  const k = 2.1;
+  const scale = (rows: { name: string; n: number }[]) => rows.map((x) => ({ name: x.name, n: Math.round(x.n * k) }));
+  const daily = report.daily.map((d) => ({ date: d.date, views: Math.round(d.pageviews * k), visitors: Math.round(d.visitors * k) }));
+  report.all = {
+    daily,
+    totals: { views: daily.reduce((a, d) => a + d.views, 0), visitors: daily.reduce((a, d) => a + d.visitors, 0) },
+    pages: scale(report.pages.map((p) => ({ name: p.path, n: p.views }))).slice(0, 12),
+    countries: scale(report.countries).slice(0, 12),
+    devices: scale(report.devices),
+  };
+  return report;
 }

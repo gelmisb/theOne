@@ -2,6 +2,8 @@
 // name must match the Google Business Profile listing exactly. Type is
 // ProfessionalService (a LocalBusiness subtype) - schema.org has no
 // "MarketingAgency" type, and an invalid @type gets the whole block ignored.
+import { business } from '../data/business';
+
 interface Props {
   image: string;
 }
@@ -16,23 +18,27 @@ const service = (name: string, description: string) => ({
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'ProfessionalService',
-  '@id': `${Astro.site}#business`,
-  name: 'Horizon Vantage',
-  url: Astro.site,
+  '@id': `${business.url}/#business`,
+  name: business.name,
+  // Plain-language alternates: "Horizon Vantage" alone collides with unrelated
+  // things (a video game), so give search engines and AI assistants the
+  // descriptive forms people actually search for.
+  alternateName: ['Horizon Vantage Photography', 'Horizon Vantage Wicklow'],
+  slogan: 'See further. Show it better.',
+  url: business.url,
   image,
+  logo: `${business.url}/apple-touch-icon.png`,
   description:
-    'On-site photography, videography, website development, and local SEO for small local businesses - cafés, bakeries, barbershops, pet shops and other shops, tourism accommodation and experiences, and artisan food and drink producers - based in Co. Wicklow.',
-  telephone: '+353894939050',
-  email: 'info@horizonvantage.ie',
+    'Horizon Vantage is a one-person photography, videography, web design and local SEO business in Co. Wicklow, Ireland, working with cafés, bakeries, barbershops, pet shops and other shops, holiday lets and other tourism businesses, and artisan food and drink producers.',
+  telephone: business.phone,
+  email: business.email,
   priceRange: '€150-€3200',
   // The Google Business Profile is the strongest entity link for a local
   // business - it tells search engines this site and that listing are the
-  // same business. Instagram is the same profile the footer links to. Add
-  // LinkedIn/Facebook here only once those profiles exist.
-  sameAs: [
-    'https://share.google/ureOlqVEXfppzPK6R',
-    'https://instagram.com/horizonvantage',
-  ],
+  // same business. hasMap points at the same listing. Add LinkedIn here only
+  // once that profile exists.
+  hasMap: business.googleProfile,
+  sameAs: [business.googleProfile, business.instagram, business.facebook],
   address: {
     '@type': 'PostalAddress',
     addressLocality: 'Wicklow',
@@ -40,12 +46,21 @@ const structuredData = {
     addressCountry: 'IE',
   },
   // Kept lean deliberately - Google treats an oversized areaServed list (one
-  // entry per town) as a spam signal. Country + the two primary counties is
-  // the standard "based here, working nationwide" pattern.
+  // entry per town) as a spam signal. Counties, matching the service area on
+  // the Facebook page, plus the country for work further afield.
   areaServed: [
     { '@type': 'Country', name: 'Ireland' },
     { '@type': 'AdministrativeArea', name: 'County Wicklow' },
+    { '@type': 'AdministrativeArea', name: 'County Kildare' },
+    { '@type': 'AdministrativeArea', name: 'County Wexford' },
     { '@type': 'AdministrativeArea', name: 'County Dublin' },
+  ],
+  knowsAbout: [
+    'Business photography',
+    'Commercial videography',
+    'Website design and development',
+    'Local SEO',
+    'Google Business Profile optimisation',
   ],
   makesOffer: [
     service('Photography', 'On-site business photography for small businesses in Ireland.'),
@@ -53,11 +68,28 @@ const structuredData = {
     service('Website development', 'Custom-built websites designed around real on-site photography.'),
     service('Local SEO', 'Google Business Profile setup and local search optimisation.'),
   ],
-  founder: {
-    '@type': 'Person',
-    name: 'Gelmis Bartulis',
-  },
+  founder: { '@id': `${business.url}/#founder` },
+};
+
+const founder = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  '@id': `${business.url}/#founder`,
+  name: business.founder,
+  jobTitle: 'Founder, photographer, videographer and web developer',
+  worksFor: { '@id': `${business.url}/#business` },
+  url: `${business.url}/about/`,
+};
+
+const website = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': `${business.url}/#website`,
+  url: business.url,
+  name: business.name,
+  inLanguage: 'en-IE',
+  publisher: { '@id': `${business.url}/#business` },
 };
 ---
 
-<script type="application/ld+json" set:html={JSON.stringify(structuredData)} is:inline />
+<script type="application/ld+json" set:html={JSON.stringify([structuredData, founder, website])} is:inline />
