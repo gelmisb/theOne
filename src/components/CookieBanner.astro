@@ -20,6 +20,12 @@
 ---
 
 <div class="cookie-banner glass" id="cookie-banner" role="region" aria-label="Cookie choices" hidden>
+  <!-- Closing without choosing counts as "Essential only": declining is always one tap, and
+       nothing is switched on by dismissing the banner. Handled by the same data-consent click
+       handler below. -->
+  <button type="button" class="cookie-banner-close" data-consent="denied" aria-label="Close and use essential cookies only">
+    <span aria-hidden="true">×</span>
+  </button>
   <div class="cookie-banner-inner wrap">
     <p class="cookie-banner-text">
       Whatever you choose, we keep a simple anonymous count of visits - no cookies, no IDs - and Google's ad tag is
@@ -80,6 +86,7 @@
 
 <style>
   .cookie-banner{
+    max-height: 100vh; max-height: 100dvh; overflow-y: auto; /* never taller than the screen: the buttons stay reachable */
     position: fixed; left: 0; right: 0; bottom: 0;
     z-index: 1000;
     padding: 18px 0;
@@ -96,8 +103,17 @@
     display: flex; align-items: center; justify-content: space-between; gap: 20px;
     flex-wrap: wrap;
   }
+  .cookie-banner-close{
+    position: absolute; top: 6px; right: 10px;
+    width: 40px; height: 40px;
+    background: none; border: none; cursor: pointer; border-radius: 50%;
+    color: var(--paper-dim); font-size: 28px; line-height: 1;
+  }
+  .cookie-banner-close:hover, .cookie-banner-close:focus-visible{ color: var(--paper); }
+  .cookie-banner-close:focus-visible{ outline: 2px solid var(--brass); outline-offset: 2px; }
   .cookie-banner-text{
     margin: 0; font-size: 13px; line-height: 1.5; color: var(--paper-dim); max-width: 700px;
+    padding-right: 36px; /* clear of the close button */
   }
   .cookie-banner-text a{ color: var(--brass); text-decoration: underline; text-underline-offset: 2px; }
   .cookie-banner-actions{ display: flex; gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
