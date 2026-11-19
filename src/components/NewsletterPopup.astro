@@ -59,10 +59,13 @@ import { subscriberOffer } from '../data/offers';
 
 <style>
   .np{
-    position: fixed; z-index: 45;
+    /* Above the fixed header (50) and the side dot navigation (60): at 45 both
+       sat on top of the close button, so on desktop (side nav) and in a landscape
+       phone (header) the X could not be clicked at all. */
+    position: fixed; z-index: 70;
     right: 20px; bottom: 20px;
     width: min(380px, calc(100vw - 24px));
-    max-height: calc(100vh - 40px); overflow-y: auto;
+    max-height: calc(100vh - 40px); max-height: calc(100dvh - 40px); overflow-y: auto;
     padding: 24px 22px 22px;
     border-radius: var(--radius-glass);
     border-color: rgba(230,196,104,0.4);
@@ -72,6 +75,10 @@ import { subscriberOffer } from '../data/offers';
   }
   .np.is-visible{ opacity: 1; transform: none; }
   @media (prefers-reduced-motion: reduce){ .np{ transition: none; transform: none; } }
+  /* Desktop: sit clear of the side navigation dots (right edge) instead of on top of them. */
+  @media (min-width: 900px){ .np{ right: 80px; } }
+  /* The full-screen mobile menu is open: step out of its way. */
+  :global(body:has(header.nav-open)) .np{ opacity: 0; pointer-events: none; }
   /* Phone: a compact sheet along the bottom edge, leaving the page visible above it. */
   @media (max-width: 640px){
     .np{ right: 12px; left: 12px; bottom: 12px; width: auto; padding: 20px 18px 18px; }
