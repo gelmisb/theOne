@@ -57,8 +57,12 @@ import logoMark from '../assets/photos/logo/logo_transparent.png';
     border: 1px solid transparent;
     background: linear-gradient(180deg, rgba(10,14,19,0.35), rgba(10,14,19,0.05));
     box-shadow: none;
+    /* backdrop-filter and box-shadow are deliberately NOT transitioned: easing a blur
+       re-blurs everything behind the header on every frame of the 350ms, and this
+       fires exactly as the pinned intro hands over to Hero (the heaviest moment of
+       the page). They switch on instantly; shape and colour still ease. */
     transition: margin .35s ease, border-radius .35s ease, background .35s ease,
-      border-color .35s ease, box-shadow .35s ease, backdrop-filter .35s ease;
+      border-color .35s ease;
   }
   header:global(.scrolled) .nav-shell{
     margin: 12px auto 0;
