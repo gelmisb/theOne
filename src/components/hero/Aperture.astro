@@ -1,0 +1,129 @@
+---
+// The iris from the logo: six blades that rotate outward to open.
+//
+// Geometry (all computed here, once, at build time - nothing is measured in the
+// browser): each blade is a fan from the frame's centre out to a circle just past
+// the frame's corners, pivoting on the rim point where its straight edge meets
+// the rim. Swinging a blade about that pivot slides its straight edge away from the
+// centre, so six of them leave a hexagonal hole whose radius is R * sin(angle).
+// Closed (angle 0) every blade's edge passes through the centre and the six fans
+// tile the whole frame with no gap.
+//
+// Performance: every blade is its OWN element and only that element's CSS
+// `transform: rotate()` is animated (hero.ts) - never SVG attributes - and the
+// shapes themselves are static.
+//
+// variant:
+//   "outline" - hairline brass strokes, decorative (type mode)
+//   "solid"   - opaque black; closed it fully covers the media underneath (video/stills)
+interface Props {
+  variant: 'outline' | 'solid';
+  /** Frame shape. The blades are drawn to cover it exactly. */
+  aspect?: 'portrait' | 'wide';
+  class?: string;
+}
+
+const { variant, aspect = 'portrait', class: className } = Astro.props;
+
+const W = aspect === 'wide' ? 850 : 400;
+const H = 500;
+const BLADES = 6;
+// Degrees one blade covers when closed. 60 would just tile the circle, but a blade swings
+// about its pivot, so its trailing edge swings too: it has to be wide enough to still
+// reach its neighbour when open (about 60 + 2 x the opening angle), or the hole goes
+// star-shaped instead of hexagonal. Real iris blades overlap this much.
+const SPAN = 150;
+const ARC_STEPS = 8;
+const cx = W / 2;
+const cy = H / 2;
+const R = Math.ceil(Math.hypot(cx, cy)) + 14; // past the corners, so closed = fully covered
+
+// Point on the rim at `deg` clockwise from straight up.
+const rim = (deg: number): [number, number] => {
+  const a = (deg * Math.PI) / 180;
+  return [cx + R * Math.sin(a), cy - R * Math.cos(a)];
+};
+const fmt = (p: [number, number]) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`;
+
+const blades = Array.from({ length: BLADES }, (_, i) => {
+  const a0 = (i * 360) / BLADES;
+  const pivot = rim(a0);
+  // Rim arc in short steps so the straight chords stay outside the frame's corners.
+  const arc = Array.from({ length: ARC_STEPS + 1 }, (_, k) => rim(a0 + (SPAN * k) / ARC_STEPS));
+  return {
+    points: [`${cx},${cy}`, ...arc.map(fmt)].join(' '),
+    origin: `${((pivot[0] / W) * 100).toFixed(2)}% ${((pivot[1] / H) * 100).toFixed(2)}%`,
+  };
+});
+
+// How far the blades swing when open (degrees, counter-clockwise).
+// Outline: a hexagonal opening about half the frame wide (hole radius = R*sin(angle)).
+// Solid: the opening's flat sides must clear the frame's corners, i.e. R*sin(angle) >= the
+// corner distance. R is only 14 units past the corners, so that needs about 74-77 degrees;
+// 80 leaves a margin (66 left small dark wedges in the corners).
+const OPEN = variant === 'outline' ? 20 : 80;
+---
+
+<div
+  class:list={['hv-ap', `hv-ap--${variant}`, className]}
+  data-aperture
+  data-open={OPEN}
+  style={`--hv-open: -${OPEN}deg`}
+  aria-hidden="true"
+>
+  {
+    blades.map((b) => (
+      <div class="hv-blade" data-blade style={`transform-origin: ${b.origin}`}>
+        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" focusable="false">
+          <polygon points={b.points} />
+        </svg>
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  .hv-ap {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .hv-blade {
+    position: absolute;
+    inset: 0;
+    /* No will-change here: hero.ts sets it for the length of the opening only. */
+  }
+  .hv-blade svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible; /* the blades reach past the frame; the frame's overflow: hidden clips them */
+  }
+
+  /* Outline: dark plates with a hairline brass edge. The fill matters - overlapping
+     blades hide each other's edges, as real ones do, which is what turns six fans into a
+     clean hexagonal opening instead of a tangle of crossing lines. */
+  .hv-ap--outline polygon {
+    fill: #0b1118;
+    stroke: var(--brass);
+    stroke-width: 1;
+    stroke-opacity: 0.55;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke; /* a true hairline however the frame scales */
+  }
+  .hv-ap--solid polygon {
+    fill: #000;
+    stroke: #000; /* closes the hairline seams between blades */
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* Final state with no JavaScript (and for reduced motion, which hero.ts also sets
+     in script): the iris is open. With scripting on and motion allowed the blades
+     start closed and hero.ts opens them. */
+  @media (scripting: none), (prefers-reduced-motion: reduce) {
+    .hv-blade {
+      transform: rotate(var(--hv-open));
+    }
+  }
+</style>

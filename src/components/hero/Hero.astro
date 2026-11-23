@@ -1,0 +1,291 @@
+---
+// Type-first "aperture" hero (HERO_BUILD.md, Phase 2).
+//
+//   <Hero mode="type" />        text + hairline iris (the homepage today)
+//
+// The "video" and "stills" modes - the same iris opening onto media - arrive in the
+// next commit as extra props; nothing here needs rewriting for them.
+//
+// It sits transparent over Layout.astro's persistent background photo (.persist-bg), the
+// same photo the film-roll intro expands into, so the hand-off from the intro stays one
+// continuous reveal - there is deliberately no solid background here. id="hero" stays:
+// the header's scroll state, the skip link and the scroll nav all key off it.
+//
+// The old hero is still in the repo as ../Hero.astro (unused).
+import Aperture from './Aperture.astro';
+
+interface Props {
+  mode?: 'type';
+}
+
+const { mode = 'type' } = Astro.props;
+
+// ---- All the words live here, so they are easy to edit. -------------------------------
+const copy = {
+  // What search engines and screen readers get as the <h1>; the animated text is aria-hidden.
+  srHeading: 'Photography, video and websites for Irish small businesses',
+  lead: 'Your',
+  // The word that rotates. Keep "business" last: it is also the fixed word under reduced motion.
+  words: ['café', 'salon', 'gym', 'clinic', 'shop', 'business'],
+  tail: '— shot for real.',
+  // Service area: Wicklow and Dublin, per the brief (seo.ts also lists Kildare and Wexford).
+  sub: 'Photos, video and a website that gets found — shot on-site across Wicklow and Dublin.',
+  cta: { label: 'Get a Free Listing Audit', href: '/contact/' },
+  secondary: { label: 'See the work', href: '#portfolio' },
+};
+// ---------------------------------------------------------------------------------------
+
+const n = copy.words.length;
+---
+
+<section class="hv-hero" id="hero" data-hero data-mode={mode} aria-labelledby="hero-title">
+  <div class="hv-glow" data-glow aria-hidden="true"></div>
+
+  <div class="wrap hv-hero__inner">
+    <div class="hv-copy">
+      <h1 class="hv-h" id="hero-title">
+        <span class="hv-sr">{copy.srHeading}</span>
+        <span class="hv-hl" data-hl aria-hidden="true">
+          <span class="hv-ln" data-hl-static>{copy.lead}</span>
+          <span class="hv-ln hv-rot-mask">
+            <span class="hv-rot-inner" data-rot-reveal>
+              <span class="hv-rot">
+                <span class="hv-rot-track" data-rot-track data-count={n + 1} style={`--hv-n: ${n}`}>
+                  {copy.words.map((w) => <span class="hv-rot-word">{w}</span>)}
+                  <span class="hv-rot-word">{copy.words[0]}</span>
+                </span>
+              </span>
+            </span>
+          </span>
+          <span class="hv-ln" data-hl-static>{copy.tail}</span>
+        </span>
+      </h1>
+
+      <p class="hv-sub hv-fade" data-hero-fade>{copy.sub}</p>
+
+      <div class="hv-ctas hv-fade" data-hero-fade>
+        <a href={copy.cta.href} class="btn btn-primary">{copy.cta.label}</a>
+        <a href={copy.secondary.href} class="hv-link">{copy.secondary.label}</a>
+      </div>
+    </div>
+
+    <div class="hv-frame-wrap">
+      <div class="hv-frame hv-frame--type">
+        <Aperture variant="outline" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hv-hero {
+    position: relative;
+    min-height: 100vh; /* fallback */
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    padding: 120px 0 90px;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  /* Legibility scrim over the persistent photo - same recipe as the hero it replaces,
+     so the hand-off from the film-roll intro and into Gap is unchanged. */
+  .hv-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+      linear-gradient(180deg, rgba(10, 14, 19, 0.65), rgba(10, 14, 19, 0.85) 65%, var(--bg) 100%),
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(230, 196, 104, 0.16), transparent 60%);
+  }
+
+  /* Static film grain: one small tile, 4% opacity, never animated, no blend mode. */
+  .hv-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background-image: url('/textures/grain.png');
+    background-size: 200px 200px;
+    opacity: 0.04;
+  }
+
+  /* Soft brass glow that follows the cursor (fine pointer, >=1024px only; hero.ts moves it
+     with transform). The softness is in the gradient itself - no blur, no blend mode. */
+  .hv-glow {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 600px;
+    height: 600px;
+    margin: -300px 0 0 -300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(230, 196, 104, 0.14), rgba(230, 196, 104, 0) 65%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+  @media (pointer: fine) and (min-width: 1024px) {
+    .hv-glow {
+      display: block;
+    }
+  }
+
+  .hv-hero__inner {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 44px;
+    align-items: center;
+  }
+  @media (min-width: 1024px) {
+    .hv-hero__inner {
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+      gap: 64px;
+    }
+  }
+
+  /* ----- Headline ----- */
+  .hv-h {
+    margin: 0 0 26px;
+    font-family: var(--font-display), serif;
+    font-weight: 300; /* the brief asks for a thin serif */
+    font-size: clamp(46px, 6.6vw, 100px);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: var(--paper);
+  }
+  .hv-ln {
+    display: block;
+  }
+  /* The rotating word: a one-line window (overflow hidden) over a tall track of words.
+     Only the track's transform moves. The mask wrapper reveals the whole line on intro. */
+  .hv-rot-mask {
+    overflow: hidden;
+  }
+  .hv-rot {
+    display: block;
+    overflow: hidden;
+    height: 1.2em;
+  }
+  .hv-rot-track {
+    display: block;
+  }
+  .hv-rot-word {
+    display: block;
+    height: 1.2em;
+    line-height: 1.2;
+    width: fit-content;
+    font-style: italic;
+    color: var(--brass);
+    background: linear-gradient(100deg, var(--brass), var(--brass-light));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Final state (no JavaScript, or reduced motion): the word rests on "business" (the last
+     real word). With scripting and motion on, the track starts at the first word. */
+  .hv-rot-track {
+    transform: translateY(calc(-100% * (var(--hv-n) - 1) / (var(--hv-n) + 1)));
+  }
+  @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+    .hv-rot-track {
+      transform: none;
+    }
+    /* Hidden until hero.ts plays the intro (the first time the hero is on screen). */
+    .hv-hl {
+      visibility: hidden;
+    }
+    .hv-fade {
+      opacity: 0;
+    }
+  }
+
+  .hv-sub {
+    max-width: 34em;
+    margin: 0 0 40px;
+    font-size: clamp(17px, 1.6vw, 20px);
+    line-height: 1.6;
+    color: var(--paper-dim);
+  }
+  .hv-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 28px;
+  }
+  .hv-link {
+    font-family: var(--font-mono), monospace;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--paper);
+    text-decoration: none;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--line-strong);
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .hv-link:hover {
+    color: var(--brass);
+    border-color: var(--brass);
+  }
+  .hv-link:focus-visible {
+    outline: 2px solid var(--brass);
+    outline-offset: 4px;
+  }
+
+  /* Visually hidden, but read by screen readers and search engines. */
+  .hv-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* ----- The frame the iris opens onto ----- */
+  .hv-frame-wrap {
+    min-width: 0;
+  }
+  .hv-frame {
+    position: relative;
+    overflow: hidden; /* the blades swing out past the frame; this is what hides them */
+    aspect-ratio: 4 / 5;
+    width: min(100%, 300px);
+    border: 1px solid var(--line);
+    background: rgba(10, 14, 19, 0.35);
+  }
+  @media (min-width: 640px) {
+    .hv-frame {
+      width: min(100%, 380px);
+    }
+  }
+  @media (min-width: 1024px) {
+    .hv-frame {
+      width: 100%;
+      max-width: 460px;
+      margin-left: auto;
+    }
+  }
+  /* Type mode: black behind the iris, with a faint brass bloom showing through its opening. */
+  .hv-frame--type {
+    background: #05080c;
+  }
+  .hv-frame--type::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(230, 196, 104, 0.2), transparent 58%);
+  }
+</style>

@@ -196,6 +196,8 @@ const persistImage = Object.values(persistImages)[0]?.default;
     initRefreshOnAssets,
   } from '../scripts/animations';
   import { initSmoothScroll } from '../scripts/lenis';
+  // The new aperture hero's own animation logic (src/components/hero/).
+  import { initHero } from '../components/hero/hero';
   // First-party analytics - inert until the visitor accepts it in the cookie
   // banner. Binds its own listeners once; this call just marks a page view.
   import { initAnalytics } from '../scripts/analytics';
@@ -212,6 +214,7 @@ const persistImage = Object.values(persistImages)[0]?.default;
     initPersistBgFade();
     initHeroTimeline();
     initHeroParallax();
+    initHero();
     initScrollReveals();
     initContactSheetReveal();
     initNavOnScroll();

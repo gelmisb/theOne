@@ -3,7 +3,9 @@ import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import FilmRollIntro from '../components/FilmRollIntro.astro';
 import ScrollNav from '../components/ScrollNav.astro';
-import Hero from '../components/Hero.astro';
+// The new type-first aperture hero (HERO_BUILD.md). The previous one is still at
+// ../components/Hero.astro, unused, until the owner says to delete it.
+import Hero from '../components/hero/Hero.astro';
 import Sprockets from '../components/Sprockets.astro';
 import Gap from '../components/Gap.astro';
 import Offer from '../components/Offer.astro';
@@ -26,7 +28,12 @@ import Footer from '../components/Footer.astro';
   <main id="main-content">
   <FilmRollIntro />
   <ScrollNav />
-  <Hero />
+  <!-- To switch to footage later, change only these props, e.g.
+         <Hero mode="video" poster={posterImg} videoDesktop={{ webm, mp4 }} videoMobile={{ webm, mp4 }} priority={false} />
+         <Hero mode="stills" stills={[a, b, c]} priority={false} />
+       priority={false} because the film-roll intro sits above the hero and owns this
+       page's LCP; the hero's own image must not compete with it. -->
+  <Hero mode="type" />
   <Sprockets />
   <SeasonalOffer />
   <WhoWeHelp />
