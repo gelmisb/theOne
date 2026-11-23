@@ -193,6 +193,7 @@ const persistImage = Object.values(persistImages)[0]?.default;
     initScrollNav,
     initHeadingSplitReveal,
     initSectionTransitions,
+    initRefreshOnAssets,
   } from '../scripts/animations';
   import { initSmoothScroll } from '../scripts/lenis';
   // First-party analytics - inert until the visitor accepts it in the cookie
@@ -225,6 +226,7 @@ const persistImage = Object.values(persistImages)[0]?.default;
     initScrollNav();
     initHeadingSplitReveal();
     initSectionTransitions();
+    initRefreshOnAssets(); // last: every ScrollTrigger above must exist before it re-measures
     initAnalytics();
     initGoogleAds();
     initHitCounter();

@@ -207,7 +207,8 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
 <style>
   .filmroll-intro{
     position: relative;
-    min-height: 100vh;
+    min-height: 100vh; /* fallback */
+    min-height: 100svh; /* "small viewport": doesn't resize as the mobile address bar shows/hides */
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 54px;
     overflow: hidden;
@@ -263,7 +264,8 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
     display: flex;
     gap: 3px;
     width: max-content;
-    will-change: transform;
+    /* No will-change here: initFilmRollIntro sets it from JS only when the strip
+       is really animating, so a static phone/tablet doesn't hold it as a layer. */
     height: 500px;
   }
   .fr-frame{
@@ -325,7 +327,10 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
   @media (max-width: 900px){
     .fr-frame{ width: 100px; }
   }
-  @media (max-width: 640px){
+  /* The static layout: phones, and touch tablets of any width. This test must stay
+     in step with the gate in initFilmRollIntro (animations.ts), which skips the
+     pin under exactly the same conditions. */
+  @media (max-width: 640px), (pointer: coarse){
     .filmroll-intro{ padding: 120px 0 50px; gap: 40px; }
     .fr-frame{ width: 78px; }
     .fr-track{ gap: 2px; height: auto; }

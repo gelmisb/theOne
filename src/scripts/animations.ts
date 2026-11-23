@@ -1,9 +1,13 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
-import { getLenis, destroySmoothScroll } from './lenis';
+import { getLenis, destroySmoothScroll, scrubValue } from './lenis';
 
 gsap.registerPlugin(ScrollTrigger);
+// On phones and tablets the address bar sliding in and out resizes the viewport
+// mid-scroll. Don't let that trigger a full ScrollTrigger re-measure (a visible
+// hitch, and pins jump) - a real rotation or resize still refreshes.
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -24,10 +28,16 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
  * client-side navigations, the same class of bug as the pre-existing "two
  * controllers fighting over one tween" note on the film-roll idle drift.
  */
+let onVisibilityChange: (() => void) | null = null;
+
 export function teardownForTransition() {
   ScrollTrigger.getAll().forEach((st) => st.kill());
   gsap.globalTimeline.clear();
   destroySmoothScroll();
+  if (onVisibilityChange) {
+    document.removeEventListener('visibilitychange', onVisibilityChange);
+    onVisibilityChange = null;
+  }
   // Safety net for the mobile nav panel (initMobileNav, below): its own
   // close() fires on every link click inside the panel, but the brand/logo
   // link sits outside it, and so does the browser's own back/forward
@@ -241,12 +251,24 @@ export function initFilmRollIntro() {
   // with no adaptation - found via /impeccable critique intro's re-run.
   // Mobile/reduced-motion get Phase 1's static, flex-centred layout as-is;
   // a proper mobile variant (shorter pin, fewer frames) is Phase 4.
-  const isDesktop = window.matchMedia('(min-width: 641px)').matches;
+  //
+  // Touch devices skip the pin too, however wide they are (tablets). A pinned,
+  // scroll-scrubbed section is the one thing phones don't run and tablets did,
+  // and it is the classic cause of scroll jitter on iPad / Android tablets:
+  // touch scrolling runs on the compositor, so the scroll position JavaScript
+  // sees lags a frame behind what is on screen, and a pinned layer visibly
+  // judders against it. The CSS (FilmRollIntro.astro) uses the same
+  // `(pointer: coarse)` test to show the static layout on those devices.
+  const isDesktop = window.matchMedia('(min-width: 641px)').matches
+    && !window.matchMedia('(pointer: coarse)').matches;
   if (prefersReducedMotion || !isDesktop) return;
 
   const otherFrames = gsap.utils.toArray<HTMLElement>('.fr-frame', track).filter((f) => f !== heroFrame);
+  // will-change only while this effect is actually running (not in the CSS, where
+  // it also held the whole 12,000px-wide strip as a layer on phones that never
+  // animate it). There is no filter animation any more, so no filter hint.
   heroFrame.style.willChange = 'transform';
-  heroImg.style.willChange = 'filter';
+  track.style.willChange = 'transform';
 
   const CONTENT_FADE_END = 0.08; // wordmark/tagline/CTA clear out almost immediately, per Beat 1
   const DIM_START = 0.24;
@@ -384,16 +406,24 @@ export function initFilmRollIntro() {
   // juddering side to side for a moment before settling.
   let idleShouldPlay = true;
 
-  document.addEventListener('visibilitychange', () => {
+  // One listener for the whole session, replaced on each homepage visit and
+  // removed in teardownForTransition - adding a fresh one every visit stacked
+  // them up, each holding a dead tween from an earlier page.
+  if (onVisibilityChange) document.removeEventListener('visibilitychange', onVisibilityChange);
+  onVisibilityChange = () => {
     if (document.hidden) idleTween.pause();
     else if (idleShouldPlay) idleTween.play();
-  });
+  };
+  document.addEventListener('visibilitychange', onVisibilityChange);
 
   ScrollTrigger.create({
     trigger: section,
     start: 'top top',
     end: () => '+=' + window.innerHeight * 2.8, // ~280vh - covers all four beats (brief section 7: "250-300vh on desktop")
     pin: true,
+    // Start pinning a frame early so the section doesn't visibly stutter at the
+    // moment the pin takes over.
+    anticipatePin: 1,
     // Lenis already smooths raw scroll input (lenis.ts). A numeric scrub
     // value here would add GSAP's own extra lag on top of that - two
     // independent smoothing systems fighting each other, which shows up as
@@ -493,7 +523,7 @@ export function initPersistBgFade() {
       trigger: gap,
       start: 'top bottom',
       end: 'bottom top',
-      scrub: true,
+      scrub: scrubValue(),
     },
   });
 }
@@ -616,7 +646,7 @@ export function initHeroParallax() {
       trigger: hero,
       start: 'top top',
       end: 'bottom top',
-      scrub: true,
+      scrub: scrubValue(),
     },
   });
 }
@@ -631,12 +661,14 @@ export function initContactSheetReveal() {
     return;
   }
 
+  // Opacity only: this used to also animate a `filter: brightness()` per frame,
+  // which forces a repaint of every frame on every step. (This sheet only shows
+  // while the portfolio has no real photos yet.)
   gsap.fromTo(
     frames,
-    { opacity: 0, filter: 'brightness(0.3)' },
+    { opacity: 0 },
     {
       opacity: 1,
-      filter: 'brightness(1)',
       duration: 0.6,
       stagger: { each: 0.06, from: 'start' },
       ease: 'power1.out',
@@ -1105,8 +1137,29 @@ export function initSectionTransitions() {
         trigger: section,
         start: 'bottom 88%',
         end: 'bottom 8%',
-        scrub: 0.6,
+        // true with Lenis (its easing is the smoothing), a short catch-up without it.
+        scrub: scrubValue(),
       },
     });
   });
+}
+
+let refreshTimer = 0;
+
+/**
+ * Re-measure every ScrollTrigger once the things that change the page's layout
+ * have actually arrived: the web fonts (text reflows when they swap in) and the
+ * window `load` event (images). Positions are first measured at init, before
+ * either, so without this the start/end points can sit slightly off and pins
+ * and fades fire early or late. Call this LAST in the bootstrap, after every
+ * trigger exists. Coalesced, so fonts + load landing together refresh once.
+ */
+export function initRefreshOnAssets() {
+  const refresh = () => {
+    window.clearTimeout(refreshTimer);
+    refreshTimer = window.setTimeout(() => ScrollTrigger.refresh(), 60);
+  };
+  document.fonts?.ready.then(refresh);
+  if (document.readyState === 'complete') refresh();
+  else window.addEventListener('load', refresh, { once: true });
 }
