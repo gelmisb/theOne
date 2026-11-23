@@ -4,8 +4,8 @@
 //
 // Rules this file keeps (HERO_BUILD.md): only transform and opacity are animated, no
 // ScrollTrigger and no pinning in the hero, and everything that loops (rotating word,
-// slow iris spin) pauses when the hero is off-screen or the tab is hidden. Under
-// prefers-reduced-motion nothing moves.
+// slow iris spin, Ken Burns, video) pauses when the hero is off-screen or the tab is
+// hidden. Under prefers-reduced-motion nothing moves and no video is loaded.
 //
 // One deliberate difference from "play once on load": the hero sits BELOW the film-roll
 // intro on the homepage, so an intro that played at page load would be over before
@@ -17,6 +17,8 @@ import { gsap } from 'gsap';
 
 const WORD_HOLD = 1.7; // seconds a word stays before the next rolls in
 const WORD_ROLL = 0.7;
+const STILL_HOLD = 4; // seconds per still
+const STILL_FADE = 1.1;
 
 let cleanups: Array<() => void> = [];
 
@@ -33,6 +35,11 @@ export function destroyHero() {
   });
 }
 
+const idle = (cb: () => void) => {
+  if ('requestIdleCallback' in window) (window as Window & { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(cb);
+  else setTimeout(cb, 200);
+};
+
 export function initHero() {
   destroyHero();
   const root = document.querySelector<HTMLElement>('[data-hero]');
@@ -41,7 +48,9 @@ export function initHero() {
   document.addEventListener('astro:before-swap', destroyHero, { once: true });
   cleanups.push(() => document.removeEventListener('astro:before-swap', destroyHero));
 
+  const mode = (root.dataset.mode ?? 'type') as 'type' | 'video' | 'stills';
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
 
   const headline = root.querySelector<HTMLElement>('[data-hl]');
   const statics = gsap.utils.toArray<HTMLElement>('[data-hl-static]', root);
@@ -51,7 +60,12 @@ export function initHero() {
   const blades = gsap.utils.toArray<HTMLElement>('[data-blade]', root);
   const aperture = root.querySelector<HTMLElement>('[data-aperture]');
   const open = Number(aperture?.dataset.open ?? 0);
+  const video = root.querySelector<HTMLVideoElement>('[data-hero-video]');
+  const stills = gsap.utils.toArray<HTMLElement>('[data-still]', root);
 
+  // ---------------------------------------------------------------- reduced motion
+  // Everything is in its final state already (CSS, under the same media query): blades
+  // open, text visible, the word fixed on "business", poster only. Nothing to run.
   // The markup holds the words plus a copy of the first (so the loop is seamless);
   // data-count is that total, so editing the word list in Hero.astro is enough.
   const wordCount = Number(track?.dataset.count ?? 7);
@@ -71,6 +85,10 @@ export function initHero() {
   const apply = () => {
     const run = introDone && inView && !document.hidden;
     pausables.forEach((p) => (run ? p.resume() : p.pause()));
+    if (video && videoLoaded) {
+      if (inView && !document.hidden) void video.play().catch(() => {});
+      else video.pause();
+    }
   };
   // `el` gets will-change: transform only while its loop is actually running.
   const tween = (t: gsap.core.Animation, el?: HTMLElement) => {
@@ -100,7 +118,7 @@ export function initHero() {
   }
 
   // ----------------------------------------------------------- slow iris spin (type)
-  if (aperture) {
+  if (mode === 'type' && aperture) {
     tween(gsap.to(aperture, { rotation: 360, duration: 90, ease: 'none', repeat: -1, force3D: true }), aperture);
   }
 
@@ -134,6 +152,81 @@ export function initHero() {
       root.removeEventListener('pointerleave', leave);
       if (raf) cancelAnimationFrame(raf);
     });
+  }
+
+  // ---------------------------------------------------------------------- stills
+  let stillTimer: gsap.core.Tween | null = null;
+  if (mode === 'stills' && stills.length > 1) {
+    let current = 0;
+    gsap.set(stills, { opacity: 0 });
+    gsap.set(stills[0], { opacity: 1 });
+    const kenBurns = (i: number) => {
+      const img = stills[i].querySelector('img');
+      if (img) gsap.fromTo(img, { scale: 1 }, { scale: 1.06, duration: STILL_HOLD + STILL_FADE + 0.5, ease: 'none' });
+    };
+    const step = () => {
+      const next = (current + 1) % stills.length;
+      gsap.to(stills[current], { opacity: 0, duration: STILL_FADE, ease: 'power1.inOut' });
+      gsap.to(stills[next], { opacity: 1, duration: STILL_FADE, ease: 'power1.inOut' });
+      kenBurns(next);
+      current = next;
+      stillTimer = gsap.delayedCall(STILL_HOLD, step);
+    };
+    kenBurns(0);
+    stillTimer = gsap.delayedCall(STILL_HOLD, step);
+    stillTimer.pause();
+    pausables.push({
+      pause: () => stillTimer?.pause(),
+      resume: () => stillTimer?.resume(),
+    });
+  }
+
+  // ----------------------------------------------------------------------- video
+  let videoLoaded = false;
+  let windowLoaded = document.readyState === 'complete';
+  let nearViewport = false;
+  const loadVideo = () => {
+    if (!video || videoLoaded || saveData) return;
+    videoLoaded = true;
+    const desktop = window.matchMedia('(min-width: 1024px)').matches;
+    const files = desktop
+      ? ([[video.dataset.desktopWebm, 'video/webm'], [video.dataset.desktopMp4, 'video/mp4']] as const)
+      : ([[video.dataset.mobileWebm, 'video/webm'], [video.dataset.mobileMp4, 'video/mp4']] as const);
+    for (const [src, type] of files) {
+      if (!src) continue;
+      const s = document.createElement('source');
+      s.src = src;
+      s.type = type;
+      video.appendChild(s);
+    }
+    video.addEventListener('playing', () => video.classList.add('is-playing'), { once: true });
+    video.load();
+    void video.play().catch(() => {});
+  };
+  // Not before the window has loaded and the browser is idle (the poster is what the
+  // page waits for), and - because the hero can sit far down the page - not until it is
+  // within a screen of the viewport, so nobody downloads a video they never reach.
+  const tryLoadVideo = () => {
+    if (windowLoaded && nearViewport) idle(loadVideo);
+  };
+  if (video && !saveData) {
+    if (!windowLoaded) {
+      const onLoad = () => {
+        windowLoaded = true;
+        tryLoadVideo();
+      };
+      window.addEventListener('load', onLoad, { once: true });
+      cleanups.push(() => window.removeEventListener('load', onLoad));
+    }
+    const near = new IntersectionObserver(
+      ([entry]) => {
+        nearViewport = entry.isIntersecting;
+        tryLoadVideo();
+      },
+      { rootMargin: '100% 0px' },
+    );
+    near.observe(root);
+    cleanups.push(() => near.disconnect());
   }
 
   // ------------------------------------------------------------------ the intro
@@ -187,5 +280,6 @@ export function initHero() {
   cleanups.push(() => {
     io.disconnect();
     document.removeEventListener('visibilitychange', onVisibility);
+    stillTimer?.kill();
   });
 }

@@ -1,10 +1,12 @@
 ---
 // Type-first "aperture" hero (HERO_BUILD.md, Phase 2).
 //
-//   <Hero mode="type" />        text + hairline iris (the homepage today)
+//   <Hero mode="type" />                                   text + hairline iris (homepage today)
+//   <Hero mode="video" poster={img} videoDesktop={...} videoMobile={...} aspect="wide" priority />
+//   <Hero mode="stills" stills={[a, b, c]} />
 //
-// The "video" and "stills" modes - the same iris opening onto media - arrive in the
-// next commit as extra props; nothing here needs rewriting for them.
+// Switching mode is a change of props, not of code: the same iris opens in every mode;
+// in "video" and "stills" it opens onto the media.
 //
 // It sits transparent over Layout.astro's persistent background photo (.persist-bg), the
 // same photo the film-roll intro expands into, so the hand-off from the intro stays one
@@ -12,13 +14,33 @@
 // the header's scroll state, the skip link and the scroll nav all key off it.
 //
 // The old hero is still in the repo as ../Hero.astro (unused).
+import type { ImageMetadata } from 'astro';
+import { Image, Picture } from 'astro:assets';
 import Aperture from './Aperture.astro';
 
 interface Props {
-  mode?: 'type';
+  mode?: 'type' | 'video' | 'stills';
+  /** video mode: desktop and mobile files (the mobile one is always portrait). */
+  videoDesktop?: { webm: string; mp4: string };
+  videoMobile?: { webm: string; mp4: string };
+  /** video mode: required. It is the LCP image when the hero is the first thing on the page. */
+  poster?: ImageMetadata;
+  /** portrait = one vertical clip; wide = three clips pre-combined side by side (desktop only). */
+  aspect?: 'portrait' | 'wide';
+  /** stills mode: 3-4 images. */
+  stills?: ImageMetadata[];
+  /**
+   * Load the poster / first still at high priority. Right when the hero is the first
+   * thing on the page. Turn it OFF when something else sits above it (the homepage's
+   * film-roll intro does) - otherwise the hero's image competes with the real LCP.
+   */
+  priority?: boolean;
 }
 
-const { mode = 'type' } = Astro.props;
+const { mode = 'type', videoDesktop, videoMobile, poster, aspect = 'portrait', stills = [], priority = true } = Astro.props;
+
+if (mode === 'video' && !poster) throw new Error('<Hero mode="video"> needs a `poster` image.');
+if (mode === 'stills' && stills.length < 2) throw new Error('<Hero mode="stills"> needs at least two `stills`.');
 
 // ---- All the words live here, so they are easy to edit. -------------------------------
 const copy = {
@@ -35,13 +57,16 @@ const copy = {
 };
 // ---------------------------------------------------------------------------------------
 
+const wide = aspect === 'wide' && mode !== 'type';
+const variant = mode === 'type' ? 'outline' : 'solid';
+const sizes = wide ? '(min-width: 1024px) 55vw, 80vw' : '(min-width: 1024px) 460px, 380px';
 const n = copy.words.length;
 ---
 
 <section class="hv-hero" id="hero" data-hero data-mode={mode} aria-labelledby="hero-title">
   <div class="hv-glow" data-glow aria-hidden="true"></div>
 
-  <div class="wrap hv-hero__inner">
+  <div class="wrap hv-hero__inner" data-wide={wide ? 'true' : undefined}>
     <div class="hv-copy">
       <h1 class="hv-h" id="hero-title">
         <span class="hv-sr">{copy.srHeading}</span>
@@ -70,8 +95,67 @@ const n = copy.words.length;
     </div>
 
     <div class="hv-frame-wrap">
-      <div class="hv-frame hv-frame--type">
-        <Aperture variant="outline" />
+      <div class:list={['hv-frame', `hv-frame--${mode}`, wide && 'hv-frame--wide']}>
+        {
+          mode === 'video' && poster && (
+            <>
+              <Picture
+                src={poster}
+                formats={['avif', 'webp']}
+                widths={[480, 720, 960, 1440]}
+                sizes={sizes}
+                alt=""
+                class="hv-media"
+                loading={priority ? 'eager' : 'lazy'}
+                fetchpriority={priority ? 'high' : 'auto'}
+                decoding="async"
+              />
+              <video
+                class="hv-media hv-video"
+                data-hero-video
+                data-desktop-webm={videoDesktop?.webm}
+                data-desktop-mp4={videoDesktop?.mp4}
+                data-mobile-webm={videoMobile?.webm}
+                data-mobile-mp4={videoMobile?.mp4}
+                muted
+                playsinline
+                loop
+                autoplay
+                preload="none"
+                aria-hidden="true"
+                tabindex="-1"
+              />
+            </>
+          )
+        }
+        {
+          mode === 'stills' &&
+            stills.map((img, i) => (
+              <div class="hv-still" data-still>
+                <Image
+                  src={img}
+                  alt=""
+                  widths={[480, 720, 960, 1440]}
+                  sizes={sizes}
+                  class="hv-media"
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  fetchpriority={i === 0 && priority ? 'high' : 'auto'}
+                  decoding="async"
+                />
+              </div>
+            ))
+        }
+
+        {
+          wide ? (
+            <>
+              <Aperture variant={variant} aspect="portrait" class="hv-ap-mobile" />
+              <Aperture variant={variant} aspect="wide" class="hv-ap-wide" />
+            </>
+          ) : (
+            <Aperture variant={variant} aspect="portrait" />
+          )
+        }
       </div>
     </div>
   </div>
@@ -148,6 +232,9 @@ const n = copy.words.length;
     .hv-hero__inner {
       grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
       gap: 64px;
+    }
+    .hv-hero__inner[data-wide] {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr);
     }
   }
 
@@ -277,6 +364,10 @@ const n = copy.words.length;
       max-width: 460px;
       margin-left: auto;
     }
+    .hv-frame--wide {
+      max-width: none;
+      aspect-ratio: 17 / 10;
+    }
   }
   /* Type mode: black behind the iris, with a faint brass bloom showing through its opening. */
   .hv-frame--type {
@@ -287,5 +378,46 @@ const n = copy.words.length;
     position: absolute;
     inset: 0;
     background: radial-gradient(circle at 50% 50%, rgba(230, 196, 104, 0.2), transparent 58%);
+  }
+
+  .hv-frame :global(.hv-media) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .hv-video {
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  .hv-video.is-playing {
+    opacity: 1;
+  }
+  .hv-still {
+    position: absolute;
+    inset: 0;
+  }
+  /* Stills: only the first shows until hero.ts takes over, so nothing stacks visibly. */
+  .hv-still:not(:first-child) {
+    opacity: 0;
+  }
+  @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+    .hv-still :global(img) {
+      transform-origin: 50% 50%;
+    }
+  }
+
+  /* "wide" swaps in the wide iris at >=1024px and the portrait one below. */
+  .hv-frame :global(.hv-ap-wide) {
+    display: none;
+  }
+  @media (min-width: 1024px) {
+    .hv-frame :global(.hv-ap-wide) {
+      display: block;
+    }
+    .hv-frame :global(.hv-ap-mobile) {
+      display: none;
+    }
   }
 </style>
