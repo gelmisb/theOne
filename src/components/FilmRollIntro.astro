@@ -210,10 +210,10 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
     min-height: 100vh; /* fallback */
     min-height: 100svh; /* "small viewport": doesn't resize as the mobile address bar shows/hides */
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 54px;
     overflow: hidden;
     text-align: center;
-    padding: 140px 0 60px;
+    padding: 120px 0 50px;
+    gap: 40px;
     background: var(--bg);
   }
 
@@ -262,20 +262,20 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
   }
   .fr-track{
     display: flex;
-    gap: 3px;
+    gap: 2px;
     width: max-content;
     /* No will-change here: initFilmRollIntro sets it from JS only when the strip
        is really animating, so a static phone/tablet doesn't hold it as a layer. */
-    height: 500px;
+    height: auto;
   }
   .fr-frame{
     position: relative;
     flex: 0 0 auto;
-    width: 130px; aspect-ratio: 1/1;
+    /* 78px on a phone, growing a little with the screen up to 130px. */
+    width: clamp(78px, 8vw, 130px); aspect-ratio: 1/1;
     border: 1px solid var(--line);
     overflow: hidden;
     background: var(--panel);
-    width: 500px;
   }
   .fr-frame :global(.fr-photo){
     position: absolute; inset: 0;
@@ -319,34 +319,22 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
     margin: 0 0 30px;
   }
 
-  /* Mobile static photo background - hidden on desktop, where the pinned
-     film roll owns the section. */
-  .filmroll-intro :global(.fr-mobile-bg),
-  .fr-mobile-bg-scrim{ display: none; }
-
-  @media (max-width: 900px){
-    .fr-frame{ width: 100px; }
+  /* The static layout, at every screen size (it was phones and touch tablets only;
+     desktop used to get the pinned, zooming film roll - switched off, see
+     PINNED_INTRO_ENABLED in animations.ts): the hero photo behind the strip,
+     darkened so the wordmark reads. */
+  .filmroll-intro :global(.fr-mobile-bg){
+    display: block;
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: 0;
   }
-  /* The static layout: phones, and touch tablets of any width. This test must stay
-     in step with the gate in initFilmRollIntro (animations.ts), which skips the
-     pin under exactly the same conditions. */
-  @media (max-width: 640px), (pointer: coarse){
-    .filmroll-intro{ padding: 120px 0 50px; gap: 40px; }
-    .fr-frame{ width: 78px; }
-    .fr-track{ gap: 2px; height: auto; }
-    .filmroll-intro :global(.fr-mobile-bg){
-      display: block;
-      position: absolute; inset: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
-      z-index: 0;
-    }
-    .fr-mobile-bg-scrim{
-      display: block;
-      position: absolute; inset: 0; z-index: 0;
-      background:
-        radial-gradient(ellipse 100% 60% at 50% 15%, rgba(230,196,104,0.14), transparent 60%),
-        linear-gradient(180deg, rgba(10,14,19,0.55) 0%, rgba(10,14,19,0.72) 55%, rgba(10,14,19,0.92) 100%);
-    }
+  .fr-mobile-bg-scrim{
+    display: block;
+    position: absolute; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 100% 60% at 50% 15%, rgba(230,196,104,0.14), transparent 60%),
+      linear-gradient(180deg, rgba(10,14,19,0.55) 0%, rgba(10,14,19,0.72) 55%, rgba(10,14,19,0.92) 100%);
   }
 </style>
