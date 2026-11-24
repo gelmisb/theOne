@@ -201,8 +201,8 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
   <!-- A draggable lens of liquid glass resting on the photo (scripts/introLens.ts + liquidGlass.ts).
        Invisible and inert until the script has measured it and built its refraction map, and it
        never appears where the browser cannot refract (Safari, Firefox): the photo stays plain.
-       Sits after the strip in the DOM so it floats above it, and below the wordmark and button
-       (.fr-content comes next) so those always stay readable and tappable. -->
+       Floats above everything on this screen (z-index 2: the strip, the wordmark, the tagline and
+       the button all bend under it); a tap on it is passed through to the button underneath. -->
   <div class="fr-lens" data-lens aria-hidden="true">
     <div class="fr-lens-glass" data-lens-glass></div>
   </div>
@@ -356,7 +356,7 @@ const frames = Array.from({ length: FRAME_COUNT }, (_, i) => ({
   /* The glass lens. Hidden (not display:none - the glass has to be measured) until introLens.ts
      adds .is-on; sized and positioned from JS. Shadow and top highlight are the original's. */
   .fr-lens{
-    position: absolute; top: 0; left: 0; z-index: 1;
+    position: absolute; top: 0; left: 0; z-index: 2;
     opacity: 0; visibility: hidden; pointer-events: none;
     touch-action: none; cursor: grab;
     -webkit-user-select: none; user-select: none;

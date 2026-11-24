@@ -205,7 +205,7 @@ const persistImage = Object.values(persistImages)[0]?.default;
   import { initGoogleAds } from '../scripts/googleAds';
   // Always-on visit counter: no cookie, no ID, path only - runs for everyone.
   import { initHitCounter } from '../scripts/hitCounter';
-  // Cube-field background for the homepage intro (touch screens for now).
+  // The homepage intro's effect: a draggable glass lens (or the cubes) - see scripts/introEffect.ts.
   import { initIntroEffect } from '../scripts/introEffect';
 
   document.addEventListener('astro:before-swap', teardownForTransition);

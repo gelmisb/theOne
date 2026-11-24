@@ -248,6 +248,22 @@ const n = copy.words.length;
     }
   }
 
+  /* Text only, on a phone or tablet: the copy is one stacked column, and the intro above it is
+     centred, so centre this too (a left-aligned block under it read as off to one side). From
+     1024px up it stays left-aligned, lined up with the header. */
+  @media (max-width: 1023px) {
+    .hv-hero[data-mode='type'] .hv-copy {
+      text-align: center;
+    }
+    .hv-hero[data-mode='type'] .hv-sub,
+    .hv-hero[data-mode='type'] .hv-rot-word {
+      margin-inline: auto;
+    }
+    .hv-hero[data-mode='type'] .hv-ctas {
+      justify-content: center;
+    }
+  }
+
   /* ----- Headline ----- */
   .hv-h {
     margin: 0 0 26px;
