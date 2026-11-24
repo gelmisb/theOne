@@ -63,8 +63,12 @@ effect back on also needs the old desktop sizing (500px frames) restored there.
   **It refracts only in Chromium** (Chrome, Edge, Samsung Internet): Safari/iOS and Firefox cannot take an SVG filter in
   backdrop-filter, so there `glassSupport()` is false and the lens never appears (a pale frosted disc would look wrong on
   this dark site). Same under `prefers-reduced-transparency`. Under `prefers-reduced-motion` it still drags, but with no
-  lift, no momentum and no opening nudge. It sits above the film strip and below the wordmark/button, so the button is
-  always tappable. The lens is `touch-action: none`: a swipe that starts on it moves it instead of scrolling the page.
+  lift, no momentum and no opening nudge. It floats above everything on the intro screen (strip, wordmark, tagline,
+  button - all of it bends under it, but not the fixed header); a tap (not a drag) on it is passed through to the link or
+  button underneath (`tapThrough`), so the call to action still works. It is built to survive interruptions (phone
+  screenshot, app switch, cancelled touch): they end any half-finished drag, and coming back to the page rebuilds the glass
+  from scratch. Keep both when changing it. The lens is `touch-action: none`: a swipe that starts on it moves it instead of
+  scrolling the page.
   DESIGN.md's glass rule (floating, responding surfaces only) is why it is a draggable lens and not a fixed decoration.
 - **`'cubes'`** - `src/scripts/cubesBackground.ts`: the photo as big isometric tiles (110-150px wide; raw WebGL2, instanced,
   2-D wave simulation) that a finger presses down, the exposed walls giving the depth. Works in every browser with WebGL2
