@@ -206,7 +206,7 @@ const persistImage = Object.values(persistImages)[0]?.default;
   // Always-on visit counter: no cookie, no ID, path only - runs for everyone.
   import { initHitCounter } from '../scripts/hitCounter';
   // Cube-field background for the homepage intro (touch screens for now).
-  import { initCubesBackground } from '../scripts/cubesBackground';
+  import { initIntroEffect } from '../scripts/introEffect';
 
   document.addEventListener('astro:before-swap', teardownForTransition);
   document.addEventListener('astro:page-load', () => {
@@ -235,7 +235,7 @@ const persistImage = Object.values(persistImages)[0]?.default;
     initAnalytics();
     initGoogleAds();
     initHitCounter();
-    initCubesBackground();
+    initIntroEffect();
   });
 </script>
 

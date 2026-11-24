@@ -53,15 +53,25 @@ no zoom into the statue's head. The code is kept behind `PINNED_INTRO_ENABLED = 
 `initFilmRollIntro`; the static CSS in `FilmRollIntro.astro` now applies at every width, so turning the
 effect back on also needs the old desktop sizing (500px frames) restored there.
 
-**Cubes background (mobile only so far).** `src/scripts/cubesBackground.ts` draws the intro's statue photo on a
-grid of big isometric tiles (110-150px wide, like Aceternity's original; raw WebGL2, instanced, 2-D wave simulation).
-Touch presses tiles down (about a tile and a bit at most) and the exposed walls give the depth; idle ripples fire every
-couple of seconds. All wave numbers are in tiles, so they scale with tile size - retune them together (a standalone
-copy of the sim is easy to iterate on) if the tile size changes. It sits in `FilmRollIntro.astro` as `canvas[data-cubes]` over `.fr-mobile-bg`, which stays as the
-fallback (no WebGL2, reduced motion, desktop) and is hidden only after the canvas has faded in. It is gated by
-`CUBES_ON_DESKTOP = false` at the top of the file: flip it to `true` once it has been judged smooth on a real phone.
-The loop sleeps when the wave settles and pauses while the intro is off-screen; keep it that way (it is the only
-continuously-drawing canvas on the page). It covers the intro section only, not the fixed `.persist-bg`.
+**The intro's effect is one switch: `INTRO_EFFECT` in `src/scripts/introEffect.ts`** (`'lens'` | `'cubes'` |
+`'none'`), called from Layout's `astro:page-load` handler. Both effects sit on top of the static photo
+(`.fr-mobile-bg`), which is always the fallback.
+
+- **`'lens'` (current)** - `src/scripts/introLens.ts` + `liquidGlass.ts`: a draggable lens of liquid glass on the statue
+  photo (`.fr-lens` in `FilmRollIntro.astro`). `liquidGlass.ts` is a plain-TS port of Aceternity UI's "Liquid Glass"
+  (Snell's-law displacement map -> SVG filter used as `backdrop-filter`); keep its maths and numbers as they are.
+  **It refracts only in Chromium** (Chrome, Edge, Samsung Internet): Safari/iOS and Firefox cannot take an SVG filter in
+  backdrop-filter, so there `glassSupport()` is false and the lens never appears (a pale frosted disc would look wrong on
+  this dark site). Same under `prefers-reduced-transparency`. Under `prefers-reduced-motion` it still drags, but with no
+  lift, no momentum and no opening nudge. It sits above the film strip and below the wordmark/button, so the button is
+  always tappable. The lens is `touch-action: none`: a swipe that starts on it moves it instead of scrolling the page.
+  DESIGN.md's glass rule (floating, responding surfaces only) is why it is a draggable lens and not a fixed decoration.
+- **`'cubes'`** - `src/scripts/cubesBackground.ts`: the photo as big isometric tiles (110-150px wide; raw WebGL2, instanced,
+  2-D wave simulation) that a finger presses down, the exposed walls giving the depth. Works in every browser with WebGL2
+  (so on iPhones too), phones/touch only unless `CUBES_ON_DESKTOP = true`. All its wave numbers are in tiles, so they scale
+  with tile size - retune them together (a standalone copy of the sim is easy to iterate on) if the tile size changes. The
+  loop sleeps when the wave settles and pauses while the intro is off-screen; keep it that way. It covers the intro only,
+  not the fixed `.persist-bg`.
 
 **The homepage intro (`FilmRollIntro.astro` + `initFilmRollIntro` in
 animations.ts) is a pinned, scroll-scrubbed film strip.** Replaced an
