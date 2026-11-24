@@ -54,8 +54,10 @@ no zoom into the statue's head. The code is kept behind `PINNED_INTRO_ENABLED = 
 effect back on also needs the old desktop sizing (500px frames) restored there.
 
 **Cubes background (mobile only so far).** `src/scripts/cubesBackground.ts` draws the intro's statue photo on a
-grid of isometric tiles (raw WebGL2, instanced, 2-D wave simulation; touch makes ripples, idle ripples fire every
-couple of seconds). It sits in `FilmRollIntro.astro` as `canvas[data-cubes]` over `.fr-mobile-bg`, which stays as the
+grid of big isometric tiles (110-150px wide, like Aceternity's original; raw WebGL2, instanced, 2-D wave simulation).
+Touch presses tiles down (about a tile and a bit at most) and the exposed walls give the depth; idle ripples fire every
+couple of seconds. All wave numbers are in tiles, so they scale with tile size - retune them together (a standalone
+copy of the sim is easy to iterate on) if the tile size changes. It sits in `FilmRollIntro.astro` as `canvas[data-cubes]` over `.fr-mobile-bg`, which stays as the
 fallback (no WebGL2, reduced motion, desktop) and is hidden only after the canvas has faded in. It is gated by
 `CUBES_ON_DESKTOP = false` at the top of the file: flip it to `true` once it has been judged smooth on a real phone.
 The loop sleeps when the wave settles and pauses while the intro is off-screen; keep it that way (it is the only

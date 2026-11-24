@@ -29,20 +29,24 @@ const CUBES_ON_DESKTOP = false;
 // ----- tuning ---------------------------------------------------------------------
 const SIM_HZ = 120;
 const STEP = 1 / SIM_HZ;
-const BRUSH_RADIUS = 1.5;
-const PUSH_PER_CELL = 0.17;
-// Tiles are small on a phone (~44px, the original uses 150px), so the numbers below are
-// scaled up from the original's so the effect reads at the same size on screen.
-const GAP = 0.07; // seam between tiles, as a fraction of a tile
+// Tiles are big, like the original's (~150px wide, so a phone shows only a few across), and
+// every number below is in tiles, so the wave's size and speed on screen follow the tile size.
+const TILE_FRACTION = 0.36; // tile width as a share of the screen width...
+const TILE_MIN = 110; // ...kept between these two, in CSS px
+const TILE_MAX = 150;
+const BRUSH_RADIUS = 1.1;
+const PUSH_PER_CELL = 0.025; // push per tile of finger travel
+const GAP = 0.035; // seam between tiles, as a fraction of a tile
 const AMPLITUDE = 1.0; // wave height, in tiles
-const SPEED = 13; // tiles per second
+const SPEED = 4.5; // tiles per second
 const DAMPING = 0.08; // fraction of wave energy kept per second
 const IDLE_DELAY = 1.2; // seconds of stillness before idle ripples
 const IDLE_EVERY = 2.2; // seconds between idle ripples
-const GLOW = 0.45;
+const IDLE_PUSH = 0.04; // strength of the ripples that start by themselves
+const GLOW = 1.0;
 const GLOW_COLOR: [number, number, number] = [0.9, 0.77, 0.41]; // brand brass
-const SHADE_LEFT = 0.72; // side faces, as a share of the top face's brightness
-const SHADE_RIGHT = 0.5;
+const SHADE_LEFT = 0.85; // side faces, as a share of the top face's brightness
+const SHADE_RIGHT = 0.6;
 const COLUMN_DEPTH = 4; // how far each tile extends below its top
 const MAX_PIXEL_RATIO = 1.5;
 
@@ -101,10 +105,11 @@ out float vGlow;
 out float vDepth;
 out vec2 vRest;
 void main() {
-  // Crests round off softly; troughs sink further than crests rise, and the two curves
-  // blend smoothly through zero so tiles never change speed as they pass rest.
+  // Crests round off softly; troughs sink further than crests rise (but stop at about two
+  // tiles, so a hard swipe can't punch a hole), and the two curves blend smoothly through
+  // zero so tiles never change speed as they pass rest.
   float x = aHeight;
-  float h = mix(x * 1.5, tanh(x), smoothstep(-0.6, 0.6, x));
+  float h = mix(-2.2 * tanh(-x * 1.5 / 2.2), tanh(x), smoothstep(-0.6, 0.6, x));
   vec3 base = aPos + vec3(aOffset.x, 0.0, aOffset.y);
   vec3 p = base;
   p.y += h * uAmp;
@@ -139,14 +144,20 @@ void main() {
   vec3 col = texture(uTex, uv).rgb;
 
   bool isTop = vNormal.y > 0.5;
-  col *= isTop ? 1.0 : (abs(vNormal.x) > 0.5 ? uShade.y : uShade.x);
+  if (!isTop) {
+    // Walls are what make the depth read, and the photo is dark, so they get a lift of
+    // their own: left and right faces differ, and each is lightest at its rim and falls
+    // into shadow towards its foot.
+    col = col * (abs(vNormal.x) > 0.5 ? uShade.y : uShade.x) + (abs(vNormal.x) > 0.5 ? 0.05 : 0.09);
+    col *= mix(0.45, 1.0, exp(vDepth * 0.9));
+  }
   // Sunk tops pick up shade so the trough reads; crests catch a little light.
-  if (isTop) col *= 1.0 - clamp(-vH, 0.0, 1.0) * 0.45;
-  col *= 1.0 + clamp(vH, 0.0, 1.0) * 0.2;
+  if (isTop) col *= 1.0 - clamp(-vH, 0.0, 1.0) * 0.35;
+  col *= 1.0 + clamp(vH, 0.0, 1.0) * 0.25;
 
   // Glow: a soft tint on tops, strongest near the rim on the sides (like a box-shadow).
   float glow = clamp(vGlow * uGlow, 0.0, 1.0);
-  float falloff = isTop ? 0.22 : exp(vDepth * 1.6) * 0.6;
+  float falloff = isTop ? 0.22 : exp(vDepth * 1.4) * 0.9;
   col = mix(col, uGlowColor, glow * falloff);
   outColor = vec4(col, 1.0);
 }`;
@@ -260,7 +271,7 @@ function start(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement, section: H
 
   gl.enable(gl.DEPTH_TEST);
   gl.depthFunc(gl.LEQUAL);
-  gl.clearColor(0.02, 0.03, 0.045, 1); // the seams between tiles
+  gl.clearColor(0.15, 0.14, 0.11, 1); // the seams between tiles: a faint warm line, so the lattice reads
 
   // ---- camera: true isometric, from the (1,1,1) diagonal
   const eye = [10, 10, 10];
@@ -274,7 +285,7 @@ function start(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement, section: H
   let heightPx = 0;
   let pixelRatio = Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO);
   let scale = 1; // px per world unit
-  let cellPx = 40;
+  let cellPx = TILE_MAX;
   let size = 0;
   let height = new Float32Array(0);
   let velocity = new Float32Array(0);
@@ -331,7 +342,7 @@ function start(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement, section: H
     if (!w || !h) return;
     width = w;
     heightPx = h;
-    cellPx = w < 500 ? 44 : 60; // tile width on screen, CSS px
+    cellPx = Math.round(Math.min(TILE_MAX, Math.max(TILE_MIN, w * TILE_FRACTION))); // tile width on screen, CSS px
     canvas.width = Math.round(w * pixelRatio);
     canvas.height = Math.round(h * pixelRatio);
     gl.viewport(0, 0, canvas.width, canvas.height);
@@ -439,7 +450,7 @@ function start(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement, section: H
         const laplacian = (4 * edges + corners - 20 * height[k]) / 6;
         velocity[k] = (velocity[k] + c2 * laplacian) * keep;
       }
-    for (let k = 0; k < height.length; k++) height[k] = (height[k] + velocity[k]) * relax;
+    for (let k = 0; k < height.length; k++) height[k] = Math.max(-3, Math.min(3, (height[k] + velocity[k]) * relax));
     // Glow eases toward local wave energy: quick to light up, slow to fade.
     for (let i = 1; i < size - 1; i++)
       for (let j = 1; j < size - 1; j++) {
@@ -501,7 +512,7 @@ function start(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement, section: H
       if (idleTimer > IDLE_EVERY) {
         idleTimer = 0;
         const spread = size * 0.12;
-        brush(size / 2 + (Math.random() - 0.5) * spread * 2, size / 2 + (Math.random() - 0.5) * spread * 2, 0.3, 2.6);
+        brush(size / 2 + (Math.random() - 0.5) * spread * 2, size / 2 + (Math.random() - 0.5) * spread * 2, IDLE_PUSH, 1.6);
       }
     }
     applyPointer();
@@ -584,7 +595,7 @@ function start(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement, section: H
 
   resize();
   // Wake the field with one soft ripple so it is clear the background is alive.
-  window.setTimeout(() => brush(size / 2, size / 2 - 2, 0.34, 3), 700);
+  window.setTimeout(() => brush(size / 2, size / 2 - 1, IDLE_PUSH * 1.1, 1.8), 700);
   wake();
 
   function dispose() {
