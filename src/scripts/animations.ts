@@ -261,7 +261,13 @@ export function initFilmRollIntro() {
   // `(pointer: coarse)` test to show the static layout on those devices.
   const isDesktop = window.matchMedia('(min-width: 641px)').matches
     && !window.matchMedia('(pointer: coarse)').matches;
-  if (prefersReducedMotion || !isDesktop) return;
+  // Switched off for everyone (founder request, 2026-11-24): the pinned, scrubbed
+  // intro - roll, develop, then scaling one frame up until it fills the screen - is
+  // replaced by the same static layout phones get. The code below is kept, not
+  // deleted, so it can come back: set this to true AND restore the desktop-only
+  // sizing in FilmRollIntro.astro (the static layout there now applies at every width).
+  const PINNED_INTRO_ENABLED = false;
+  if (!PINNED_INTRO_ENABLED || prefersReducedMotion || !isDesktop) return;
 
   const otherFrames = gsap.utils.toArray<HTMLElement>('.fr-frame', track).filter((f) => f !== heroFrame);
   // will-change only while this effect is actually running (not in the CSS, where

@@ -47,6 +47,12 @@ smooth scrolling now. Native CSS smooth-scroll would run its own competing
 animation on anchor jumps and fight Lenis's easing. Anchor clicks are
 intercepted in `lenis.ts` and routed through `lenis.scrollTo()` instead.
 
+**UPDATE 2026-11-24 - the pinned intro described below is switched OFF.** Everyone, desktop included, now
+gets the static layout phones always had (strip, hero photo behind it, wordmark, button): no pin, no scrub,
+no zoom into the statue's head. The code is kept behind `PINNED_INTRO_ENABLED = false` in
+`initFilmRollIntro`; the static CSS in `FilmRollIntro.astro` now applies at every width, so turning the
+effect back on also needs the old desktop sizing (500px frames) restored there.
+
 **The homepage intro (`FilmRollIntro.astro` + `initFilmRollIntro` in
 animations.ts) is a pinned, scroll-scrubbed film strip.** Replaced an
 earlier "glowing portal" concept that read as a spa/wellness site rather
