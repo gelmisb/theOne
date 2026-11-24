@@ -53,6 +53,14 @@ no zoom into the statue's head. The code is kept behind `PINNED_INTRO_ENABLED = 
 `initFilmRollIntro`; the static CSS in `FilmRollIntro.astro` now applies at every width, so turning the
 effect back on also needs the old desktop sizing (500px frames) restored there.
 
+**Cubes background (mobile only so far).** `src/scripts/cubesBackground.ts` draws the intro's statue photo on a
+grid of isometric tiles (raw WebGL2, instanced, 2-D wave simulation; touch makes ripples, idle ripples fire every
+couple of seconds). It sits in `FilmRollIntro.astro` as `canvas[data-cubes]` over `.fr-mobile-bg`, which stays as the
+fallback (no WebGL2, reduced motion, desktop) and is hidden only after the canvas has faded in. It is gated by
+`CUBES_ON_DESKTOP = false` at the top of the file: flip it to `true` once it has been judged smooth on a real phone.
+The loop sleeps when the wave settles and pauses while the intro is off-screen; keep it that way (it is the only
+continuously-drawing canvas on the page). It covers the intro section only, not the fixed `.persist-bg`.
+
 **The homepage intro (`FilmRollIntro.astro` + `initFilmRollIntro` in
 animations.ts) is a pinned, scroll-scrubbed film strip.** Replaced an
 earlier "glowing portal" concept that read as a spa/wellness site rather
