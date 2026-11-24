@@ -1,12 +1,13 @@
 ---
 // Type-first "aperture" hero (HERO_BUILD.md, Phase 2).
 //
-//   <Hero mode="type" />                                   text + hairline iris (homepage today)
+//   <Hero mode="type" />                                   text only (homepage today)
 //   <Hero mode="video" poster={img} videoDesktop={...} videoMobile={...} aspect="wide" priority />
 //   <Hero mode="stills" stills={[a, b, c]} />
 //
-// Switching mode is a change of props, not of code: the same iris opens in every mode;
-// in "video" and "stills" it opens onto the media.
+// "type" is text only: no iris. An iris with nothing inside it was an empty dark box
+// that read as a broken placeholder, so it is only drawn in "video" and "stills", where
+// it opens onto the media (the homepage uses neither yet).
 //
 // It sits transparent over Layout.astro's persistent background photo (.persist-bg), the
 // same photo the film-roll intro expands into, so the hand-off from the intro stays one
@@ -94,6 +95,7 @@ const n = copy.words.length;
       </div>
     </div>
 
+    {mode !== 'type' && (
     <div class="hv-frame-wrap">
       <div class:list={['hv-frame', `hv-frame--${mode}`, wide && 'hv-frame--wide']}>
         {
@@ -158,6 +160,7 @@ const n = copy.words.length;
         }
       </div>
     </div>
+    )}
   </div>
 </section>
 
@@ -223,6 +226,9 @@ const n = copy.words.length;
   .hv-hero__inner {
     position: relative;
     z-index: 2;
+    /* A flex item shrinks to its content: without this, the text-only hero sat in the
+       middle of the page instead of lining up with the header and every other section. */
+    width: 100%;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 44px;
@@ -235,6 +241,10 @@ const n = copy.words.length;
     }
     .hv-hero__inner[data-wide] {
       grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr);
+    }
+    /* Text only: one column, so the copy isn't squeezed into 60% of the width. */
+    .hv-hero[data-mode='type'] .hv-hero__inner {
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 
